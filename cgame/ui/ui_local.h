@@ -173,7 +173,7 @@ typedef struct uiField_s {
 typedef struct uiList_s {
 	uiCommon_t				generic;
 
-	int						curValue;
+	size_t					curValue;
 
 	char					**itemNames;
 	int						numItemNames;

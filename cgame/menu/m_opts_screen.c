@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define MAX_CROSSHAIRS 512
 
 typedef struct crosshairInfo_s {
-	int				number;
+	size_t			number;
 	struct shader_s	*shader;
 } crosshairInfo_t;
 
@@ -340,10 +340,10 @@ static void ScreenMenu_Init (void)
 	};
 
 	char	*crosshairList[MAX_CROSSHAIRS];
-	int		numCrosshairs;
+	size_t	numCrosshairs;
 	char	scratch[MAX_QPATH];
 	char	*p;
-	int		i, j;
+	size_t	i, j;
 
 	// get crosshair list
 	numCrosshairs = cgi.FS_FindFiles ("pics", "pics/ch*.*", NULL, crosshairList, MAX_CROSSHAIRS, qFalse, qFalse);

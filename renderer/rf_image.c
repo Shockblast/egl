@@ -348,7 +348,7 @@ static void R_LoadPCX (char *name, byte **pic, byte **palette, int *width, int *
 
 typedef struct pngBuf_s {
 	byte	*buffer;
-	int		pos;
+	size_t	pos;
 } pngBuf_t;
 
 void __cdecl PngReadFunc (png_struct *Png, png_bytep buf, png_size_t size)
@@ -365,14 +365,12 @@ R_LoadPNG
 */
 static void R_LoadPNG (char *name, byte **pic, int *width, int *height, int *samples)
 {
-	int				rowbytes;
 	png_structp		png_ptr;
 	png_infop		info_ptr;
 	png_infop		end_info;
 	png_bytepp		row_pointers;
 	png_bytep		pic_ptr;
-	int				fileLen;
-	uint32			i;
+	size_t			rowbytes, fileLen, i;
 	pngBuf_t		PngFileBuffer = { NULL, 0 };
 
 	if (pic)
@@ -1844,7 +1842,8 @@ Static because R_RegisterImage uses it if it's passed the IT_CUBEMAP flag
 static inline image_t *R_RegisterCubeMap (char *name, texFlags_t flags)
 {
 	image_t		*image;
-	int			i, len;
+	int			i;
+	size_t		len;
 	int			samples;
 	byte		*pic[6];
 	int			width, height;
@@ -1933,7 +1932,8 @@ image_t	*R_RegisterImage (char *name, texFlags_t flags)
 {
 	image_t		*image;
 	byte		*pic;
-	int			len, width, height, samples;
+	size_t		len;
+	int			width, height, samples;
 	char		loadName[MAX_QPATH];
 	const char	*bareName;
 
@@ -2720,7 +2720,7 @@ R_ImageShutdown
 void R_ImageShutdown (void)
 {
 	image_t	*image;
-	uint32	size, i;
+	size_t	size, i;
 
 	Com_Printf (0, "Image system shutdown:\n");
 

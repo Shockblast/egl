@@ -732,12 +732,12 @@ int			FS_ZLibCompressChunk (byte *in, int len_in, byte *out, int len_out, int me
 void		FS_CreatePath (char *path);
 void		FS_CopyFile (char *src, char *dst);
 
-int			FS_FileLength (fileHandle_t fileNum);
-int			FS_Tell (fileHandle_t fileNum);
+size_t		FS_FileLength (fileHandle_t fileNum);
+size_t		FS_Tell (fileHandle_t fileNum);
 
-int			FS_Read (void *buffer, int len, fileHandle_t fileNum);
-int			FS_Write (void *buffer, int size, fileHandle_t fileNum);
-void		FS_Seek (fileHandle_t fileNum, int offset, fsSeekOrigin_t seekOrigin);
+size_t		FS_Read (void *buffer, size_t len, fileHandle_t fileNum);
+size_t		FS_Write (void *buffer, size_t size, fileHandle_t fileNum);
+void		FS_Seek (fileHandle_t fileNum, long offset, fsSeekOrigin_t seekOrigin);
 int			FS_OpenFile (char *fileName, fileHandle_t *fileNum, fsOpenMode_t openMode);
 void		FS_CloseFile (fileHandle_t fileNum);
 
@@ -751,8 +751,8 @@ void		FS_SetGamedir (char *dir, qBool firstTime);
 
 void		FS_ExecAutoexec (void);
 
-int			FS_FindFiles (char *path, char *filter, char *extension, char **fileList, int maxFiles, qBool addGameDir, qBool recurse);
-void		_FS_FreeFileList (char **list, int num, const char *fileName, const int fileLine);
+size_t		FS_FindFiles (char *path, char *filter, char *extension, char **fileList, size_t maxFiles, qBool addGameDir, qBool recurse);
+void		_FS_FreeFileList (char **list, size_t num, const char *fileName, const int fileLine);
 
 char		*FS_NextPath (char *prevPath);
 

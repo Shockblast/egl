@@ -594,8 +594,7 @@ void SV_RecordDemoMessage (void)
 	MSG_Clear (&svs.demoMultiCast);
 
 	// now write the entire message to the file, prefixed by the length
-	len = LittleLong (buf.curSize);
-
+	len = LittleLong ((int) buf.curSize);
 	FS_Write (&len, sizeof (len), svs.demoFile);
 	FS_Write (buf.data, buf.curSize, svs.demoFile);
 }

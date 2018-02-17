@@ -598,7 +598,7 @@ void CL_SendCmd (void)
 	netMsg_t	buf;
 	userCmd_t	*cmd, *oldCmd;
 	userCmd_t	nullCmd;
-	int			checkSumIndex;
+	size_t		checkSumIndex;
 
 	switch (Com_ClientState ()) {
 	case CA_CONNECTED:

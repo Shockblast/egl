@@ -183,7 +183,8 @@ void CG_Say_Preprocessor (void)
 {
 	char	*locName, *p;
 	char	*sayText;
-	int		locLen, cmdLen, c;
+	size_t	locLen, cmdLen;
+	int		c;
 	trace_t	tr;
 	vec3_t	end;
 

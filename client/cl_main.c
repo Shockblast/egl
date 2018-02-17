@@ -1566,7 +1566,7 @@ Stop recording a demo
 */
 static void CL_Stop_f (void)
 {
-	int		len;
+	size_t		len;
 
 	if (!cls.demoRecording) {
 		Com_Printf (0, "Not recording a demo.\n");

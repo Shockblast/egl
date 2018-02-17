@@ -435,7 +435,7 @@ R_StripModelLODSuffix
 */
 void R_StripModelLODSuffix (char *name)
 {
-	int		len;
+	size_t	len;
 	int		lodNum;
 
 	len = strlen (name);
@@ -593,7 +593,7 @@ static qBool R_LoadMD3Model (refModel_t *model)
 		Q_strncpyz (outMesh->name, inMesh->meshName, sizeof (outMesh->name));
 		if (strncmp ((const char *)inMesh->ident, MD3_HEADERSTR, 4)) {
 			FS_FreeFile (buffer);
-			Com_Printf (PRNT_ERROR, "R_LoadMD3Model: mesh '%s' in model '%s' has wrong id (%i != %i)", inMesh->meshName, model->name, LittleLong ((int)inMesh->ident), MD3_HEADER);
+			Com_Printf (PRNT_ERROR, "R_LoadMD3Model: mesh '%s' in model '%s' has wrong id (%i != %i)", inMesh->meshName, model->name, LittleLong (*(int* )inMesh->ident), MD3_HEADER);
 			return qFalse;
 		}
 
@@ -4293,7 +4293,7 @@ refModel_t *R_RegisterModel (char *name)
 {
 	refModel_t	*model;
 	char		bareName[MAX_QPATH];
-	int			len;
+	size_t		len;
 
 	// Check the name
 	if (!name || !name[0])
@@ -4382,8 +4382,8 @@ R_ModelList_f
 static void R_ModelList_f (void)
 {
 	refModel_t	*mod;
-	uint32		totalBytes;
-	uint32		i, total;
+	size_t		totalBytes;
+	size_t		i, total;
 
 	Com_Printf (0, "Loaded models:\n");
 
@@ -4455,7 +4455,7 @@ R_ModelShutdown
 */
 void R_ModelShutdown (void)
 {
-	uint32	size, i;
+	size_t	size, i;
 
 	Com_Printf (0, "Model system shutdown:\n");
 

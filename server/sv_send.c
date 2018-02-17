@@ -492,7 +492,8 @@ bandwidth estimation and should not be sent another packet
 */
 qBool SV_RateDrop (svClient_t *c)
 {
-	int		total, i;
+	size_t	total;
+	int		i;
 
 	// never drop over the loopback
 	if (c->netChan.remoteAddress.naType == NA_LOOPBACK)
@@ -534,7 +535,7 @@ void SV_SendClientMessages (void)
 		}
 		else {
 			// Get the next message
-			r = FS_Read (&msgLen, sizeof (r), sv.demoFile);
+			r = (int) FS_Read (&msgLen, sizeof (r), sv.demoFile);
 			if (r != 4) {
 				SV_DemoCompleted ();
 				return;
@@ -549,7 +550,7 @@ void SV_SendClientMessages (void)
 			if (msgLen > MAX_SV_MSGLEN)
 				Com_Error (ERR_DROP, "SV_SendClientMessages: msgLen > MAX_SV_MSGLEN");
 
-			r = FS_Read (msgBuf, msgLen, sv.demoFile);
+			r = (int) FS_Read (msgBuf, msgLen, sv.demoFile);
 			if (r != msgLen) {
 				SV_DemoCompleted ();
 				return;

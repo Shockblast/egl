@@ -335,7 +335,7 @@ GI_TagAlloc
 Makes sure the game DLL does not use client, or signed tags
 =================
 */
-static void *GI_TagAlloc (int size, int tagNum)
+static void *GI_TagAlloc (size_t size, int tagNum)
 {
 	if (tagNum < 0)
 		tagNum *= -1;
@@ -561,7 +561,7 @@ it is changing to a different game directory.
 */
 void SV_GameAPI_Shutdown (void)
 {
-	uint32	size;
+	size_t	size;
 
 	if (!ge)
 		return;

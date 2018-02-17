@@ -372,7 +372,7 @@ void		CL_DrawConsole (void);
 
 void		CL_WriteDemoPlayerstate (frame_t *from, frame_t *to, netMsg_t *msg);
 void		CL_WriteDemoPacketEntities (const frame_t *from, frame_t *to, netMsg_t *msg);
-void		CL_WriteDemoMessageChunk (byte *buffer, int length, qBool forceFlush);
+void		CL_WriteDemoMessageChunk (byte *buffer, size_t length, qBool forceFlush);
 void		CL_WriteDemoMessageFull (void);
 
 qBool		CL_StartDemoRecording (char *name);

@@ -434,7 +434,7 @@ typedef struct refModel_s {
 	qBool					isBspModel;
 
 	uint32					memTag;		// memory tag
-	uint32					memSize;	// size in memory
+	size_t					memSize;	// size in memory
 
 	uint32					hashValue;
 	struct refModel_s		*hashNext;

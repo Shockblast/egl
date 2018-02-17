@@ -400,9 +400,10 @@ void R_GetFontDimensions (font_t *font, float xScale, float yScale, uint32 flags
 R_DrawString
 ================
 */
-int R_DrawString (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color)
+size_t R_DrawString (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color)
 {
-	int			num, i;
+	int			num;
+	size_t		i;
 	float		frow, fcol;
 	float		startX;
 	vec4_t		strColor;
@@ -519,10 +520,10 @@ int R_DrawString (font_t *font, float x, float y, float xScale, float yScale, ui
 R_DrawStringLen
 ================
 */
-int R_DrawStringLen (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, int len, vec4_t color)
+size_t R_DrawStringLen (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color)
 {
 	char	swap;
-	int		length;
+	size_t	length;
 
 	if (len < 0)
 		return R_DrawString (font, x, y, xScale, yScale, flags, string, color);
@@ -609,7 +610,7 @@ R_FontShutdown
 void R_FontShutdown (void)
 {
 	font_t	*font;
-	uint32	size, i;
+	size_t	size, i;
 
 	Com_Printf (0, "Font system shutdown:\n");
 	// Release fonts

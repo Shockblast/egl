@@ -1086,7 +1086,7 @@ static qBool itemDef_newEvent (evType_t type, char *fileName, gui_t *gui, parse_
 	evaType_t	action;
 	evAction_t	*actionList;
 	char		*token;
-	int			len;
+	size_t		len;
 	qBool		gotSemicolon;
 	int			i;
 
@@ -1653,7 +1653,7 @@ textDef_text
 static qBool textDef_text (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 {
 	char	*token;
-	int		len;
+	size_t	len;
 
 	if (!PS_ParseToken (ps, PSF_CONVERT_NEWLINE, &token)) {
 		GUI_PrintPos (PRNT_ERROR, ps, fileName, gui);
@@ -2682,7 +2682,7 @@ void GUI_Init (void)
 {
 	char			*guiList[MAX_GUIS];
 	char			fixedName[MAX_QPATH];
-	uint32			numGUI, i;
+	size_t			numGUI, i;
 	guiPathType_t	pathType;
 	char			*name;
 	uint32			initTime;

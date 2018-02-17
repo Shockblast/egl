@@ -253,7 +253,7 @@ static void Cmd_AliasList_f (void)
 	aliasCmd_t	*alias, *sortedList;
 	int			i, j;
 	int			matching;
-	int			longest;
+	size_t		longest;
 	int			total;
 	char		*wildCard;
 

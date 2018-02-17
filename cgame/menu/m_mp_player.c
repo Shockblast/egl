@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define MAX_PLAYERSKINS		512
 
 typedef struct modelInfo_s {
-	int		numSkins;
+	size_t	numSkins;
 	char	**skinDisplayNames;
 
 	char	displayName[16];
@@ -48,7 +48,7 @@ typedef struct m_playerConfigMenu_s {
 
 	modelInfo_t			modelInfo[MAX_PLAYERMODELS];
 	char				*modelNames[MAX_PLAYERMODELS];
-	int					numPlayerModels;
+	size_t				numPlayerModels;
 
 	// Menu items
 	uiFrameWork_t		frameWork;
@@ -110,10 +110,10 @@ static qBool PlayerConfig_ScanDirectories (void)
 	char	**modelSkins;
 	char	scratch[1024];
 	char	directory[1024];
-	int		numModels;
-	int		numSkins;
-	int		numModelSkins;
-	int		i, j, k;
+	size_t	numModels;
+	size_t	numSkins;
+	size_t	numModelSkins;
+	size_t	i, j, k;
 	char	*p;
 
 	m_playerConfigMenu.numPlayerModels = 0;

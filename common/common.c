@@ -570,7 +570,7 @@ will keep the demoloop from immediately starting
 static qBool Com_AddLateCommands (void)
 {
 	int		i, j;
-	int		s;
+	size_t	s;
 	char	*text, *build, c;
 	int		argc;
 	qBool	ret;

@@ -660,6 +660,11 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	if (hPrevInstance)
 		return 0;
 
+	// Set rounding control
+#ifndef _M_X64
+	_controlfp (_PC_24, _MCW_PC);
+#endif
+
 	sys_winInfo.hInstance = hInstance;
 
 	// Create the console
@@ -716,7 +721,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 			time = newTime - oldTime;
 		} while (time < 1);
 
-		_controlfp (_PC_24, _MCW_PC);
 		Com_Frame (time);
 
 		oldTime = newTime;

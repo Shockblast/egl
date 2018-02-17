@@ -947,7 +947,7 @@ void CL_ParseServerMessage (void)
 	static int	queryLastTime = 0;
 	static int	lastCmd = -2;
 	int			extraBits;
-	int			oldReadCount;
+	size_t		oldReadCount;
 
 	// If recording demos, copy the message out
 	if (cl_shownet->intVal == 1)

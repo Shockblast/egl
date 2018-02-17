@@ -679,10 +679,10 @@ extern vec4_t	Q_strColorTable[10];
 #define Q_StrColorIndex(c)	(((c & 127) - '0') % 9)
 
 qBool		Q_IsColorString (const char *p);
-int			Q_ColorCharCount (const char *s, int endPos);
-int			Q_ColorCharOffset (const char *s, int charCount);
-int			Q_ColorStrLastColor (char *s, int byteOfs);
-int			Q_ColorStrLastStyle (char *s, int byteOfs);
+size_t		Q_ColorCharCount (const char *s, size_t endPos);
+size_t		Q_ColorCharOffset (const char *s, size_t charCount);
+int			Q_ColorStrLastColor (char *s, size_t byteOfs);
+int			Q_ColorStrLastStyle (char *s, size_t byteOfs);
 
 #define COLOR_R(rgba)		((rgba) & 0xFF)
 #define COLOR_G(rgba)		(((rgba) >> 8) & 0xFF)
@@ -700,7 +700,7 @@ int			Q_ColorStrLastStyle (char *s, int byteOfs);
 */
 
 void	Q_snprintfz (char *dest, size_t size, const char *fmt, ...);
-void	Q_strcatz (char *dst, const char *src, int dstSize);
+void	Q_strcatz (char *dst, const char *src, size_t dstSize);
 void	Q_strncpyz (char *dest, const char *src, size_t size);
 
 char	*Q_strlwr (char *s);

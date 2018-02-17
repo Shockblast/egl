@@ -78,7 +78,7 @@ typedef struct mPack_s {
 typedef struct fsLink_s {
 	struct fsLink_s			*next;
 	char					*from;
-	int						fromLength;
+	size_t					fromLength;
 	char					*to;
 } fsLink_t;
 
@@ -270,7 +270,7 @@ FS_CopyFile
 void FS_CopyFile (char *src, char *dst)
 {
 	FILE	*f1, *f2;
-	int		l;
+	size_t	l;
 	byte	buffer[65536];
 
 	if (fs_developer->intVal)
@@ -356,7 +356,7 @@ Returns the TOTAL file size, not the position.
 Make sure to move the position back after moving to the beginning of the file for the size lookup.
 ============
 */
-int FS_FileLength (fileHandle_t fileNum)
+size_t FS_FileLength (fileHandle_t fileNum)
 {
 	fsHandleIndex_t		*handle;
 
@@ -382,7 +382,7 @@ FS_Tell
 Returns the current file position.
 ============
 */
-int FS_Tell (fileHandle_t fileNum)
+size_t FS_Tell (fileHandle_t fileNum)
 {
 	fsHandleIndex_t	*handle;
 
@@ -406,11 +406,10 @@ Properly handles partial reads
 =================
 */
 void CDAudio_Stop (void);
-int FS_Read (void *buffer, int len, fileHandle_t fileNum)
+size_t FS_Read (void *buffer, size_t len, fileHandle_t fileNum)
 {
 	fsHandleIndex_t	*handle;
-	int				remaining;
-	int				read;
+	size_t			remaining;
 	byte			*buf;
 	qBool			tried;
 
@@ -426,7 +425,7 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 	if (handle->regFile) {
 		// File
 		while (remaining) {
-			read = fread (buf, 1, remaining, handle->regFile);
+			size_t read = fread (buf, 1, remaining, handle->regFile);
 			switch (read) {
 			case 0:
 				// We might have been trying to read from a CD
@@ -443,10 +442,6 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 					return len - remaining;
 				}
 				break;
-
-			case -1:
-				Com_Error (ERR_FATAL, "FS_Read: -1 bytes read from \"%s\"", handle->name);
-				break;
 			}
 
 			// Do some progress bar thing here
@@ -459,7 +454,7 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 	else if (handle->pkzFile) {
 		// Zip file
 		while (remaining) {
-			read = unzReadCurrentFile (handle->pkzFile, buf, remaining);
+			int read = unzReadCurrentFile (handle->pkzFile, buf, (uint32) remaining);
 			switch (read) {
 			case 0:
 				// We might have been trying to read from a CD
@@ -501,11 +496,11 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 FS_Write
 =================
 */
-int FS_Write (void *buffer, int size, fileHandle_t fileNum)
+size_t FS_Write (void *buffer, size_t size, fileHandle_t fileNum)
 {
 	fsHandleIndex_t	*handle;
-	int				remaining;
-	int				write;
+	size_t			remaining;
+	size_t			write;
 	byte			*buf;
 
 	handle = FS_GetHandle (fileNum);
@@ -536,10 +531,6 @@ int FS_Write (void *buffer, int size, fileHandle_t fileNum)
 				if (fs_developer->intVal)
 					Com_Printf (PRNT_ERROR, "FS_Write: 0 bytes written to %s\n", handle->name);
 				return size - remaining;
-
-			case -1:
-				Com_Error (ERR_FATAL, "FS_Write: -1 bytes written to %s", handle->name);
-				break;
 			}
 
 			remaining -= write;
@@ -564,7 +555,7 @@ int FS_Write (void *buffer, int size, fileHandle_t fileNum)
 FS_Seek
 =================
 */
-void FS_Seek (fileHandle_t fileNum, int offset, fsSeekOrigin_t seekOrigin)
+void FS_Seek (fileHandle_t fileNum, long offset, fsSeekOrigin_t seekOrigin)
 {
 	fsHandleIndex_t	*handle;
 	unz_file_info	info;
@@ -908,7 +899,7 @@ int FS_LoadFile (char *path, void **buffer, char *terminate)
 	byte			*buf;
 	int				fileLen;
 	fileHandle_t	fileNum;
-	uint32			termLen;
+	size_t			termLen;
 
 	// Look for it in the filesystem or pack files
 	fileLen = FS_OpenFile (path, &fileNum, FS_MODE_READ_BINARY);
@@ -944,7 +935,7 @@ int FS_LoadFile (char *path, void **buffer, char *terminate)
 	// Terminate if desired
 	if (termLen)
 		strncpy ((char *)buf+fileLen, terminate, termLen);
-	return fileLen+termLen;
+	return (int) ((size_t) fileLen + termLen);
 }
 
 
@@ -1382,12 +1373,12 @@ void FS_ExecAutoexec (void)
 FS_FindFiles
 ================
 */
-int FS_FindFiles (char *path, char *filter, char *extension, char **fileList, int maxFiles, qBool addGameDir, qBool recurse)
+size_t FS_FindFiles (char *path, char *filter, char *extension, char **fileList, size_t maxFiles, qBool addGameDir, qBool recurse)
 {
 	fsPath_t	*search;
 	mPackFile_t	*packFile;
 	mPack_t		*pack;
-	int			fileCount;
+	size_t		fileCount;
 	char		*name;
 	char		dir[MAX_OSPATH];
 	char		ext[MAX_QEXT];
@@ -1511,7 +1502,7 @@ int FS_FindFiles (char *path, char *filter, char *extension, char **fileList, in
 _FS_FreeFileList
 =============
 */
-void _FS_FreeFileList (char **list, int num, const char *fileName, const int fileLine)
+void _FS_FreeFileList (char **list, size_t num, const char *fileName, const int fileLine)
 {
 	int		i;
 

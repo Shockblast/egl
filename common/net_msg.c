@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 MSG_Init
 ================
 */
-void MSG_Init (netMsg_t *dest, byte *data, int length)
+void MSG_Init (netMsg_t *dest, byte *data, size_t length)
 {
 	assert (length > 0);
 
@@ -75,7 +75,7 @@ void MSG_Clear (netMsg_t *dest)
 MSG_GetWriteSpace
 ================
 */
-static void *MSG_GetWriteSpace (netMsg_t *dest, int length)
+static void *MSG_GetWriteSpace (netMsg_t *dest, size_t length)
 {
 	void	*data;
 
@@ -409,7 +409,7 @@ void MSG_WriteLong (netMsg_t *dest, int c)
 MSG_WriteRaw
 ================
 */
-void MSG_WriteRaw (netMsg_t *dest, void *data, int length)
+void MSG_WriteRaw (netMsg_t *dest, void *data, size_t length)
 {
 	assert (length > 0);
 	memcpy (MSG_GetWriteSpace (dest, length), data, length);		
@@ -452,7 +452,7 @@ MSG_WriteStringCat
 */
 void MSG_WriteStringCat (netMsg_t *dest, char *data)
 {
-	int		len;
+	size_t		len;
 	
 	len = strlen (data) + 1;
 	assert (len > 1);
@@ -532,9 +532,9 @@ int MSG_ReadChar (netMsg_t *src)
 MSG_ReadData
 ================
 */
-void MSG_ReadData (netMsg_t *src, void *data, int len)
+void MSG_ReadData (netMsg_t *src, void *data, size_t len)
 {
-	int		i;
+	size_t		i;
 
 	for (i=0 ; i<len ; i++)
 		((byte *)data)[i] = MSG_ReadByte (src);

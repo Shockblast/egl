@@ -109,7 +109,7 @@ typedef struct svClient_s {
 	int				frameLatency[LATENCY_COUNTS];
 	int				ping;
 
-	int				messageSize[RATE_MESSAGES];		// used to rate drop packets
+	size_t			messageSize[RATE_MESSAGES];		// used to rate drop packets
 	int				rate;
 	int				surpressCount;					// number of messages rate supressed
 

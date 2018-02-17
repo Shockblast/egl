@@ -49,17 +49,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // functions
 struct memPool_s *_Mem_CreatePool (const char *name, const char *fileName, const int fileLine);
-uint32		_Mem_DeletePool (struct memPool_s *pool, const char *fileName, const int fileLine);
+size_t		_Mem_DeletePool (struct memPool_s *pool, const char *fileName, const int fileLine);
 
-uint32		_Mem_Free (const void *ptr, const char *fileName, const int fileLine);
-uint32		_Mem_FreeTag (struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine);
-uint32		_Mem_FreePool (struct memPool_s *pool, const char *fileName, const int fileLine);
+size_t		_Mem_Free (const void *ptr, const char *fileName, const int fileLine);
+size_t		_Mem_FreeTag (struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine);
+size_t		_Mem_FreePool (struct memPool_s *pool, const char *fileName, const int fileLine);
 void		*_Mem_Alloc (size_t size, qBool zeroFill, struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine);
 
 char		*_Mem_PoolStrDup (const char *in, struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine);
-uint32		_Mem_PoolSize (struct memPool_s *pool);
-uint32		_Mem_TagSize (struct memPool_s *pool, const int tagNum);
-uint32		_Mem_ChangeTag (struct memPool_s *pool, const int tagFrom, const int tagTo);
+size_t		_Mem_PoolSize (struct memPool_s *pool);
+size_t		_Mem_TagSize (struct memPool_s *pool, const int tagNum);
+size_t		_Mem_ChangeTag (struct memPool_s *pool, const int tagFrom, const int tagTo);
 
 void		_Mem_CheckPoolIntegrity (struct memPool_s *pool, const char *fileName, const int fileLine);
 void		_Mem_CheckGlobalIntegrity (const char *fileName, const int fileLine);

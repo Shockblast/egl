@@ -80,8 +80,8 @@ void		__fastcall Com_Frame (int msec);
 void		Com_Shutdown (void);
 
 // crc and checksum
-byte		Com_BlockSequenceCRCByte (byte *base, int length, int sequence);
-uint32		Com_BlockChecksum (void *buffer, int length);
+byte		Com_BlockSequenceCRCByte (byte *base, size_t length, int sequence);
+uint32		Com_BlockChecksum (void *buffer, size_t length);
 
 /*
 ==============================================================================

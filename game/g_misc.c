@@ -1577,7 +1577,8 @@ void SP_target_character (edict_t *self)
 void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t *e;
-	int		n, l;
+	int		n;
+	size_t	l;
 	char	c;
 
 	l = strlen(self->message);

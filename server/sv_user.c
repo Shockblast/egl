@@ -540,7 +540,7 @@ void SV_ExecuteClientMessage (svClient_t *cl)
 	int			uinfoChgCount;
 	int			stringCmdCount;
 	int			checksum, calculatedChecksum;
-	int			checksumIndex;
+	size_t		checksumIndex;
 	qBool		moveIssued;
 	int			lastFrame;
 	int			c;
@@ -658,13 +658,13 @@ void SV_ExecuteClientMessage (svClient_t *cl)
 			break;
 
 		case CLC_STRINGCMD:
-			c = sv_netMessage.readCount;
+			c = (int) sv_netMessage.readCount;
 			s = MSG_ReadString (&sv_netMessage);
 
 			// r1:Another security check, client caps at 256+1, but a hacked client could
 			//    send huge strings, if they are then used in a mod which sends a %s cprintf
 			//    to the exe, this could result in a buffer overflow for example.
-			c = sv_netMessage.readCount - c;
+			c = (int) sv_netMessage.readCount - c;
 			if (c > 256) {
 				Com_Printf (PRNT_WARNING, "WARNING: %i byte excessive stringcmd discarded from %s: '%.32s...'\n", c, cl->name, s);
 				break;

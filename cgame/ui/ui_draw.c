@@ -167,7 +167,7 @@ static void Action_Draw (uiAction_t *a)
 
 static void Field_Draw (uiField_t *f)
 {
-	int		i, curOffset;
+	size_t	i, curOffset;
 	char	tempbuffer[128]="";
 	float	x, y;
 	uint32	txtflags = 0;
@@ -212,7 +212,7 @@ static void Field_Draw (uiField_t *f)
 
 	// blinking cursor
 	if (UI_ItemAtCursor (f->generic.parent) == f) {
-		int offset;
+		size_t offset;
 
 		if (f->visibleOffset)
 			offset = f->visibleLength;

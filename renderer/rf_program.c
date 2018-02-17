@@ -445,7 +445,7 @@ void R_ProgramInit (void)
 {
 	char	fixedName[MAX_QPATH];
 	char	*fileList[MAX_PROGRAMS];
-	int		numFiles, i;
+	size_t	numFiles, i;
 	qBool	baseDir;
 	char	*name;
 	uint32	initTime;
@@ -541,7 +541,7 @@ R_ProgramShutdown
 void R_ProgramShutdown (void)
 {
 	program_t	*prog;
-	uint32		size, i;
+	size_t		size, i;
 
 	Com_Printf (0, "Program system shutdown:\n");
 

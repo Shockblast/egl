@@ -186,7 +186,7 @@ SV_CopySaveGame
 static void SV_CopySaveGame (char *src, char *dst)
 {
 	char	name[MAX_OSPATH], name2[MAX_OSPATH];
-	int		l, len;
+	size_t	l, len;
 	char	*found;
 
 	Com_DevPrintf (0, "SV_CopySaveGame (%s, %s)\n", src, dst);
@@ -736,7 +736,8 @@ SV_Status_f
 */
 static void SV_Status_f (void)
 {
-	int			i, j, l;
+	int			i, j;
+	size_t		l;
 	svClient_t	*cl;
 	char		*s;
 	int			ping;
@@ -959,7 +960,7 @@ static void SV_ServerRecord_f (void)
 
 	// Write it to the demo file
 	Com_DevPrintf (0, "signon message length: %i\n", buf.curSize);
-	len = LittleLong (buf.curSize);
+	len = LittleLong ((int) buf.curSize);
 	FS_Write (&len, sizeof (len), svs.demoFile);
 	FS_Write (buf.data, buf.curSize, svs.demoFile);
 

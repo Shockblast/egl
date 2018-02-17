@@ -150,7 +150,7 @@ typedef struct gameImport_s {
 	void	(*WriteAngle) (float f);
 
 	// managed memory allocation
-	void	*(*TagMalloc) (int size, int tag);
+	void	*(*TagMalloc) (size_t size, int tag);
 	void	(*TagFree) (void *block);
 	void	(*FreeTags) (int tag);
 

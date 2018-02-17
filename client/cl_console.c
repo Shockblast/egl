@@ -583,9 +583,9 @@ static void CL_DrawInput (void)
 {
 	char			*text;
 	int				lastColor, lastStyle;
-	int				colorCursorPos;
-	int				byteOfs;
-	int				byteLen;
+	size_t			colorCursorPos;
+	size_t			byteOfs;
+	size_t			byteLen;
 	vec2_t			charSize;
 
 	if (Key_GetDest () == KD_MENU)
@@ -702,10 +702,10 @@ static void CL_DrawNotify (void)
 	// Print messagemode input
 	//
 	if (Key_GetDest () == KD_MESSAGE) {
-		int				skip;
+		size_t			skip;
 		int				lastColor, lastStyle;
-		int				colorCursorPos;
-		int				byteOfs;
+		size_t			colorCursorPos;
+		size_t			byteOfs;
 
 		if (key_chatTeam)
 			skip = R_DrawString (NULL, 4, v, newScale, newScale, 0, "say_team:", Q_colorWhite) + 1;
@@ -735,9 +735,9 @@ static void CL_DrawNotify (void)
 
 		// Add cursor
 		if ((Sys_UMilliseconds()>>8)&1) {
-			int charCount = Q_ColorCharCount (key_chatBuffer[key_chatEditLine], key_chatCursorPos) + skip;
-			if (charCount > (int)(cls.refConfig.vidWidth/charSize[0]) - 1)
-				charCount = (int)(cls.refConfig.vidWidth/charSize[0]) - 1;
+			size_t charCount = Q_ColorCharCount (key_chatBuffer[key_chatEditLine], key_chatCursorPos) + skip;
+			if (charCount > (size_t)(cls.refConfig.vidWidth/charSize[0]) - 1)
+				charCount = (size_t)(cls.refConfig.vidWidth/charSize[0]) - 1;
 
 			R_DrawChar (NULL, ((charCount - (key_insertOn ? 0.3 : 0)) * charSize[0]), v, newScale, newScale, 0,
 						key_insertOn ? '|' : 11, Q_colorWhite);

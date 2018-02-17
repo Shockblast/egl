@@ -554,7 +554,7 @@ static void *CGI_Alloc (size_t size, qBool zeroFill, const int tagNum, const cha
 CGI_ChangeTag
 ===============
 */
-uint32 CGI_ChangeTag (const int tagFrom, const int tagTo)
+size_t CGI_ChangeTag (const int tagFrom, const int tagTo)
 {
 	return _Mem_ChangeTag (cl_cGameSysPool, tagFrom, tagTo);
 }
@@ -565,7 +565,7 @@ uint32 CGI_ChangeTag (const int tagFrom, const int tagTo)
 CGI_Free
 ===============
 */
-static uint32 CGI_Free (const void *ptr, const char *fileName, const int fileLine)
+static size_t CGI_Free (const void *ptr, const char *fileName, const int fileLine)
 {
 	return _Mem_Free (ptr, fileName, fileLine);
 }
@@ -576,7 +576,7 @@ static uint32 CGI_Free (const void *ptr, const char *fileName, const int fileLin
 CGI_FreeTag
 ===============
 */
-static uint32 CGI_FreeTag (const int tagNum, const char *fileName, const int fileLine)
+static size_t CGI_FreeTag (const int tagNum, const char *fileName, const int fileLine)
 {
 	return _Mem_FreeTag (cl_cGameSysPool, tagNum, fileName, fileLine);
 }
@@ -598,7 +598,7 @@ static char *CGI_StrDup (const char *in, const int tagNum, const char *fileName,
 CGI_TagSize
 ===============
 */
-static uint32 CGI_TagSize (const int tagNum)
+static size_t CGI_TagSize (const int tagNum)
 {
 	return _Mem_TagSize (cl_cGameSysPool, tagNum);
 }
@@ -823,7 +823,7 @@ CL_CGameAPI_Shutdown
 */
 void CL_CGameAPI_Shutdown (void)
 {
-	uint32	size;
+	size_t	size;
 
 	if (!cge)
 		return;

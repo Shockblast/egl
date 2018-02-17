@@ -145,8 +145,8 @@ struct font_s *R_RegisterFont (char *name);
 void		R_GetFontDimensions (struct font_s *font, float xScale, float yScale, uint32 flags, vec2_t dest);
 
 void		R_DrawChar (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, int num, vec4_t color);
-int			R_DrawString (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
-int			R_DrawStringLen (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, int len, vec4_t color);
+size_t		R_DrawString (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
+size_t		R_DrawStringLen (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color);
 
 //
 // rf_image.c

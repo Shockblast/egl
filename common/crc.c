@@ -171,7 +171,7 @@ static uint16 CRC_Value (uint16 crcvalue)
 CRC_Block
 =================
 */
-static uint16 CRC_Block (byte *start, int count)
+static uint16 CRC_Block (byte *start, size_t count)
 {
 	uint16	crc;
 
@@ -190,9 +190,9 @@ Com_BlockSequenceCRCByte
 For proxy protecting
 ====================
 */
-byte Com_BlockSequenceCRCByte (byte *base, int length, int sequence)
+byte Com_BlockSequenceCRCByte (byte *base, size_t length, int sequence)
 {
-	int		n;
+	size_t	n;
 	byte	*p;
 	int		x;
 	byte	chkb[60 + 4];

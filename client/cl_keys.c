@@ -34,13 +34,13 @@ int					key_anyKeyDown;
 keyInfo_t			key_keyInfo[K_MAXKEYS];
 
 char				key_consoleBuffer[32][MAXCMDLINE];
-int					key_consoleCursorPos = 1;
+size_t				key_consoleCursorPos = 1;
 int					key_consoleEditLine = 0;
 int					key_consoleHistoryLine = 0;
 
 qBool				key_chatTeam;
 char				key_chatBuffer[32][MAXCMDLINE];
-int					key_chatCursorPos = 0;
+size_t				key_chatCursorPos = 0;
 int					key_chatEditLine = 0;
 int					key_chatHistoryLine = 0;
 
@@ -210,8 +210,8 @@ static int	key_totalMatches;
 static int	key_totalMatchGroup[GRP_TOTAL];
 static int	key_matchGroup;
 
-static char	key_completePartial[MAX_TOKEN_CHARS];
-static int	key_completeLen;
+static char		key_completePartial[MAX_TOKEN_CHARS];
+static size_t	key_completeLen;
 
 static void Key_FindMatch (const char *name)
 {
@@ -237,9 +237,9 @@ static void Key_FindMatch (const char *name)
 	memset (&key_shortMatch[i], 0, sizeof (key_shortMatch)-i);
 }
 
-static int Key_CompleteOffset (char *source)
+static size_t Key_CompleteOffset (char *source)
 {
-	int		startPos, len, i;
+	size_t		startPos, len, i;
 
 	len = strlen (source);
 
@@ -275,7 +275,7 @@ static int Key_CompleteOffset (char *source)
 
 static qBool Key_SubComplete (char *source, char *dest, size_t size, qBool doAliases, qBool doCmds, qBool doCvars)
 {
-	int		startPos, len, i, j;
+	size_t		startPos, len, i, j;
 
 	// Clear
 	memset (key_shortMatch, 0, sizeof (key_shortMatch));
@@ -356,9 +356,8 @@ static qBool Key_SubComplete (char *source, char *dest, size_t size, qBool doAli
 static qBool Key_FileSubComplete (char *source, char *dest, size_t size, char *path, char *filter, char *ext, qBool recurse, qBool stripExt)
 {
 	char	*fileList[FS_MAX_FINDFILES];
-	int		numFiles, len, i, j;
+	size_t	numFiles, len, i, j, pathLen;
 	int		matchFiles;
-	int		pathLen;
 	char	*p;
 
 	// Clear
@@ -444,9 +443,9 @@ static qBool Key_FileSubComplete (char *source, char *dest, size_t size, char *p
 
 static void Key_CompleteCommand (void)
 {
-	int		len, i, j, startPos;
+	size_t	len, i, j, startPos;
 	char	*dest, *source;
-	int		*cursorPos;
+	size_t	*cursorPos;
 	size_t	size;
 	char	*p;
 
@@ -583,7 +582,7 @@ Key_Message
 */
 static void Key_Message (int key)
 {
-	int		charCount, i;
+	size_t	charCount, i;
 	char	*cbd;
 
 	switch (key) {
@@ -782,7 +781,7 @@ Interactive line editing and console scrollback
 */
 static void Key_Console (int key)
 {
-	int		charCount, i;
+	size_t	charCount, i;
 	char	*cbd;
 
 	switch (key) {
@@ -998,7 +997,7 @@ pasteIntoMessage:
 		return;
 
 	if (key_consoleCursorPos < MAXCMDLINE-1) {
-		int i;
+		size_t i;
 
 		// Check insert mode
 		if (key_insertOn) {

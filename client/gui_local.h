@@ -353,7 +353,7 @@ typedef struct event_s {
 	char				*named;
 
 	// WEV_TIME
-	uint32				onTime;
+	size_t				onTime;
 } event_t;
 
 /*

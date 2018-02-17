@@ -73,7 +73,7 @@ FIXME: actually change the command buffer to do less copying
 void Cbuf_InsertText (char *text)
 {
 	char	temp[COMMAND_BUFFER_SIZE];
-	int		tempLen;
+	size_t	tempLen;
 
 	// Copy off any commands still remaining in the exec buffer
 	tempLen = com_cbufText.curSize;

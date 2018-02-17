@@ -121,14 +121,14 @@ typedef struct cgImport_s {
 	void		(*FS_CreatePath) (char *path);
 	char		*(*FS_Gamedir) (void);
 	int			(*FS_FileExists) (char *path);
-	int			(*FS_FindFiles) (char *path, char *filter, char *extension, char **fileList, int maxFiles, qBool addGameDir, qBool recurse);
-	void		(*FS_FreeFileList) (char **list, int num, const char *fileName, const int fileLine);
+	size_t		(*FS_FindFiles) (char *path, char *filter, char *extension, char **fileList, size_t maxFiles, qBool addGameDir, qBool recurse);
+	void		(*FS_FreeFileList) (char **list, size_t num, const char *fileName, const int fileLine);
 	int			(*FS_LoadFile) (char *path, void **buffer, char *terminate);
 	void		(*FS_FreeFile) (void *buffer, const char *fileName, const int fileLine);
 	char		*(*FS_NextPath) (char *prevPath);
-	int			(*FS_Read) (void *buffer, int len, fileHandle_t fileNum);
-	int			(*FS_Write) (void *buffer, int size, fileHandle_t fileNum);
-	void		(*FS_Seek) (fileHandle_t fileNum, int offset, fsSeekOrigin_t seekOrigin);
+	size_t		(*FS_Read) (void *buffer, size_t len, fileHandle_t fileNum);
+	size_t		(*FS_Write) (void *buffer, size_t size, fileHandle_t fileNum);
+	void		(*FS_Seek) (fileHandle_t fileNum, long offset, fsSeekOrigin_t seekOrigin);
 	int			(*FS_OpenFile) (char *fileName, fileHandle_t *fileNum, fsOpenMode_t openMode);
 	void		(*FS_CloseFile) (fileHandle_t fileNum);
 
@@ -161,11 +161,11 @@ typedef struct cgImport_s {
 	qBool		(*Key_ShiftDown) (void);
 
 	void		*(*Mem_Alloc) (size_t size, qBool zeroFill, const int tagNum, const char *fileName, const int fileLine);
-	uint32		(*Mem_Free) (const void *ptr, const char *fileName, const int fileLine);
-	uint32		(*Mem_FreeTag) (const int tagNum, const char *fileName, const int fileLine);
+	size_t		(*Mem_Free) (const void *ptr, const char *fileName, const int fileLine);
+	size_t		(*Mem_FreeTag) (const int tagNum, const char *fileName, const int fileLine);
 	char		*(*Mem_StrDup) (const char *in, const int tagNum, const char *fileName, const int fileLine);
-	uint32		(*Mem_TagSize) (const int tagNum);
-	uint32		(*Mem_ChangeTag) (const int tagFrom, const int tagTo);
+	size_t		(*Mem_TagSize) (const int tagNum);
+	size_t		(*Mem_ChangeTag) (const int tagFrom, const int tagTo);
 
 	int			(*MSG_ReadChar) (void);
 	int			(*MSG_ReadByte) (void);
@@ -197,8 +197,8 @@ typedef struct cgImport_s {
 	struct font_s *(*R_RegisterFont) (char *name);
 	void		(*R_GetFontDimensions) (struct font_s *font, float xScale, float yScale, uint32 flags, vec2_t dest);
 	void		(*R_DrawChar) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, int num, vec4_t color);
-	int			(*R_DrawString) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
-	int			(*R_DrawStringLen) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, int len, vec4_t color);
+	size_t		(*R_DrawString) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
+	size_t		(*R_DrawStringLen) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color);
 
 	void		(*R_DrawPic) (struct shader_s *shader, float shaderTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
 	void		(*R_DrawRectangle) (struct shader_s *shader, float shaderTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);

@@ -37,12 +37,12 @@ extern qBool	key_insertOn;
 extern int		key_anyKeyDown;
 
 extern char		key_consoleBuffer[32][MAXCMDLINE];
-extern int		key_consoleCursorPos;
+extern size_t	key_consoleCursorPos;
 extern int		key_consoleEditLine;
 
 extern qBool	key_chatTeam;
 extern char		key_chatBuffer[32][MAXCMDLINE];
-extern int		key_chatCursorPos;
+extern size_t	key_chatCursorPos;
 extern int		key_chatEditLine;
 
 keyDest_t	Key_GetDest (void);

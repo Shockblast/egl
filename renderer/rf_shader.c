@@ -3169,7 +3169,7 @@ void R_ShaderInit (void)
 {
 	char			*fileList[MAX_SHADERS];
 	char			fixedName[MAX_QPATH];
-	int				numFiles, i;
+	size_t			numFiles, i;
 	shPathType_t	pathType;
 	char			*name;
 	uint32			initTime;
@@ -3242,7 +3242,7 @@ R_ShaderShutdown
 */
 void R_ShaderShutdown (void)
 {
-	uint32	size;
+	size_t	size;
 
 	Com_Printf (0, "Shader system shutdown:\n");
 

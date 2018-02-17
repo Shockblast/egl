@@ -146,7 +146,7 @@ Cmd_MacroExpandString
 char *Cmd_MacroExpandString (char *text)
 {
 	static	char	expanded[MAX_STRING_CHARS];
-	int		i, j, count, len;
+	size_t	i, j, count, len;
 	qBool	inquote;
 	char	*scan;
 	char	temporary[MAX_STRING_CHARS];
@@ -251,7 +251,7 @@ void Cmd_TokenizeString (char *text, qBool macroExpand)
 
 		// Set com_cmdArgs to everything after the first arg
 		if (com_cmdArgc == 1) {
-			int		l;
+			size_t		l;
 
 			Q_strcatz (com_cmdArgs, text, sizeof (com_cmdArgs));
 
@@ -536,7 +536,7 @@ static int alphaSortCmp (const void *_a, const void *_b)
 static void Cmd_List_f (void) {
 	cmdFunc_t	*cmd, *sortedList;
 	int			i, j, total;
-	int			matching, longest;
+	size_t		matching, longest;
 	char		*wildCard;
 	uint32		c;
 

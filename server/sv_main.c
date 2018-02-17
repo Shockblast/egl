@@ -213,8 +213,8 @@ static char *SV_StatusString (void)
 	static char	status[MAX_SV_MSGLEN - 16];
 	int			i;
 	svClient_t	*cl;
-	int			statusLength;
-	int			playerLength;
+	size_t		statusLength;
+	size_t		playerLength;
 
 	Q_snprintfz (status, sizeof (status), "%s\n", Cvar_BitInfo (CVAR_SERVERINFO));
 	statusLength = strlen (status);
