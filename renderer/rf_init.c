@@ -1084,7 +1084,7 @@ static void GL_InitExtensions (void)
 	else
 		Com_Printf (0, "...ignoring GL_EXT_stencil_wrap\n");
 
-#ifdef WIN32
+#ifdef _WIN32
 	/*
 	** WGL_3DFX_gamma_control
 	*/
@@ -1122,7 +1122,7 @@ static void GL_InitExtensions (void)
 	}
 	else
 		Com_Printf (0, "...ignoring WGL_EXT_swap_control\n");
-#endif // WIN32
+#endif // _WIN32
 }
 
 

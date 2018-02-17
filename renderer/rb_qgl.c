@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // QGL_GetProcAddress () - returns the address of a gl function
 //
 
-#ifdef WIN32
+#ifdef _WIN32
 
 # include "../renderer/r_local.h"
 # include "../win32/win_glimp.h"
@@ -398,7 +398,7 @@ void		(APIENTRYP qglViewport) (GLint x, GLint y, GLsizei width, GLsizei height);
 // win32
 //
 
-#ifdef WIN32
+#ifdef _WIN32
 int			(WINAPIP qwglChoosePixelFormat) (HDC, CONST PIXELFORMATDESCRIPTOR *);
 int			(WINAPIP qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
 int			(WINAPIP qwglGetPixelFormat) (HDC);
@@ -3869,7 +3869,7 @@ Unloads the specified DLL then nulls out all the proc pointers.
 */
 void QGL_Shutdown (void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	if (glwState.hInstOpenGL) {
 		FreeLibrary (glwState.hInstOpenGL);
 		glwState.hInstOpenGL = NULL;
@@ -4219,7 +4219,7 @@ void QGL_Shutdown (void)
 	qglVertexPointer			= NULL;
 	qglViewport					= NULL;
 
-#ifdef WIN32
+#ifdef _WIN32
 	qwglCopyContext				= NULL;
 	qwglCreateContext			= NULL;
 	qwglCreateLayerContext		= NULL;
@@ -4308,7 +4308,7 @@ qBool QGL_Init (const char *dllName)
 {
 	Com_Printf (0, "QGL_Init: LoadLibrary ( \"%s\" )", dllName);
 
-#ifdef WIN32
+#ifdef _WIN32
 	if (!(glwState.hInstOpenGL = LoadLibrary (dllName))) {
 		char *buf = NULL;
 
@@ -4699,7 +4699,7 @@ qBool QGL_Init (const char *dllName)
 	qglVertexPointer			= dllVertexPointer				= GL_GPA ("glVertexPointer");
 	qglViewport					= dllViewport					= GL_GPA ("glViewport");
 
-#ifdef WIN32
+#ifdef _WIN32
 	qwglCopyContext				= GL_GPA ("wglCopyContext");
 	qwglCreateContext			= GL_GPA ("wglCreateContext");
 	qwglCreateLayerContext		= GL_GPA ("wglCreateLayerContext");
@@ -6199,7 +6199,7 @@ QGL_GetProcAddress
 */
 void *QGL_GetProcAddress (const char *procName)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	return qwglGetProcAddress ((LPCSTR) procName);
 #elif defined __unix__
 	if (glxState.OpenGLLib)

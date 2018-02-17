@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define SHADOW_VOLUMES	2
 #define SHADOW_ALPHA	0.5f
 
-#ifdef WIN32
+#ifdef _WIN32
 # include <windows.h>
 #endif
 

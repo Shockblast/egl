@@ -292,10 +292,14 @@ static void R_ParseProgramFile (char *fixedName, qBool baseDir, qBool vp, qBool 
 	if (vp) {
 		vpBuf = (char *)Mem_PoolAllocExt (fileLen, qFalse, ri.programSysPool, 0);
 		memcpy (vpBuf, fileBuffer, fileLen);
+	} else {
+		vpBuf = NULL;
 	}
 	if (fp) {
 		fpBuf = (char *)Mem_PoolAllocExt (fileLen, qFalse, ri.programSysPool, 0);
 		memcpy (fpBuf, fileBuffer, fileLen);
+	} else {
+		fpBuf = NULL;
 	}
 
 	// Don't need this anymore
@@ -560,7 +564,7 @@ void R_ProgramShutdown (void)
 
 	r_numPrograms = 0;
 	memset (r_programList, 0, sizeof (program_t) * MAX_PROGRAMS);
-	memset (r_programHashTree, 0, sizeof (program_t *) * MAX_PROGRAMS);
+	memset (r_programHashTree, 0, sizeof (program_t *) * MAX_PROGRAM_HASH);
 
 	size = Mem_FreePool (ri.programSysPool);
 	Com_Printf (0, "...releasing %u bytes...\n", size);

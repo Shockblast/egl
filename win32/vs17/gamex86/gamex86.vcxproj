@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{99138C1B-2F71-42DF-ACA9-9D4305762749}</ProjectGuid>
+    <RootNamespace>gamex86</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\game\g_ai.c" />
+    <ClCompile Include="..\..\..\game\g_chase.c" />
+    <ClCompile Include="..\..\..\game\g_cmds.c" />
+    <ClCompile Include="..\..\..\game\g_combat.c" />
+    <ClCompile Include="..\..\..\game\g_func.c" />
+    <ClCompile Include="..\..\..\game\g_items.c" />
+    <ClCompile Include="..\..\..\game\g_main.c" />
+    <ClCompile Include="..\..\..\game\g_misc.c" />
+    <ClCompile Include="..\..\..\game\g_monster.c" />
+    <ClCompile Include="..\..\..\game\g_phys.c" />
+    <ClCompile Include="..\..\..\game\g_save.c" />
+    <ClCompile Include="..\..\..\game\g_spawn.c" />
+    <ClCompile Include="..\..\..\game\g_svcmds.c" />
+    <ClCompile Include="..\..\..\game\g_target.c" />
+    <ClCompile Include="..\..\..\game\g_trigger.c" />
+    <ClCompile Include="..\..\..\game\g_turret.c" />
+    <ClCompile Include="..\..\..\game\g_utils.c" />
+    <ClCompile Include="..\..\..\game\g_weapon.c" />
+    <ClCompile Include="..\..\..\game\m_actor.c" />
+    <ClCompile Include="..\..\..\game\m_berserk.c" />
+    <ClCompile Include="..\..\..\game\m_boss2.c" />
+    <ClCompile Include="..\..\..\game\m_boss3.c" />
+    <ClCompile Include="..\..\..\game\m_boss31.c" />
+    <ClCompile Include="..\..\..\game\m_boss32.c" />
+    <ClCompile Include="..\..\..\game\m_brain.c" />
+    <ClCompile Include="..\..\..\game\m_chick.c" />
+    <ClCompile Include="..\..\..\game\m_flipper.c" />
+    <ClCompile Include="..\..\..\game\m_float.c" />
+    <ClCompile Include="..\..\..\game\m_flyer.c" />
+    <ClCompile Include="..\..\..\game\m_gladiator.c" />
+    <ClCompile Include="..\..\..\game\m_gunner.c" />
+    <ClCompile Include="..\..\..\game\m_hover.c" />
+    <ClCompile Include="..\..\..\game\m_infantry.c" />
+    <ClCompile Include="..\..\..\game\m_insane.c" />
+    <ClCompile Include="..\..\..\game\m_medic.c" />
+    <ClCompile Include="..\..\..\game\m_move.c" />
+    <ClCompile Include="..\..\..\game\m_mutant.c" />
+    <ClCompile Include="..\..\..\game\m_parasite.c" />
+    <ClCompile Include="..\..\..\game\m_soldier.c" />
+    <ClCompile Include="..\..\..\game\m_supertank.c" />
+    <ClCompile Include="..\..\..\game\m_tank.c" />
+    <ClCompile Include="..\..\..\game\p_client.c" />
+    <ClCompile Include="..\..\..\game\p_hud.c" />
+    <ClCompile Include="..\..\..\game\p_trail.c" />
+    <ClCompile Include="..\..\..\game\p_view.c" />
+    <ClCompile Include="..\..\..\game\p_weapon.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\game\game.h" />
+    <ClInclude Include="..\..\..\game\g_local.h" />
+    <ClInclude Include="..\..\..\game\m_actor.h" />
+    <ClInclude Include="..\..\..\game\m_berserk.h" />
+    <ClInclude Include="..\..\..\game\m_boss2.h" />
+    <ClInclude Include="..\..\..\game\m_boss31.h" />
+    <ClInclude Include="..\..\..\game\m_boss32.h" />
+    <ClInclude Include="..\..\..\game\m_brain.h" />
+    <ClInclude Include="..\..\..\game\m_chick.h" />
+    <ClInclude Include="..\..\..\game\m_flipper.h" />
+    <ClInclude Include="..\..\..\game\m_float.h" />
+    <ClInclude Include="..\..\..\game\m_flyer.h" />
+    <ClInclude Include="..\..\..\game\m_gladiator.h" />
+    <ClInclude Include="..\..\..\game\m_gunner.h" />
+    <ClInclude Include="..\..\..\game\m_hover.h" />
+    <ClInclude Include="..\..\..\game\m_infantry.h" />
+    <ClInclude Include="..\..\..\game\m_insane.h" />
+    <ClInclude Include="..\..\..\game\m_medic.h" />
+    <ClInclude Include="..\..\..\game\m_mutant.h" />
+    <ClInclude Include="..\..\..\game\m_parasite.h" />
+    <ClInclude Include="..\..\..\game\m_player.h" />
+    <ClInclude Include="..\..\..\game\m_rider.h" />
+    <ClInclude Include="..\..\..\game\m_soldier.h" />
+    <ClInclude Include="..\..\..\game\m_supertank.h" />
+    <ClInclude Include="..\..\..\game\m_tank.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\game\exports.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\shared\shared.vcxproj">
+      <Project>{c25bc6a0-9748-4920-af92-36309d94fa11}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

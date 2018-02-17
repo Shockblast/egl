@@ -654,27 +654,7 @@ this means dealing with the pixelformats and doing the wgl interface stuff.
 #define OSR2_BUILD_NUMBER 1111
 qBool GLimp_Init (void)
 {
-	OSVERSIONINFO	vinfo;
-
-	vinfo.dwOSVersionInfoSize = sizeof (vinfo);
-	glwState.bppChangeAllowed = qFalse;
-
-	if (GetVersionEx (&vinfo)) {
-		if (vinfo.dwMajorVersion > 4)
-			glwState.bppChangeAllowed = qTrue;
-		else if (vinfo.dwMajorVersion == 4) {
-			if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
-				glwState.bppChangeAllowed = qTrue;
-			else if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-				if (LOWORD (vinfo.dwBuildNumber) >= OSR2_BUILD_NUMBER)
-					glwState.bppChangeAllowed = qTrue;
-		}
-	}
-	else {
-		Com_Printf (PRNT_ERROR, "GLimp_Init: - GetVersionEx failed\n");
-		return qFalse;
-	}
-
+	glwState.bppChangeAllowed = qTrue;
 	return qTrue;
 }
 

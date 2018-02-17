@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <direct.h>
 #include <io.h>
 #include <conio.h>
+#include <VersionHelpers.h>
 
 #define MINIMUM_WIN_MEMORY	0x0a00000
 #define MAXIMUM_WIN_MEMORY	0x1000000
@@ -56,25 +57,13 @@ Sys_Init
 */
 void Sys_Init (void)
 {
-	OSVERSIONINFO	vinfo;
-
 	// Make sure the timer is high precision, otherwise NT gets 18ms resolution
 	timeBeginPeriod (1);
 
-	// Check operating system info
-	vinfo.dwOSVersionInfoSize = sizeof (vinfo);
-
-	if (!GetVersionEx (&vinfo))
-		Sys_Error ("Couldn't get OS info");
-
-	if (vinfo.dwMajorVersion < 4)
+	if (!IsWindowsVersionOrGreater(4, 0, 0))
 		Sys_Error ("EGL requires windows version 4 or greater");
-	if (vinfo.dwPlatformId == VER_PLATFORM_WIN32s)
-		Sys_Error ("EGL doesn't run on Win32s");
-	else if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-		sys_winInfo.isWin32 = qTrue;
-	else
-		sys_winInfo.isWin32 = qFalse;
+
+	sys_winInfo.isWin32 = qFalse;
 }
 
 
@@ -506,22 +495,12 @@ int Sys_FindFiles (char *path, char *pattern, char **fileList, int maxFiles, int
 ==============================================================================
 */
 
-#if defined(_M_IX86)
 # define LIBARCH		"x86"
 # ifdef _DEBUG
 #  define LIBDEBUGDIR	"debug"
 # else
 #  define LIBDEBUGDIR	"release"
 # endif
-
-#elif defined(_M_ALPHA)
-# define LIBARCH		"axp"
-# ifdef _DEBUG
-#  define LIBDEBUGDIR	"debugaxp"
-# else
-#  define LIBDEBUGDIR	"releaseaxp"
-# endif
-#endif
 
 typedef struct libList_s {
 	const char		*title;

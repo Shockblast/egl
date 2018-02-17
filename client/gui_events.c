@@ -142,7 +142,8 @@ static void GUI_SetAction (gui_t *gui, eva_set_t *setAction)
 
 	if (!setAction->destWindowPtr)
 		return;
-
+	
+	queueWindow = NULL;
 	queueEvent = WEV_NONE;
 
 	switch (setAction->destType) {

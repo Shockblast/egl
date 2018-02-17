@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // This will generate and locally store VBO information
 //
 
+#if 0
 #include "r_local.h"
 
 static vbo_t	r_vboList[MAX_VBOS];
@@ -131,3 +132,4 @@ void R_VBOShutdown (void)
 	for (i=0 ; i<MAX_VBOS ; i++)
 		R_ReleaseVBO (&r_vboList[i]);
 }
+#endif

@@ -21,9 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // win_glimp.h
 //
 
-#ifndef WIN32
+#ifndef _WIN32
 # error You should not be including this file on this platform
-#endif // WIN32
+#endif // _WIN32
 
 #ifndef __WIN_GLIMP_H__
 #define __WIN_GLIMP_H__

@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // =========================================================================
 // Windows
 //
-#ifdef WIN32
+#ifdef _WIN32
 
 // unknown pragmas are SUPPOSED to be ignored, but....
 # pragma warning(disable : 4244)	// 'conversion' conversion from 'type1' to 'type2', possible loss of data

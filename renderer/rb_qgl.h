@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #ifndef __RB_QGL_H__
 #define __RB_QGL_H__
 
-#if defined(WIN32)
+#ifdef _WIN32
 # include <windows.h>
 #endif
 
@@ -381,7 +381,7 @@ extern void		(APIENTRYP qglVertex4sv) (const GLshort *v);
 extern void		(APIENTRYP qglVertexPointer) (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 extern void		(APIENTRYP qglViewport) (GLint x, GLint y, GLsizei width, GLsizei height);
 
-#if defined(WIN32)
+#ifdef _WIN32
 
 //
 // win32
@@ -423,7 +423,7 @@ extern BOOL		(WINAPIP qwglSwapIntervalEXT) (int interval);
 extern BOOL		(WINAPIP qwglGetDeviceGammaRamp3DFX) (HDC, WORD *);
 extern BOOL		(WINAPIP qwglSetDeviceGammaRamp3DFX) (HDC, WORD *);
 
-#endif // WIN32
+#endif // _WIN32
 
 
 

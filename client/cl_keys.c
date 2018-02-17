@@ -1216,7 +1216,7 @@ void Key_Event (keyNum_t keyNum, qBool isDown, uint32 time)
 
 	if (keyNum == K_SHIFT || keyNum == K_LSHIFT || keyNum == K_RSHIFT)
 		key_shiftDown = isDown;
-#ifdef WIN32 // FIXME
+#ifdef _WIN32 // FIXME
 	key_capsLockOn = In_GetKeyState (K_CAPSLOCK);
 #else
 	key_capsLockOn = qFalse;

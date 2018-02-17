@@ -2623,6 +2623,8 @@ static shader_t *R_RegisterShader (char *name, qBool forceDefault, shRegType_t s
 		}
 	}
 
+	buffer = NULL;
+
 	// Default shader flags
 	switch (shaderType) {
 	case SHADER_PIC:

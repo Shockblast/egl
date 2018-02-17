@@ -788,7 +788,7 @@ CM_Q2BSP_TransformedBoxTrace
 Handles offseting and rotation of the end points for moving and rotating entities
 ==================
 */
-#ifdef WIN32
+#ifdef _WIN32
 #pragma optimize ("", off)
 #endif
 void CM_Q2BSP_TransformedBoxTrace (trace_t *out, vec3_t start, vec3_t end, vec3_t mins, vec3_t maxs, int headNode, int brushMask, vec3_t origin, vec3_t angles)
@@ -840,7 +840,7 @@ void CM_Q2BSP_TransformedBoxTrace (trace_t *out, vec3_t start, vec3_t end, vec3_
 	out->endPos[1] = start[1] + out->fraction * (end[1] - start[1]);
 	out->endPos[2] = start[2] + out->fraction * (end[2] - start[2]);
 }
-#ifdef WIN32
+#ifdef _WIN32
 #pragma optimize ("", on)
 #endif
 

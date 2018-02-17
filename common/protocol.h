@@ -306,7 +306,7 @@ typedef struct netAdr_s {
 	a->port = ((struct sockaddr_in *)s)->sin_port;
 
 // Checks if an address is a loopback address
-#ifdef WIN32
+#ifdef _WIN32
 # define NET_IsLocalAddress(adr) ((adr.naType == NA_LOOPBACK) ? qTrue : qFalse)
 #else
 qBool		NET_IsLocalAddress (netAdr_t adr);

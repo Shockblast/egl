@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // m_flash.c
 
-#include "../shared/shared.h"
+#include "shared.h"
 
 // this file is included in both the game dll and egl, the game needs it to source shot
 // locations, the client needs it to position muzzle flashes

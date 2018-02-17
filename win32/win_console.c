@@ -343,7 +343,7 @@ void Sys_CreateConsole (void)
 												sys_winInfo.hInstance, NULL);
 	SendMessage (winConsole.hwndBuffer, WM_SETFONT, (WPARAM) winConsole.hfBufferFont, 0);
 
-	winConsole.SysInputLineWndProc = (WNDPROC)SetWindowLong (winConsole.hwndInputLine, GWL_WNDPROC, (long)InputLineWndProc);
+	winConsole.SysInputLineWndProc = (WNDPROC)SetWindowLongPtr (winConsole.hwndInputLine, GWLP_WNDPROC, (LONG)InputLineWndProc);
 	SendMessage (winConsole.hwndInputLine, WM_SETFONT, (WPARAM)winConsole.hfBufferFont, 0);
 
 	ShowWindow (winConsole.hWnd, SW_SHOWDEFAULT);

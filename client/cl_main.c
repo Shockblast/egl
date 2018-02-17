@@ -595,6 +595,7 @@ static void CL_ConnectionlessPacket (void)
 		Q_strncpyz (cls.serverMessage, printStr, sizeof (cls.serverMessage));
 	}
 	else {
+		printStr = NULL;
 		isPrint = qFalse;
 	}
 

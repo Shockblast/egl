@@ -37,6 +37,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "cl_keys.h"
 #include "gui_public.h"
 
+// FIXME
+#ifdef _WIN32
+ #define putenv _putenv
+#endif
+
 #define CL_ANTICHEAT	1
 
 #ifdef USE_CURL

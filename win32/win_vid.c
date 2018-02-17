@@ -65,7 +65,7 @@ VID_Front_f
 */
 static void VID_Front_f (void)
 {
-	SetWindowLong (sys_winInfo.hWnd, GWL_EXSTYLE, WS_EX_TOPMOST);
+	SetWindowLongPtr (sys_winInfo.hWnd, GWL_EXSTYLE, WS_EX_TOPMOST);
 	SetForegroundWindow (sys_winInfo.hWnd);
 }
 
@@ -163,7 +163,7 @@ static void VID_UpdateWindowPosAndSize (void)
 		rect.right	= ri.config.vidWidth;
 		rect.bottom	= ri.config.vidHeight;
 
-		style = GetWindowLong (sys_winInfo.hWnd, GWL_STYLE);
+		style = GetWindowLongPtr (sys_winInfo.hWnd, GWL_STYLE);
 		AdjustWindowRect (&rect, style, FALSE);
 
 		w = rect.right - rect.left;
@@ -292,7 +292,7 @@ LRESULT CALLBACK MainWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			r.right		= 1;
 			r.bottom	= 1;
 
-			style = GetWindowLong (hWnd, GWL_STYLE);
+			style = GetWindowLongPtr (hWnd, GWL_STYLE);
 			AdjustWindowRect (&r, style, FALSE);
 
 			Cvar_VariableSetValue (vid_xpos, xPos + r.left, qTrue);
