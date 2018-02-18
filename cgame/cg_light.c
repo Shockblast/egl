@@ -205,8 +205,9 @@ void CG_RunDLights (void)
 		
 		if (dl->die < cg.realTime) {
 			dl->radius = 0;
-			return;
+			continue;
 		}
+
 		dl->radius -= cg.refreshFrameTime*dl->decay;
 		if (dl->radius < 0)
 			dl->radius = 0;
