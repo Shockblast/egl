@@ -193,7 +193,7 @@ void CG_Say_Preprocessor (void)
 
 		while (*sayText && *(sayText+1)) {
 			if (sayText[0] == '@') {
-				c = Q_tolower (sayText[1]);
+				c = tolower (sayText[1]);
 
 				locName = NULL;
 				switch (c) {

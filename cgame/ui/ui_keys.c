@@ -103,7 +103,7 @@ static qBool UI_FieldKeyFunc (uiField_t *f, keyNum_t keyNum)
 
 			Q_strncpyz (f->buffer, cbd, f->length - 1);
 			f->cursor = (int)strlen (f->buffer);
-			f->visibleOffset = (f->cursor - f->visibleLength);
+			f->visibleOffset = (f->cursor - (int) f->visibleLength);
 			if (f->visibleOffset < 0)
 				f->visibleOffset = 0;
 
@@ -144,7 +144,7 @@ static qBool UI_FieldKeyFunc (uiField_t *f, keyNum_t keyNum)
 			f->buffer[f->cursor++] = keyNum;
 			f->buffer[f->cursor] = 0;
 
-			if (f->cursor > f->visibleLength)
+			if (f->cursor > (int) f->visibleLength)
 				f->visibleOffset++;
 		}
 	}

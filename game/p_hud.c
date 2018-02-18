@@ -168,7 +168,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	size_t	i, j, k;
 	size_t	sorted[MAX_CS_CLIENTS];
 	size_t	sortedscores[MAX_CS_CLIENTS];
-	int		score, total;
+	size_t	score, total;
 	int		picnum;
 	int		x, y;
 	gclient_t	*cl;
@@ -177,7 +177,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 
 	// sort the clients by score
 	total = 0;
-	for (i=0 ; i<game.maxclients ; i++)
+	for (i=0 ; i<(size_t)game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inUse || game.clients[i].resp.spectator)
@@ -374,7 +374,7 @@ G_SetStats
 void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
-	int			index, cells;
+	int			index, cells = 0;
 	int			power_armor_type;
 
 	//

@@ -96,7 +96,7 @@ typedef struct m_screenMenu_s {
 
 	crosshairInfo_t	crosshairs[MAX_CROSSHAIRS];
 	char			*crosshairNames[MAX_CROSSHAIRS];
-	int				numCrosshairs;
+	size_t			numCrosshairs;
 } m_screenMenu_t;
 
 static m_screenMenu_t	m_screenMenu;
@@ -161,7 +161,7 @@ static void ConsoleFontScaleFunc (void *unused)
 
 static void CrosshairFunc (void *unused)
 {
-	if (m_screenMenu.ch_number_list.curValue < m_screenMenu.numCrosshairs)
+	if (m_screenMenu.ch_number_list.curValue < (int) m_screenMenu.numCrosshairs)
 		cgi.Cvar_SetValue ("crosshair", m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].number, qFalse);
 }
 
@@ -209,7 +209,7 @@ ScreenMenu_SetValues
 */
 static void ScreenMenu_SetValues (void)
 {
-	int		i;
+	size_t	i;
 
 	//
 	// console
@@ -245,11 +245,11 @@ static void ScreenMenu_SetValues (void)
 
 	m_screenMenu.ch_number_list.curValue		= cgi.Cvar_GetFloatValue ("crosshair");
 	for (i=0 ; i<m_screenMenu.numCrosshairs ; i++) {
-		if (m_screenMenu.crosshairs[i].number != m_screenMenu.ch_number_list.curValue)
+		if (m_screenMenu.crosshairs[i].number != (size_t) m_screenMenu.ch_number_list.curValue)
 			continue;
 		break;
 	}
-	m_screenMenu.ch_number_list.curValue = (i == m_screenMenu.numCrosshairs) ? 0 : i;
+	m_screenMenu.ch_number_list.curValue = (int) ((i == m_screenMenu.numCrosshairs) ? 0 : i);
 	if (m_screenMenu.numCrosshairs)
 		cgi.Cvar_SetValue ("crosshair", m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].number, qTrue);
 	else
@@ -628,7 +628,7 @@ ScreenMenu_Close
 */
 static struct sfx_s *ScreenMenu_Close (void)
 {
-	int		i;
+	size_t	i;
 
 	// Free display names
 	for (i=0 ; i<m_screenMenu.numCrosshairs ; i++)
@@ -696,7 +696,7 @@ static void ScreenMenu_Draw (void)
 	m_screenMenu.ch_header.generic.x			= 0;
 	m_screenMenu.ch_header.generic.y			= y += UIFT_SIZEINC*2;
 
-	if (m_screenMenu.crosshairsFound && m_screenMenu.ch_number_list.curValue < m_screenMenu.numCrosshairs) {
+	if (m_screenMenu.crosshairsFound && m_screenMenu.ch_number_list.curValue < (int) m_screenMenu.numCrosshairs) {
 		chShader = m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].shader;
 		cgi.R_GetImageSize (chShader, &width, &height);
 	}

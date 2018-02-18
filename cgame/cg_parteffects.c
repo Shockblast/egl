@@ -238,7 +238,7 @@ void CG_BlasterGoldParticles (vec3_t org, vec3_t dir)
 			0);
 	}
 
-	CG_ColorFlash(org, (int)((org[0]+org[1]+org[3]) / 3.0), 200, 1, 1, 0);
+	CG_ColorFlash(org, 0, 200, 100, 1, 1, 0);
 }
 
 
@@ -619,7 +619,7 @@ void CG_ExplosionBFGEffect (vec3_t org)
 CG_FlareEffect
 ===============
 */
-void __fastcall CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel)
+void CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel)
 {
 	CG_SpawnParticle (
 		origin[0],						origin[1],						origin[2],
@@ -748,7 +748,7 @@ CG_ParticleEffect
 Wall impact puffs
 ===============
 */
-void __fastcall CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
+void CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, rnum, rnum2;
 	float		d;
@@ -848,7 +848,7 @@ void __fastcall CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 CG_ParticleEffect2
 ===============
 */
-void __fastcall CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count)
+void CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count)
 {
 	if (color == 0xe2 && cg.currGameMod == GAME_MOD_GLOOM) {
 		CG_GloomRepairEffect (org, dir, count);
@@ -885,7 +885,7 @@ void __fastcall CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count
 CG_ParticleEffect3
 ===============
 */
-void __fastcall CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count)
+void CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, rnum, rnum2;
 	float		d;
@@ -919,7 +919,7 @@ CG_ParticleSmokeEffect
 like the steam effect, but unaffected by gravity
 ===============
 */
-void __fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
+void CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
 {
 	int			i, rnum, rnum2;
 	float		d;
@@ -958,7 +958,7 @@ void __fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int c
 CG_RicochetEffect
 ===============
 */
-void __fastcall CG_RicochetEffect (vec3_t org, vec3_t dir, int count)
+void CG_RicochetEffect (vec3_t org, vec3_t dir, int count)
 {
 	int		i, rnum, rnum2;
 	float	d;
@@ -1036,7 +1036,7 @@ void CG_RocketFireParticles (vec3_t org, vec3_t dir)
 CG_SparkEffect
 ===============
 */
-void __fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale)
+void CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale)
 {
 	int			i;
 	float		d, d2;
@@ -1109,7 +1109,7 @@ void __fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel,
 CG_SplashEffect
 ===============
 */
-void __fastcall CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow)
+void CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow)
 {
 	int		i, rnum, rnum2;
 	vec3_t	angle, dirVec;
@@ -1239,7 +1239,7 @@ void __fastcall CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count
 }
 
 byte		clrtbl[] = {0x00, 0xe0, 0xb0, 0x50, 0xd0, 0xe0, 0xe8};
-void __fastcall CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
+void CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	// this function merely decides what route to take
 	switch (color) {
@@ -1568,7 +1568,7 @@ void CG_ExplosionParticles (vec3_t org, float scale, qBool exploOnly, qBool inWa
 	// Only do these for small effects
 	if (scale <= 2.0f) {
 		VecToAngleRolled (normal, 180, angle);
-		rnum = Vec3DistFast (org, endPos);
+		rnum = Vec3Dist (org, endPos);
 		if (rnum < 50.0f) {
 			// Wave
 			CG_SpawnParticle (

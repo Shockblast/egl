@@ -220,8 +220,8 @@ static void SpinControl_DoSlide (uiList_t *s, int dir)
 	// Move
 	s->curValue += dir;
 	if (s->curValue < 0)
-		s->curValue = s->numItemNames-1;
-	else if (s->curValue >= s->numItemNames)
+		s->curValue = (int) s->numItemNames - 1;
+	else if (s->curValue >= (int) s->numItemNames)
 		s->curValue = 0;
 
 	// Callback

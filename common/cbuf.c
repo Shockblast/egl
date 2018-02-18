@@ -125,7 +125,7 @@ void Cbuf_Execute (void)
 {
 	char		*text;
 	char		line[1024];
-	int			i, quotes;
+	size_t		i, quotes;
 
 	com_aliasCount = 0;		// Don't allow infinite alias loops
 

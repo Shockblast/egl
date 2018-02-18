@@ -90,7 +90,7 @@ static winConsole_t winConsole;
 ConWndProc
 ==================
 */
-static LONG WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static LRESULT WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static qBool	s_timePolarity;
 
@@ -120,7 +120,7 @@ static LONG WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if ((HWND)lParam == winConsole.hwndBuffer) {
 			SetBkColor ((HDC)wParam, BUFF_BGCOLOR);
 			SetTextColor ((HDC)wParam, BUFF_TXTCOLOR);
-			return (long)winConsole.hbrEditBackground;
+			return (LRESULT) winConsole.hbrEditBackground;
 		}
 		else if ((HWND)lParam == winConsole.hwndErrorBox) {
 			if (s_timePolarity & 1) {
@@ -131,7 +131,7 @@ static LONG WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				SetBkColor ((HDC)wParam, ERR_BGCOLOR);
 				SetTextColor ((HDC)wParam, ERR_TXTCOLOR2);
 			}
-			return (long)winConsole.hbrErrorBackground;
+			return (LRESULT) winConsole.hbrErrorBackground;
 		}
 		break;
 

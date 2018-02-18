@@ -330,7 +330,7 @@ static void V_CalcThirdPersonView (void)
 	ClipCam (cg.refDef.viewOrigin, end, camPosition);
 
 	// Adjust player transparency
-	cg.cameraTrans = Vec3DistFast (cg.refDef.viewOrigin, camPosition);
+	cg.cameraTrans = Vec3Dist (cg.refDef.viewOrigin, camPosition);
 	if (cg.cameraTrans < cg_thirdPersonDist->floatVal) {
 		cg.cameraTrans = (cg.cameraTrans / cg_thirdPersonDist->floatVal) * 255;
 

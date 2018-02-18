@@ -257,11 +257,19 @@ void Cmd_TokenizeString (char *text, qBool macroExpand)
 
 			// Strip off any trailing whitespace
 			l = strlen (com_cmdArgs) - 1;
-			for ( ; l>=0 ; l--)
+
+			while (qTrue)
+			{
 				if (com_cmdArgs[l] <= ' ')
 					com_cmdArgs[l] = 0;
 				else
 					break;
+
+				if (l == 0)
+					break;
+
+				l--;
+			}
 		}
 
 		token = Com_Parse (&text);
@@ -533,9 +541,10 @@ static int alphaSortCmp (const void *_a, const void *_b)
 
 	return Q_stricmp (a->name, b->name);
 }
+
 static void Cmd_List_f (void) {
 	cmdFunc_t	*cmd, *sortedList;
-	int			i, j, total;
+	size_t		i, j, total;
 	size_t		matching, longest;
 	char		*wildCard;
 	uint32		c;

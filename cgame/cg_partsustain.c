@@ -280,7 +280,7 @@ CG_ParticleSteamEffect
 Puffs with velocity along direction, with some randomness thrown in
 ===============
 */
-void __fastcall CG_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
+void CG_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
 {
 	int			rnum, rnum2;
 	float		i, d;

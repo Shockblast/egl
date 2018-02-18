@@ -736,8 +736,7 @@ SV_Status_f
 */
 static void SV_Status_f (void)
 {
-	int			i, j;
-	size_t		l;
+	size_t		i, j, l;
 	svClient_t	*cl;
 	char		*s;
 	int			ping;
@@ -751,7 +750,7 @@ static void SV_Status_f (void)
 
 	Com_Printf (0, "num score ping name            lastmsg address               qPort  ver\n");
 	Com_Printf (0, "--- ----- ---- --------------- ------- --------------------- ------ ---\n");
-	for (i=0, cl=svs.clients ; i<maxclients->intVal ; i++, cl++) {
+	for (i=0, cl=svs.clients ; i<(size_t)maxclients->intVal ; i++, cl++) {
 		if (!cl->state)
 			continue;
 		Com_Printf (0, "%3i ", i);

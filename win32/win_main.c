@@ -495,7 +495,12 @@ int Sys_FindFiles (char *path, char *pattern, char **fileList, int maxFiles, int
 ==============================================================================
 */
 
-# define LIBARCH		"x86"
+# ifdef _M_X64
+#  define LIBARCH		"x64"
+# else
+#  define LIBARCH		"x86"
+#endif
+
 # ifdef _DEBUG
 #  define LIBDEBUGDIR	"debug"
 # else
@@ -538,6 +543,7 @@ void Sys_UnloadLibrary (libType_t libType)
 	*lib = NULL;
 }
 
+typedef void *(*APIFunc_t) (void *);
 
 /*
 =================
@@ -550,7 +556,7 @@ void *Sys_LoadLibrary (libType_t libType, void *parms)
 {
 	HINSTANCE	*lib;
 	const char	*libName;
-	void		*(*APIfunc) (void *);
+	APIFunc_t	APIfunc;
 	char		name[MAX_OSPATH];
 	char		cwd[MAX_OSPATH];
 	char		*path;
@@ -604,7 +610,7 @@ void *Sys_LoadLibrary (libType_t libType, void *parms)
 	}
 
 	// Find the API function
-	APIfunc = (void *)GetProcAddress (*lib, sys_libList[libType].apiFuncName);
+	APIfunc = (APIFunc_t)GetProcAddress (*lib, sys_libList[libType].apiFuncName);
 	if (!APIfunc) {
 		Sys_UnloadLibrary (libType);
 		return NULL;

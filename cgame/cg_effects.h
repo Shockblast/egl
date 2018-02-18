@@ -56,7 +56,7 @@ void	CG_RunDLights (void);
 void	CG_AddDLights (void);
 
 void	CG_Flashlight (int ent, vec3_t pos);
-void	__fastcall CG_ColorFlash (vec3_t pos, int ent, float intensity, float r, float g, float b);
+void	CG_ColorFlash (vec3_t pos, int ent, float intensity, float time, float r, float g, float b);
 void	CG_WeldingSparkFlash (vec3_t pos);
 
 /*
@@ -428,21 +428,21 @@ void	CG_BleedEffect (vec3_t org, vec3_t dir, int count);
 void	CG_BleedGreenEffect (vec3_t org, vec3_t dir, int count);
 void	CG_BubbleEffect (vec3_t origin);
 void	CG_ExplosionBFGEffect (vec3_t org);
-void	__fastcall CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel);
+void	CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel);
 void	CG_ItemRespawnEffect (vec3_t org);
 void	CG_LogoutEffect (vec3_t org, int type);
 
-void	__fastcall CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void	__fastcall CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
-void	__fastcall CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count);
-void	__fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void	__fastcall CG_RicochetEffect (vec3_t org, vec3_t dir, int count);
+void	CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
+void	CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
+void	CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count);
+void	CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
+void	CG_RicochetEffect (vec3_t org, vec3_t dir, int count);
 
 void	CG_RocketFireParticles (vec3_t org, vec3_t dir);
 
-void	__fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale);
-void	__fastcall CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow);
-void	__fastcall CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count);
+void	CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale);
+void	CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow);
+void	CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count);
 
 void	CG_BigTeleportParticles (vec3_t org);
 void	CG_BlasterTip (vec3_t start, vec3_t end);
@@ -475,7 +475,7 @@ void	CG_GloomStingerFire (vec3_t start, vec3_t end, float size, qBool light);
 // SUSTAINED EFFECTS
 //
 
-void	__fastcall CG_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
+void	CG_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
 
 void	CG_ParseNuke (void);
 void	CG_ParseSteam (void);
@@ -488,7 +488,7 @@ void	CG_AddSustains (void);
 // TRAIL EFFECTS
 //
 
-void	__fastcall CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel);
+void	CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel);
 void	CG_BfgTrail (refEntity_t *ent);
 void	CG_BlasterGoldTrail (vec3_t start, vec3_t end);
 void	CG_BlasterGreenTrail (vec3_t start, vec3_t end);

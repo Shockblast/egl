@@ -736,7 +736,7 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 
 			depth = -2.0f * DotProduct (n, projection);
 			Vec3MA (projection, depth, n, projection);
-			depth = Q_FastSqrt (DotProduct (projection, projection) * 4);
+			depth = sqrt (DotProduct (projection, projection) * 4);
 
 			outCoords[0] = -((projection[1] * depth) + 0.5f);
 			outCoords[1] = ((projection[2] * depth) + 0.5f);
@@ -761,8 +761,8 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 
 	case TC_GEN_WARP:
 		for (i=0 ; i<rb.numVerts ; i++, outCoords+=2) {
-			outCoords[0] = rb.inCoords[i][0] + (r_warpSinTable[Q_ftol (((rb.inCoords[i][1]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
-			outCoords[1] = rb.inCoords[i][1] + (r_warpSinTable[Q_ftol (((rb.inCoords[i][0]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			outCoords[0] = rb.inCoords[i][0] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][1]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			outCoords[1] = rb.inCoords[i][1] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][0]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
 		}
 		break;
 
@@ -1133,8 +1133,8 @@ static qBool RB_VertexTCBaseMatrix (shaderPass_t *pass, texUnit_t texUnit, mat4x
 
 	case TC_GEN_WARP:
 		for (i=0 ; i<rb.numVerts ; i++) {
-			rb_outCoordArray[texUnit][i][0] = rb.inCoords[i][0] + (r_warpSinTable[Q_ftol (((rb.inCoords[i][1]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
-			rb_outCoordArray[texUnit][i][1] = rb.inCoords[i][1] + (r_warpSinTable[Q_ftol (((rb.inCoords[i][0]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			rb_outCoordArray[texUnit][i][0] = rb.inCoords[i][0] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][1]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			rb_outCoordArray[texUnit][i][1] = rb.inCoords[i][1] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][0]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
 		}
 
 		qglTexCoordPointer (2, GL_FLOAT, 0, rb_outCoordArray[texUnit][0]);

@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 // =========================================================================
 
@@ -45,53 +46,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 #ifdef _WIN32
 
-// unknown pragmas are SUPPOSED to be ignored, but....
-# pragma warning(disable : 4244)	// 'conversion' conversion from 'type1' to 'type2', possible loss of data
-
-// Off by default, force on for level 3 warning level
-# pragma warning(3 : 4056)	// overflow in floating point constant arithmetic
-# pragma warning(3 : 4191)	// 'operator/operation' : unsafe conversion from 'type of expression' to 'type required'
-# pragma warning(3 : 4202)	// nonstandard extension used : '...': prototype parameter in name list illegal
-# pragma warning(3 : 4254)	// 'operator' : conversion from 'type1' to 'type2', possible loss of data
-
 # pragma intrinsic(memcmp)
 
 # define GL_DRIVERNAME		"opengl32.dll"
 # define AL_DRIVERNAME		"openal32.dll"
 
 # define HAVE___INLINE
-# define HAVE___FASTCALL
 # define HAVE__SNPRINTF
 # define HAVE__STRICMP
 # define HAVE__VSNPRINTF
-# define HAVE__CDECL
 
 # define BUILDSTRING		"Win32"
 
 # ifdef NDEBUG
 #  ifdef _M_IX86
 #   define CPUSTRING		"x86"
+#  elif _M_X64
+#   define CPUSTRING		"x64"
 #  elif defined _M_ALPHA
 #   define CPUSTRING		"AXP"
 #  endif
 # else // NDEBUG
 #  ifdef _M_IX86
 #   define CPUSTRING		"x86 Debug"
+#  elif _M_X64
+#   define CPUSTRING		"x64 Debug"
 #  elif defined _M_ALPHA
 #   define CPUSTRING		"AXP Debug"
 #  endif
 # endif // NDEBUG
 
-typedef __int16				int16;
-typedef __int32				int32;
-typedef __int64				int64;
-typedef unsigned __int16	uint16;
-typedef unsigned __int32	uint32;
-typedef unsigned __int64	uint64;
-
 # define strdup _strdup
-
-# define __declspec_naked __declspec(naked)
 
 // =========================================================================
 // Generic Unix
@@ -103,9 +88,6 @@ typedef unsigned __int64	uint64;
 
 #  define HAVE_INLINE
 #  define HAVE_STRCASECMP
-
-#  define __declspec
-#  define __declspec_naked
 
 //
 // Linux
@@ -158,6 +140,8 @@ typedef unsigned __int64	uint64;
 
 # endif
 
+#endif	// __unix__
+
 typedef int16_t				int16;
 typedef int32_t				int32;
 typedef int64_t				int64;
@@ -165,17 +149,7 @@ typedef uint16_t			uint16;
 typedef uint32_t			uint32;
 typedef uint64_t			uint64;
 
-#endif	// __unix__
-
 // =========================================================================
-
-#ifndef HAVE__CDECL
-# define __cdecl
-#endif
-
-#ifndef HAVE___FASTCALL
-# define __fastcall
-#endif
 
 #ifdef HAVE___INLINE
 # ifndef inline
@@ -228,15 +202,11 @@ typedef uint64_t			uint64;
 #endif
 
 #ifndef BUILDSTRING
-# define BUILDSTRING	"Unknown"
+#error No build string, need to fix
 #endif
 
 #ifndef CPUSTRING
-# define CPUSTRING		"Unknown"
-#endif
-
-#ifndef NULL
-# define NULL ((void *)0)
+#error No CPU string, need to fix
 #endif
 
 // =========================================================================
@@ -456,7 +426,6 @@ float		ColorNormalizeb (const float *in, byte *out);
 #define Vec2Compare(v1,v2)		((v1)[0]==(v2)[0] && (v1)[1]==(v2)[1])
 #define Vec2Copy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1])
 #define Vec2Dist(v1,v2)			(sqrt((((v1)[0]-(v2)[0])*((v1)[0]-(v2)[0])+((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1]))))
-#define Vec2DistFast(v1,v2)		(Q_FastSqrt((((v1)[0]-(v2)[0])*((v1)[0]-(v2)[0])+((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1]))))
 #define Vec2Inverse(v)			((v)[0]=-(v)[0],(v)[1]=-(v)[1])
 #define Vec2MA(v,s,b,o)			((o)[0]=(v)[0]+(b)[0]*(s),(o)[1]=(v)[1]+(b)[1]*(s))
 #define Vec2Negate(a,b)			((b)[0]=-(a)[0],(b)[1]=-(a)[1])
@@ -473,10 +442,8 @@ float		ColorNormalizeb (const float *in, byte *out);
 #define Vec3Compare(v1,v2)		((v1)[0]==(v2)[0] && (v1)[1]==(v2)[1] && (v1)[2]==(v2)[2])
 #define Vec3Copy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
 #define Vec3Dist(v1,v2)			(sqrt((((v1)[0]-(v2)[0])*((v1)[0]-(v2)[0])+((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1])+((v1)[2]-(v2)[2])*((v1)[2]-(v2)[2]))))
-#define Vec3DistFast(v1,v2)		(Q_FastSqrt((((v1)[0]-(v2)[0])*((v1)[0]-(v2)[0])+((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1])+((v1)[2]-(v2)[2])*((v1)[2]-(v2)[2]))))
 #define Vec3Inverse(v)			((v)[0]=-(v)[0],(v)[1]=-(v)[1],(v)[2]=-(v)[2])
 #define Vec3Length(v)			(sqrt(DotProduct((v),(v))))
-#define Vec3LengthFast(v)		(Q_FastSqrt(DotProduct((v),(v))))
 #define Vec3MA(v,s,b,o)			((o)[0]=(v)[0]+(b)[0]*(s),(o)[1]=(v)[1]+(b)[1]*(s),(o)[2]=(v)[2]+(b)[2]*(s))
 #define Vec3Negate(a,b)			((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
 #define Vec3Scale(in,s,out)		((out)[0]=(in)[0]*(s),(out)[1]=(in)[1]*(s),(out)[2]=(in)[2]*(s))
@@ -497,14 +464,6 @@ float		ColorNormalizeb (const float *in, byte *out);
 // ===========================================================================
 
 #define Q_rint(x)	((x) < 0 ? ((int)((x)-0.5f)) : ((int)((x)+0.5f)))
-
-#ifdef id386
-long	Q_ftol (float f);
-float	Q_FastSqrt (float value);
-#else // id386
-# define Q_ftol(f) ((long)(f))
-# define Q_FastSqrt(v) (sqrt(v))
-#endif // id386
 
 float	Q_RSqrtf (float number);
 double	Q_RSqrtd (double number);
@@ -704,12 +663,6 @@ void	Q_strcatz (char *dst, const char *src, size_t dstSize);
 void	Q_strncpyz (char *dest, const char *src, size_t size);
 
 char	*Q_strlwr (char *s);
-
-#ifdef id386
-int __cdecl Q_tolower (int c);
-#else // id386
-#define Q_tolower(chr) (tolower ((chr)))
-#endif // id386
 
 // ===========================================================================
 

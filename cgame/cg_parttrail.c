@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 CG_BeamTrail
 ===============
 */
-void __fastcall CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel)
+void CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel)
 {
 	vec3_t		dest, move, vec;
 	float		len, dec;
@@ -131,7 +131,7 @@ void CG_BfgTrail (refEntity_t *ent)
 		org[1] = ent->origin[1] + (m_byteDirs[i][1] * (float)sin (ltime + i) * 64) + (forward[0] * BEAMLENGTH);
 		org[2] = ent->origin[2] + (m_byteDirs[i][2] * (float)sin (ltime + i) * 64) + (forward[0] * BEAMLENGTH);
 
-		dist = Vec3DistFast (org, ent->origin) / 90.0f;
+		dist = Vec3Dist (org, ent->origin) / 90.0f;
 
 		size = (2 - (dist * 2 + 0.1f)) * 12;
 		CG_SpawnParticle (
@@ -924,7 +924,7 @@ void CG_RailTrail (vec3_t start, vec3_t end)
 		Vec3Subtract (end, start, vec);
 		len = VectorNormalizeFastf (vec);
 
-		dist = Vec3DistFast (start, end);
+		dist = Vec3Dist (start, end);
 		dist++;
 
 		dec = 4;

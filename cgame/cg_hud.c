@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 HUD_DrawString
 ==============
 */
-static void __fastcall HUD_DrawString (char *string, float x, float y, float centerwidth, qBool bold)
+static void HUD_DrawString (char *string, float x, float y, float centerwidth, qBool bold)
 {
 	float	margin;
 	char	line[1024];
@@ -82,7 +82,7 @@ static void __fastcall HUD_DrawString (char *string, float x, float y, float cen
 HUD_DrawField
 ==============
 */
-static void __fastcall HUD_DrawField (float x, float y, int altclr, int width, int value)
+static void HUD_DrawField (float x, float y, int altclr, int width, int value)
 {
 	char	num[16], *ptr;
 	int		l, frame;
@@ -326,7 +326,6 @@ static void HUD_ExecuteLayoutString (char *layout)
 					altclr = 1;
 
 				if (cg.frame.playerState.stats[STAT_FLASHES] & 1) {
-					int		w, h;
 					cgi.R_GetImageSize (cgMedia.hudFieldShader, &w, &h);
 					cgi.R_DrawPic (
 						cgMedia.hudFieldShader, 0, x, y,

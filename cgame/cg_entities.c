@@ -1012,7 +1012,7 @@ void CG_AddPacketEntities (void)
 
 							// Check if it's close
 							Vec3Subtract (tr.endPos, ent.origin, forward); 
-							if (Vec3LengthFast (forward) > 256) {
+							if (Vec3Length (forward) > 256) {
 								Vec3Copy (ent.origin, flOrg);
 							}
 							else {

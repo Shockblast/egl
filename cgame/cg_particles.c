@@ -269,7 +269,7 @@ void CG_AddParticles (void)
 
 				// Lessen fillrate consumption
 				if (!(p->flags & PF_NOCLOSECULL)) {
-					dist = Vec3DistFast (cg.refDef.viewOrigin, org);
+					dist = Vec3Dist (cg.refDef.viewOrigin, org);
 					if (dist <= 5)
 						goto nextParticle;
 				}
@@ -462,7 +462,7 @@ void CG_AddParticles (void)
 
 			Vec3Add (org, p->angle, delta);
 
-			dist = Vec3DistFast (org, delta);
+			dist = Vec3Dist (org, delta);
 
 			Vec2Set (p->outCoords[0], 1, dist);
 			Vec3Set (p->outVertices[0], org[0] + width[0],
@@ -497,7 +497,7 @@ void CG_AddParticles (void)
 
 			p->outPoly.shader = p->shader;
 			Vec3Copy (p->org, p->outPoly.origin);
-			p->outPoly.radius = Vec3DistFast (org, delta);
+			p->outPoly.radius = Vec3Dist (org, delta);
 
 			cgi.R_AddPoly (&p->outPoly);
 			break;
@@ -515,7 +515,7 @@ void CG_AddParticles (void)
 			VectorNormalizeFastf (a_rtVec);
 
 			Vec3Scale (a_rtVec, 0.75f, a_rtVec);
-			Vec3Scale (a_upVec, 0.75f * Vec3LengthFast (p->angle), a_upVec);
+			Vec3Scale (a_upVec, 0.75f * Vec3Length (p->angle), a_upVec);
 
 			// Top left
 			Vec2Set (p->outCoords[0], 0, 0);

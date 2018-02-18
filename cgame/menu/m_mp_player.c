@@ -89,8 +89,8 @@ static void RateCallback (void *unused)
 
 static void ModelCallback (void *unused)
 {
-	if (m_playerConfigMenu.modelList.curValue >= m_playerConfigMenu.numPlayerModels)
-		m_playerConfigMenu.modelList.curValue = m_playerConfigMenu.numPlayerModels-1;
+	if (m_playerConfigMenu.modelList.curValue >= (int) m_playerConfigMenu.numPlayerModels)
+		m_playerConfigMenu.modelList.curValue = (int) m_playerConfigMenu.numPlayerModels-1;
 
 	m_playerConfigMenu.skinList.itemNames = m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].skinDisplayNames;
 	m_playerConfigMenu.skinList.curValue = 0;
@@ -261,10 +261,10 @@ static int pmicmpfnc (const void *_a, const void *_b)
 static void PlayerConfigMenu_Init (void)
 {
 	char	currentDirectory[1024];
-	int		currentDirectoryIndex;
+	size_t	currentDirectoryIndex;
 	char	currentSkin[1024];
-	int		currentSkinIndex;
-	int		i, j;
+	size_t	currentSkinIndex;
+	size_t	i, j;
 
 	static char *rateNames[] = {
 		"28.8 Modem",
@@ -347,13 +347,13 @@ static void PlayerConfigMenu_Init (void)
 		m_playerConfigMenu.modelList.generic.type		= UITYPE_SPINCONTROL;
 		m_playerConfigMenu.modelList.generic.name		= "Model";
 		m_playerConfigMenu.modelList.generic.callBack	= ModelCallback;
-		m_playerConfigMenu.modelList.curValue			= currentDirectoryIndex;
+		m_playerConfigMenu.modelList.curValue			= (int) currentDirectoryIndex;
 		m_playerConfigMenu.modelList.itemNames			= m_playerConfigMenu.modelNames;
 
 		m_playerConfigMenu.skinList.generic.type		= UITYPE_SPINCONTROL;
 		m_playerConfigMenu.skinList.generic.name		= "Skin";
 		m_playerConfigMenu.skinList.generic.callBack	= 0;
-		m_playerConfigMenu.skinList.curValue			= currentSkinIndex;
+		m_playerConfigMenu.skinList.curValue			= (int) currentSkinIndex;
 		m_playerConfigMenu.skinList.itemNames			= m_playerConfigMenu.modelInfo[currentDirectoryIndex].skinDisplayNames;
 	}
 
@@ -370,7 +370,7 @@ static void PlayerConfigMenu_Init (void)
 	m_playerConfigMenu.rateList.generic.type		= UITYPE_SPINCONTROL;
 	m_playerConfigMenu.rateList.generic.name		= "Speed";
 	m_playerConfigMenu.rateList.generic.callBack	= RateCallback;
-	m_playerConfigMenu.rateList.curValue			= i;
+	m_playerConfigMenu.rateList.curValue			= (int) i;
 	m_playerConfigMenu.rateList.itemNames			= rateNames;
 
 	m_playerConfigMenu.backAction.generic.type		= UITYPE_ACTION;
@@ -405,7 +405,7 @@ PlayerConfigMenu_Close
 */
 struct sfx_s *PlayerConfigMenu_Close (void)
 {
-	int		i, j;
+	size_t	i, j;
 
 	// Set name
 	cgi.Cvar_Set ("name", m_playerConfigMenu.nameField.buffer, qFalse);

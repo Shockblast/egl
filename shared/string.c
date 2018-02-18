@@ -284,38 +284,12 @@ char *Q_strlwr (char *s)
 
 	if (s) {
 		for (p=s ; *s ; s++)
-			*s = Q_tolower (*s);
+			*s = tolower (*s);
 		return p;
 	}
 
 	return NULL;
 }
-
-
-/*
-===============
-Q_tolower
-
-by R1CH
-===============
-*/
-#ifdef id386
-__declspec(naked) int __cdecl Q_tolower (int c)
-{
-	__asm {
-			mov eax, [esp+4]		;get character
-			cmp	eax, 5Ah
-			ja  short finish1
-
-			cmp	eax, 41h
-			jb  short finish1
-
-			or  eax, 00100000b		;to lower (-32)
-		finish1:
-			ret	
-	}
-}
-#endif // id386
 
 // =========================================================================
 

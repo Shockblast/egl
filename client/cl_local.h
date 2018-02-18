@@ -436,7 +436,7 @@ void		CL_ClearState (void);
 
 void		CL_Disconnect (qBool openMenu);
 
-void		__fastcall CL_Frame (int msec);
+void		CL_Frame (int msec);
 
 void		CL_ClientInit (void);
 void		CL_ClientShutdown (qBool error);

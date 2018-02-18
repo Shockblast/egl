@@ -75,8 +75,8 @@ void CG_ExploRattle (vec3_t org, float scale)
 			continue;
 
 		// calculate distance
-		dist = Vec3DistFast (cg.refDef.viewOrigin, org) * 0.1;
-		max = (20 * scale, 20, 50);
+		dist = Vec3Dist (cg.refDef.viewOrigin, org) * 0.1;
+		max = clamp(20 * scale, 20, 50);
 
 		// lessen the effect when it's behind the view
 		Vec3Subtract (org, cg.refDef.viewOrigin, temp);
@@ -498,8 +498,6 @@ static void CG_AddPlayerBeams (void)
 
 		//PMM
 		if (cgMedia.heatBeamModel && b->model == cgMedia.heatBeamModel && b->entity == cg.playerNum+1) {
-			float	len;
-
 			len = Vec3Length (dist);
 			Vec3Scale (fwd, len, dist);
 			Vec3MA (dist, (hand_multiplier * b->offset[0]), right, dist);
@@ -1134,7 +1132,7 @@ void CG_ParseTempEnt (void)
 	case TE_TRACKER_EXPLOSION:
 		cgi.MSG_ReadPos (pos);
 
-		CG_ColorFlash (pos, 0, 150, -1, -1, -1);
+		CG_ColorFlash (pos, 0, 150, 100, -1, -1, -1);
 		CG_ExplosionColorParticles (pos);
 
 		cgi.Snd_StartSound (pos, 0, CHAN_AUTO, cgMedia.sfx.disruptExplo, 1, ATTN_NORM, 0);

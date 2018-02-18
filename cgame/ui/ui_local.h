@@ -166,17 +166,17 @@ typedef struct uiField_s {
 	int						cursor;
 
 	int						length;
-	int						visibleLength;
+	size_t					visibleLength;
 	int						visibleOffset;
 } uiField_t;
 
 typedef struct uiList_s {
 	uiCommon_t				generic;
 
-	size_t					curValue;
+	int						curValue;
 
 	char					**itemNames;
-	int						numItemNames;
+	size_t					numItemNames;
 } uiList_t;
 
 typedef struct uiImage_s {

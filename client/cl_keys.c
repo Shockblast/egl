@@ -231,7 +231,7 @@ static void Key_FindMatch (const char *name)
 
 	// Cut off where the matching stops
 	for (i=0 ; name[i] && i<MAX_TOKEN_CHARS ; i++) {
-		if (Q_tolower (key_shortMatch[i]) != Q_tolower (name[i]))
+		if (tolower (key_shortMatch[i]) != tolower (name[i]))
 			break;
 	}
 	memset (&key_shortMatch[i], 0, sizeof (key_shortMatch)-i);
@@ -324,7 +324,7 @@ static qBool Key_SubComplete (char *source, char *dest, size_t size, qBool doAli
 
 	// Cut off where partial matching stops
 	for (i=0 ; i<key_completeLen ; i++) {
-		if (Q_tolower (key_shortMatch[i]) != Q_tolower (key_completePartial[i])) {
+		if (tolower (key_shortMatch[i]) != tolower (key_completePartial[i])) {
 			key_shortMatch[i] = '\0';
 			break;
 		}
@@ -394,7 +394,7 @@ static qBool Key_FileSubComplete (char *source, char *dest, size_t size, char *p
 
 		// Create the shortest match
 		for (j=0 ; &fileList[i][j+pathLen] && j<MAX_TOKEN_CHARS ; j++) {
-			if (Q_tolower (key_shortMatch[j]) != Q_tolower (fileList[i][j+pathLen])) {
+			if (tolower (key_shortMatch[j]) != tolower (fileList[i][j+pathLen])) {
 				key_shortMatch[j] = '\0';
 				break;
 			}
@@ -545,7 +545,7 @@ static void Key_CompleteCommand (void)
 
 	// Cut off where partial matching stops
 	for (i=0 ; i<key_completeLen ; i++) {
-		if (Q_tolower (key_shortMatch[i]) != Q_tolower (key_completePartial[i])) {
+		if (tolower (key_shortMatch[i]) != tolower (key_completePartial[i])) {
 			key_shortMatch[i] = '\0';
 			break;
 		}
@@ -997,8 +997,6 @@ pasteIntoMessage:
 		return;
 
 	if (key_consoleCursorPos < MAXCMDLINE-1) {
-		size_t i;
-
 		// Check insert mode
 		if (key_insertOn) {
 			// Can't do strcpy to move string to right

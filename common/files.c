@@ -61,7 +61,7 @@ typedef struct mPack_s {
 	unzFile					*pkz;
 
 	// Information
-	int						numFiles;
+	size_t					numFiles;
 	mPackFile_t				*files;
 
 	struct mPackFile_s		*fileHashTree[FS_MAX_HASHSIZE];
@@ -96,7 +96,7 @@ static fsLink_t	*fs_fileLinks;
 
 static fsPath_t	*fs_searchPaths;
 static fsPath_t	**fs_invSearchPaths;
-static int		fs_numInvSearchPaths;
+static size_t	fs_numInvSearchPaths;
 static fsPath_t	*fs_baseSearchPath;		// Without gamedirs
 
 /*
@@ -337,7 +337,7 @@ static fsHandleIndex_t *FS_GetHandle (fileHandle_t fileNum)
 {
 	fsHandleIndex_t *hIndex;
 
-	if (fileNum < 0 || fileNum > FS_MAX_FILEINDICES)
+	if (fileNum == 0 || fileNum > FS_MAX_FILEINDICES)
 		Com_Error (ERR_FATAL, "FS_GetHandle: invalid file number");
 
 	hIndex = &fs_fileIndices[fileNum-1];
@@ -366,12 +366,12 @@ size_t FS_FileLength (fileHandle_t fileNum)
 	}
 	else if (handle->pkzFile) {
 		// FIXME
-		return -1;
+		return 0;
 	}
 
 	// Shouldn't happen...
 	assert (0);
-	return -1;
+	return 0;
 }
 
 
@@ -514,8 +514,8 @@ size_t FS_Write (void *buffer, size_t size, fileHandle_t fileNum)
 		Com_Error (ERR_FATAL, "FS_Write: %s: was no opened in append/write mode", handle->name);
 		break;
 	}
-	if (size < 0)
-		Com_Error (ERR_FATAL, "FS_Write: size < 0");
+	if (size == 0)
+		Com_Error (ERR_FATAL, "FS_Write: size == 0");
 
 	// Write
 	remaining = size;
@@ -559,7 +559,7 @@ void FS_Seek (fileHandle_t fileNum, long offset, fsSeekOrigin_t seekOrigin)
 {
 	fsHandleIndex_t	*handle;
 	unz_file_info	info;
-	int				remaining, r, len;
+	int				remaining = 0, r, len;
 	byte			dummy[0x8000];
 
 	handle = FS_GetHandle (fileNum);
@@ -810,7 +810,7 @@ FS_OpenFile
 int FS_OpenFile (char *fileName, fileHandle_t *fileNum, fsOpenMode_t openMode)
 {
 	fsHandleIndex_t	*handle;
-	int				fileSize;
+	int				fileSize = -1;
 
 	*fileNum = FS_GetFreeHandle (&handle);
 
@@ -1000,7 +1000,7 @@ mPack_t *FS_LoadPAK (char *fileName, qBool complain)
 	mPack_t			*outPack;
 	FILE			*handle;
 	dPackFile_t		info[PAK_MAX_FILES];
-	int				i, numFiles;
+	size_t			i, numFiles;
 	uint32			hashValue;
 
 	// Open
@@ -1027,7 +1027,7 @@ mPack_t *FS_LoadPAK (char *fileName, qBool complain)
 		fclose (handle);
 		Com_Error (ERR_FATAL, "FS_LoadPAK: \"%s\" has too many files (%i > %i)", fileName, numFiles, PAK_MAX_FILES);
 	}
-	if (numFiles <= 0) {
+	if (numFiles == 0) {
 		fclose (handle);
 		Com_Error (ERR_FATAL, "FS_LoadPAK: \"%s\" is empty", fileName);
 	}
@@ -1262,7 +1262,7 @@ void FS_SetGamedir (char *dir, qBool firstTime)
 	fsPath_t	*next;
 	mPack_t		*package;
 	uint32		initTime;
-	int			i;
+	size_t		i;
 
 	// Make sure it's not a path
 	if (strstr (dir, "..") || strchr (dir, '/') || strchr (dir, '\\') || strchr (dir, ':')) {
@@ -1314,8 +1314,15 @@ void FS_SetGamedir (char *dir, qBool firstTime)
 	// Store a copy of the search paths inverted for FS_FindFiles
 	for (fs_numInvSearchPaths=0, next=fs_searchPaths ; next ; next=next->next, fs_numInvSearchPaths++);
 	fs_invSearchPaths = Mem_PoolAlloc (sizeof (fsPath_t) * fs_numInvSearchPaths, com_fileSysPool, 0);
-	for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; i>=0 ; next=next->next, i--)
+	for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; ; next=next->next)
+	{
 		fs_invSearchPaths[i] = next;
+
+		if (i == 0)
+			break;
+
+		i--;
+	}
 
 	if (!firstTime) {
 		Com_Printf (0, "----------------------------------------\n");
@@ -1383,7 +1390,7 @@ size_t FS_FindFiles (char *path, char *filter, char *extension, char **fileList,
 	char		dir[MAX_OSPATH];
 	char		ext[MAX_QEXT];
 	char		*dirFiles[FS_MAX_FINDFILES];
-	int			dirCount, i, j, k;
+	size_t		dirCount, i, j, k;
 
 	// Sanity check
 	if (maxFiles > FS_MAX_FINDFILES) {
@@ -1504,7 +1511,7 @@ _FS_FreeFileList
 */
 void _FS_FreeFileList (char **list, size_t num, const char *fileName, const int fileLine)
 {
-	int		i;
+	size_t		i;
 
 	for (i=0 ; i<num ; i++) {
 		if (!list[i])
@@ -1667,7 +1674,7 @@ void FS_Init (void)
 {
 	uint32		initTime;
 	fsPath_t	*next;
-	int			i;
+	size_t		i;
 
 	initTime = Sys_UMilliseconds ();
 	Com_Printf (0, "\n------- Filesystem Initialization ------\n");
@@ -1700,8 +1707,15 @@ void FS_Init (void)
 		// Store a copy of the search paths inverted for FS_FindFiles
 		for (fs_numInvSearchPaths=0, next=fs_searchPaths ; next ; next=next->next, fs_numInvSearchPaths++);
 		fs_invSearchPaths = Mem_PoolAlloc (sizeof (fsPath_t) * fs_numInvSearchPaths, com_fileSysPool, 0);
-		for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; i>=0 ; next=next->next, i--)
+		for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; ; next=next->next)
+		{
 			fs_invSearchPaths[i] = next;
+
+			if (i == 0)
+				break;
+
+			i--;
+		}
 	}
 
 	Com_Printf (0, "----------------------------------------\n");

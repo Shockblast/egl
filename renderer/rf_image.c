@@ -351,7 +351,7 @@ typedef struct pngBuf_s {
 	size_t	pos;
 } pngBuf_t;
 
-void __cdecl PngReadFunc (png_struct *Png, png_bytep buf, png_size_t size)
+void PngReadFunc (png_struct *Png, png_bytep buf, png_size_t size)
 {
 	pngBuf_t *PngFileBuffer = (pngBuf_t*)png_get_io_ptr(Png);
 	memcpy (buf,PngFileBuffer->buffer + PngFileBuffer->pos, size);

@@ -110,7 +110,7 @@ typedef struct svClient_s {
 	int				ping;
 
 	size_t			messageSize[RATE_MESSAGES];		// used to rate drop packets
-	int				rate;
+	uint16			rate;
 	int				surpressCount;					// number of messages rate supressed
 
 	edict_t			*edict;							// EDICT_NUM(clientnum+1)

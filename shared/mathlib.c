@@ -220,48 +220,6 @@ float ColorNormalizeb (const float *in, byte *out)
 
 /*
 ===============
-Q_ftol
-===============
-*/
-#ifdef id386
-__declspec_naked long Q_ftol (float f)
-{
-	static int	tmp;
-	__asm {
-		fld dword ptr [esp+4]
-		fistp tmp
-		mov eax, tmp
-		ret
-	}
-}
-#endif // id386
-
-
-/*
-===============
-Q_FastSqrt
-
-5% margin of error
-===============
-*/
-#ifdef id386
-float Q_FastSqrt (float value)
-{
-	float result;
-	__asm {
-		mov eax, value
-		sub eax, 0x3f800000
-		sar eax, 1
-		add eax, 0x3f800000
-		mov result, eax
-	}
-	return result;
-}
-#endif // id386
-
-
-/*
-===============
 Q_RSqrtf
 
 1/sqrt, faster but not as precise

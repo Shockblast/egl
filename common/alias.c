@@ -299,7 +299,7 @@ static void Cmd_AliasList_f (void)
 		alias = &sortedList[i];
 
 		Com_Printf (0, alias->name);
-		for (j=0 ; j<longest-(int)strlen(alias->name) ; j++)
+		for (j=0 ; j<(int)longest-(int)strlen(alias->name) ; j++)
 			Com_Printf (0, " ");
 		Com_Printf (0, "\"%s\"\n", alias->value);
 	}

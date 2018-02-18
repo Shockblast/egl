@@ -583,7 +583,7 @@ static void CL_DrawInput (void)
 {
 	char			*text;
 	int				lastColor, lastStyle;
-	size_t			colorCursorPos;
+	int				colorCursorPos;
 	size_t			byteOfs;
 	size_t			byteLen;
 	vec2_t			charSize;
@@ -600,7 +600,7 @@ static void CL_DrawInput (void)
 	text = key_consoleBuffer[key_consoleEditLine];
 
 	// Convert byte offset to visible character count
-	colorCursorPos = Q_ColorCharCount (text, key_consoleCursorPos);
+	colorCursorPos = (int) Q_ColorCharCount (text, key_consoleCursorPos);
 
 	// Prestep if horizontally scrolling
 	if (colorCursorPos >= cl_console.lineWidth + 1) {
@@ -704,7 +704,7 @@ static void CL_DrawNotify (void)
 	if (Key_GetDest () == KD_MESSAGE) {
 		size_t			skip;
 		int				lastColor, lastStyle;
-		size_t			colorCursorPos;
+		int				colorCursorPos;
 		size_t			byteOfs;
 
 		if (key_chatTeam)
@@ -715,7 +715,7 @@ static void CL_DrawNotify (void)
 		str = key_chatBuffer[key_chatEditLine];
 
 		// Convert byte offset to visible character count
-		colorCursorPos = Q_ColorCharCount (str, key_chatCursorPos) + skip + 1;
+		colorCursorPos = (int) (Q_ColorCharCount (str, key_chatCursorPos) + skip + 1);
 
 		// Prestep if horizontally scrolling
 		if (colorCursorPos >= (int)(cls.refConfig.vidWidth/charSize[0])) {

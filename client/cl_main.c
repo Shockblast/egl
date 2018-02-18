@@ -909,7 +909,7 @@ CL_Frame
 ==================
 */
 #define FRAMETIME_MAX 0.5f
-void __fastcall CL_Frame (int msec)
+void CL_Frame (int msec)
 {
 	static int	packetDelta = 0;
 	static int	refreshDelta = 0;

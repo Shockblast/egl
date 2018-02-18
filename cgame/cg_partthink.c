@@ -65,7 +65,7 @@ static void pClipVelocity (vec3_t in, vec3_t normal, vec3_t out)
 	float	backoff;
 	int		i;
 	
-	backoff = Vec3LengthFast (in) * 0.25f + DotProduct (in, normal) * 3.0f;
+	backoff = Vec3Length (in) * 0.25f + DotProduct (in, normal) * 3.0f;
 
 	for (i=0 ; i<3 ; i++) {
 		out[i] = in[i] - (normal[i] * backoff);
@@ -204,7 +204,7 @@ void pBounceThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t colo
 		Vec3Copy (p->org, org);
 		Vec3Copy (p->org, p->oldOrigin);
 
-		if (tr.plane.normal[2] > 0.6f && Vec3LengthFast(p->vel) < 2) {
+		if (tr.plane.normal[2] > 0.6f && Vec3Length(p->vel) < 2) {
 			if (p->flags & PF_GRAVITY)
 				p->flags &= ~PF_GRAVITY;
 			Vec3Clear (p->vel);
@@ -326,7 +326,7 @@ void pFlareThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color
 {
 	float	dist;
 
-	dist = Vec3DistFast (cg.refDef.viewOrigin, org);
+	dist = Vec3Dist (cg.refDef.viewOrigin, org);
 	*orient = dist * 0.4f;
 
 	if (p->flags & PF_SCALED)

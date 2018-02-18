@@ -149,7 +149,6 @@ loc0:
 void R_Q2BSP_MarkBModelLights (refEntity_t *ent, vec3_t mins, vec3_t maxs)
 {
 	refDLight_t		*lt;
-	refModel_t		*model = ent->model;
 	mBspNode_t		*node;
 	uint32			i;
 
@@ -228,8 +227,8 @@ static int Q2BSP_RecursiveLightPoint (mBspNode_t *node, vec3_t start, vec3_t end
 		do {
 			surf = *mark++;
 
-			s = Q_ftol (DotProduct (mid, surf->q2_texInfo->vecs[0]) + surf->q2_texInfo->vecs[0][3]);
-			t = Q_ftol (DotProduct (mid, surf->q2_texInfo->vecs[1]) + surf->q2_texInfo->vecs[1][3]);
+			s = (int) (DotProduct (mid, surf->q2_texInfo->vecs[0]) + surf->q2_texInfo->vecs[0][3]);
+			t = (int) (DotProduct (mid, surf->q2_texInfo->vecs[1]) + surf->q2_texInfo->vecs[1][3]);
 			if (s < surf->q2_textureMins[0] || t < surf->q2_textureMins[1])
 				continue;
 
@@ -436,7 +435,7 @@ fullBright:
 
 			// Translate
 			Vec3Subtract (lt->origin, ent->origin, dir);
-			dist = Vec3LengthFast (dir);
+			dist = Vec3Length (dir);
 
 			if (!dist || dist > lt->intensity + ent->model->radius * ent->scale)
 				continue;
@@ -475,9 +474,9 @@ fullBright:
 	//
 	cArray = tempColorsArray[0];
 	for (i=0 ; i<numVerts ; i++, bArray+=4, cArray+=3) {
-		r = Q_ftol (cArray[0] * ent->color[0]);
-		g = Q_ftol (cArray[1] * ent->color[1]);
-		b = Q_ftol (cArray[2] * ent->color[2]);
+		r = (int) (cArray[0] * ent->color[0]);
+		g = (int) (cArray[1] * ent->color[1]);
+		b = (int) (cArray[2] * ent->color[2]);
 
 		bArray[0] = clamp (r, 0, 255);
 		bArray[1] = clamp (g, 0, 255);
@@ -596,12 +595,12 @@ static void R_Q2BSP_AddDynamicLights (mBspSurface_t *surf)
 
 		bl = r_q2_blockLights;
 		for (t=0, ftacc=0 ; t<surf->q2_lmHeight ; t++) {
-			td = Q_ftol (st - ftacc);
+			td = (int) (st - ftacc);
 			if (td < 0)
 				td = -td;
 
 			for (s=0, fsacc=0 ; s<surf->q2_lmWidth ; s++) {
-				sd = Q_ftol (sl - fsacc);
+				sd = (int) (sl - fsacc);
 				if (sd < 0)
 					sd = -sd;
 
@@ -1310,9 +1309,9 @@ dynamic:
 
 	cArray = tempColorsArray[0];
 	for (i=0 ; i<numVerts ; i++, bArray+=4, cArray+=3) {
-		r = Q_ftol (cArray[0] * ent->color[0]);
-		g = Q_ftol (cArray[1] * ent->color[1]);
-		b = Q_ftol (cArray[2] * ent->color[2]);
+		r = (int) (cArray[0] * ent->color[0]);
+		g = (int) (cArray[1] * ent->color[1]);
+		b = (int) (cArray[2] * ent->color[2]);
 
 		bArray[0] = clamp (r, 0, 255);
 		bArray[1] = clamp (g, 0, 255);
