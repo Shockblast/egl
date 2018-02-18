@@ -231,7 +231,11 @@ typedef enum {qFalse, qTrue}	qBool;
 #define ORIGINAL_PROTOCOL_VERSION		34
 
 #define ENHANCED_PROTOCOL_VERSION		35
-#define ENHANCED_COMPATIBILITY_NUMBER	1903
+#define ENHANCED_COMPATIBILITY_NUMBER	1905
+
+#define MINOR_VERSION_R1Q2_BASE			1903
+#define MINOR_VERSION_R1Q2_UCMD_UPDATES	1904
+#define	MINOR_VERSION_R1Q2_32BIT_SOLID	1905
 
 //
 // server to client
@@ -1062,6 +1066,15 @@ typedef struct pMoveState_s {
 //
 #define BUTTON_ATTACK		1
 #define BUTTON_USE			2
+
+//stolen for r1q2 in the name of bandwidth
+#define	BUTTON_UCMD_DBLFORWARD	4
+#define BUTTON_UCMD_DBLSIDE		8
+#define	BUTTON_UCMD_DBLUP		16
+
+#define BUTTON_UCMD_DBL_ANGLE1	32
+#define BUTTON_UCMD_DBL_ANGLE2	64
+
 #define BUTTON_ANY			128			// any key whatsoever
 
 // userCmd_t is sent to the server each client frame

@@ -33,7 +33,7 @@ typedef struct cgExport_s {
 	void		(*Shutdown) (void);
 
 	void		(*UpdateConnectInfo) (char *serverName, char *serverMessage, int connectCount, char *dlFileName, int dlPercent, float bytesDownloaded);
-	void		(*LoadMap) (int playerNum, int serverProtocol, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig);
+	void		(*LoadMap) (int playerNum, int serverProtocol, int protocolMinorVersion, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig);
 
 	void		(*DebugGraph) (float value, int color);
 

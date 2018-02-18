@@ -190,6 +190,7 @@ typedef struct clientStatic_s {
 	char				serverName[MAX_OSPATH];		// name of server from original connect
 	char				serverNameLast[MAX_OSPATH];
 	int					serverProtocol;				// in case we are doing some kind of version hack
+	int					protocolMinorVersion;
 
 	netAdr_t			netFrom;
 	netMsg_t			netMessage;

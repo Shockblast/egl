@@ -660,15 +660,15 @@ void CL_SendCmd (void)
 	*/
 	cmd = &cl.cmds[(cls.netChan.outgoingSequence-2)&CMD_MASK];
 	memset (&nullCmd, 0, sizeof (nullCmd));
-	MSG_WriteDeltaUsercmd (&buf, &nullCmd, cmd);
+	MSG_WriteDeltaUsercmd (&buf, &nullCmd, cmd, cls.protocolMinorVersion);
 	oldCmd = cmd;
 
 	cmd = &cl.cmds[(cls.netChan.outgoingSequence-1)&CMD_MASK];
-	MSG_WriteDeltaUsercmd (&buf, oldCmd, cmd);
+	MSG_WriteDeltaUsercmd (&buf, oldCmd, cmd, cls.protocolMinorVersion);
 	oldCmd = cmd;
 
 	cmd = &cl.cmds[(cls.netChan.outgoingSequence)&CMD_MASK];
-	MSG_WriteDeltaUsercmd (&buf, oldCmd, cmd);
+	MSG_WriteDeltaUsercmd (&buf, oldCmd, cmd, cls.protocolMinorVersion);
 
 	// Calculate a checksum over the move commands
 	if (cls.serverProtocol != ENHANCED_PROTOCOL_VERSION) {

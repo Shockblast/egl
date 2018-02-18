@@ -67,7 +67,7 @@ void CL_CGModule_LoadMap (void)
 	SCR_UpdateScreen ();
 
 	// Load the map and media in CGame
-	cge->LoadMap (cl.playerNum, cls.serverProtocol, cl.attractLoop, cl.strafeHack, &cls.refConfig);
+	cge->LoadMap (cl.playerNum, cls.serverProtocol, cls.protocolMinorVersion, cl.attractLoop, cl.strafeHack, &cls.refConfig);
 
 	// Touch before registration ends
 	R_MediaInit ();

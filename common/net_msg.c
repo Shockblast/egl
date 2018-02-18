@@ -305,32 +305,86 @@ void MSG_WriteDeltaEntity (netMsg_t *dest, entityStateOld_t *from, entityStateOl
 MSG_WriteDeltaUsercmd
 ================
 */
-void MSG_WriteDeltaUsercmd (netMsg_t *dest, userCmd_t *from, userCmd_t *cmd)
+void MSG_WriteDeltaUsercmd (netMsg_t *dest, userCmd_t *from, userCmd_t *cmd, int protocolMinorVersion)
 {
-	int		bits;
+	int bits;
+	int buttons;
 
 	// Send the movement message
 	bits = 0;
+	buttons = 0;
+
 	if (cmd->angles[0] != from->angles[0])		bits |= CM_ANGLE1;
 	if (cmd->angles[1] != from->angles[1])		bits |= CM_ANGLE2;
 	if (cmd->angles[2] != from->angles[2])		bits |= CM_ANGLE3;
 	if (cmd->forwardMove != from->forwardMove)	bits |= CM_FORWARD;
 	if (cmd->sideMove != from->sideMove)		bits |= CM_SIDE;
 	if (cmd->upMove != from->upMove)			bits |= CM_UP;
-	if (cmd->buttons != from->buttons)			bits |= CM_BUTTONS;
+	if (cmd->buttons != from->buttons) {
+		buttons = cmd->buttons;
+		bits |= CM_BUTTONS;
+	}
 	if (cmd->impulse != from->impulse)			bits |= CM_IMPULSE;
 
 	MSG_WriteByte (dest, bits);
 
-	if (bits & CM_ANGLE1)	MSG_WriteShort (dest, cmd->angles[0]);
-	if (bits & CM_ANGLE2)	MSG_WriteShort (dest, cmd->angles[1]);
+	//waste not what precious bytes we have...
+	if (protocolMinorVersion >= MINOR_VERSION_R1Q2_UCMD_UPDATES) {
+		if (bits & CM_BUTTONS) {
+			if ((bits & CM_FORWARD) && (cmd->forwardMove % 5) == 0)
+				buttons |= BUTTON_UCMD_DBLFORWARD;
+			if ((bits & CM_SIDE) && (cmd->sideMove % 5) == 0)
+				buttons |= BUTTON_UCMD_DBLSIDE;
+			if ((bits & CM_UP) && (cmd->upMove % 5) == 0)
+				buttons |= BUTTON_UCMD_DBLUP;
+
+			if ((bits & CM_ANGLE1) && (cmd->angles[0] % 64) == 0 && (abs(cmd->angles[0] / 64)) < 128)
+				buttons |= BUTTON_UCMD_DBL_ANGLE1;
+			if ((bits & CM_ANGLE2) && (cmd->angles[1] % 256) == 0)
+				buttons |= BUTTON_UCMD_DBL_ANGLE2;
+
+			MSG_WriteByte (dest, buttons);
+		}
+	}
+
+	if (bits & CM_ANGLE1) {
+		if (buttons & BUTTON_UCMD_DBL_ANGLE1)
+			MSG_WriteChar (dest, cmd->angles[0] / 64);
+		else
+			MSG_WriteShort (dest, cmd->angles[0]);
+	}
+	if (bits & CM_ANGLE2) {
+		if (buttons & BUTTON_UCMD_DBL_ANGLE2)
+			MSG_WriteChar (dest, cmd->angles[1] / 256);
+		else
+			MSG_WriteShort (dest, cmd->angles[1]);
+	}
 	if (bits & CM_ANGLE3)	MSG_WriteShort (dest, cmd->angles[2]);
 	
-	if (bits & CM_FORWARD)	MSG_WriteShort (dest, cmd->forwardMove);
-	if (bits & CM_SIDE)		MSG_WriteShort (dest, cmd->sideMove);
-	if (bits & CM_UP)		MSG_WriteShort (dest, cmd->upMove);
+	if (bits & CM_FORWARD) {
+		if (buttons & BUTTON_UCMD_DBLFORWARD)
+			MSG_WriteChar (dest, cmd->forwardMove / 5);
+		else
+			MSG_WriteShort (dest, cmd->forwardMove);
+	}
+	if (bits & CM_SIDE) {
+		if (buttons & BUTTON_UCMD_DBLSIDE)
+			MSG_WriteChar (dest, cmd->sideMove / 5);
+		else
+			MSG_WriteShort (dest, cmd->sideMove);
+	}
+	if (bits & CM_UP) {
+		if (buttons & BUTTON_UCMD_DBLUP)
+			MSG_WriteChar (dest, cmd->upMove / 5);
+		else
+			MSG_WriteShort (dest, cmd->upMove);
+	}
 
-	if (bits & CM_BUTTONS)	MSG_WriteByte (dest, cmd->buttons);
+	if (protocolMinorVersion < MINOR_VERSION_R1Q2_UCMD_UPDATES) {
+		if (bits & CM_BUTTONS)
+			MSG_WriteByte (dest, cmd->buttons);
+	}
+
 	if (bits & CM_IMPULSE)	MSG_WriteByte (dest, cmd->impulse);
 
 	MSG_WriteByte (dest, cmd->msec);

@@ -164,6 +164,7 @@ typedef struct cgState_s {
 	char				*serverMessage;
 	char				*serverName;
 	int					serverProtocol;
+	int					protocolMinorVersion;
 	int					connectCount;
 
 	cgDownloadInfo_t	download;
@@ -479,9 +480,9 @@ void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct
 
 void		CG_SetRefConfig (refConfig_t *inConfig);
 
-void		CG_UpdateCvars (void);
+void		CG_UpdateCvars (qBool forceUpdate);
 
-void		CG_LoadMap (int playerNum, int serverProtocol, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig);
+void		CG_LoadMap (int playerNum, int serverProtocol, int protocolMinorVersion, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig);
 
 void		CG_Init (void);
 void		CG_Shutdown (void);

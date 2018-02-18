@@ -472,7 +472,7 @@ V_RenderView
 void V_RenderView (int realTime, float netFrameTime, float refreshFrameTime, float stereoSeparation, qBool refreshPrepped)
 {
 	// Check cvar sanity
-	CG_UpdateCvars ();
+	CG_UpdateCvars (qFalse);
 
 	// Calculate screen dimensions and clear the background
 	V_CalcVrect ();

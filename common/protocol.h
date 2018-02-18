@@ -181,7 +181,7 @@ void	MSG_Clear (netMsg_t *dest);
 
 void	MSG_WriteByte (netMsg_t *dest, int c);
 void	MSG_WriteChar (netMsg_t *dest, int c);
-void	MSG_WriteDeltaUsercmd (netMsg_t *dest, struct userCmd_s *from, struct userCmd_s *cmd);
+void	MSG_WriteDeltaUsercmd (netMsg_t *dest, struct userCmd_s *from, struct userCmd_s *cmd, int protocolMinorVersion);
 void	MSG_WriteDeltaEntity (netMsg_t *dest, entityStateOld_t *from, entityStateOld_t *to, qBool force, qBool newEntity);
 void	MSG_WriteDir (netMsg_t *dest, vec3_t vector);
 void	MSG_WriteFloat (netMsg_t *dest, float f);

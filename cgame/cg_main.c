@@ -151,10 +151,10 @@ void CG_SetRefConfig (refConfig_t *inConfig)
 CG_UpdateCvars
 =================
 */
-void CG_UpdateCvars (void)
+void CG_UpdateCvars (qBool forceUpdate)
 {
 	// HUD scale
-	if (r_hudScale->modified) {
+	if (r_hudScale->modified || forceUpdate) {
 		r_hudScale->modified = qFalse;
 		if (r_hudScale->floatVal <= 0)
 			cgi.Cvar_VariableSetValue (r_hudScale, 1, qTrue);
@@ -513,7 +513,7 @@ static void CG_RemoveCmds (void)
 CG_LoadMap
 ==================
 */
-void CG_LoadMap (int playerNum, int serverProtocol, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig)
+void CG_LoadMap (int playerNum, int serverProtocol, int protocolMinorVersion, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig)
 {
 	// Default values
 	cg.frameCount = 1;
@@ -521,6 +521,7 @@ void CG_LoadMap (int playerNum, int serverProtocol, qBool attractLoop, qBool str
 	cg.gloomClassType = GLM_OBSERVER;
 	cg.playerNum = playerNum;
 	cg.serverProtocol = serverProtocol;
+	cg.protocolMinorVersion = protocolMinorVersion;
 	cg.attractLoop = attractLoop;	// true if demo playback
 	cg.strafeHack = strafeHack; // god damnit
 
@@ -591,11 +592,8 @@ void CG_Init (void)
 	CG_WeapRegister ();
 	CG_RegisterMain ();
 
-	// Force cg.hudScale update
-	r_hudScale->modified = qTrue;
-
 	// Check cvar sanity
-	CG_UpdateCvars ();
+	CG_UpdateCvars (qTrue);
 
 	// Location system init
 	CG_LocationInit ();

@@ -114,9 +114,18 @@ static void CG_ClipMoveToEntities (vec3_t start, vec3_t mins, vec3_t maxs, vec3_
 		}
 		else {
 			// Encoded bbox
-			x = 8 * (ent->solid & 31);
-			zd = 8 * ((ent->solid >> 5) & 31);
-			zu = 8 * ((ent->solid >> 10) & 63) - 32;
+			if (cg.protocolMinorVersion >= MINOR_VERSION_R1Q2_32BIT_SOLID)
+			{
+				x = (ent->solid & 255);
+				zd = ((ent->solid>>8) & 255);
+				zu = ((ent->solid>>16) & 65535) - 32768;
+			}
+			else
+			{
+				x = 8 * (ent->solid & 31);
+				zd = 8 * ((ent->solid >> 5) & 31);
+				zu = 8 * ((ent->solid >> 10) & 63) - 32;
+			}
 
 			bmins[0] = bmins[1] = -x;
 			bmaxs[0] = bmaxs[1] = x;
