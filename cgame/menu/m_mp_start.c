@@ -222,7 +222,7 @@ static void StartServerMenu_Init (void)
 			Com_Error (ERR_DROP, "No maps in maps.lst\n");
 
 		// Build a list
-		m_startServerMenu.mapNames = CG_AllocTag (sizeof (char *) * (m_startServerMenu.numMaps + 1), qTrue, CGTAG_MENU);
+		m_startServerMenu.mapNames = CG_AllocTag (sizeof (char *) * (m_startServerMenu.numMaps + 1), CGTAG_MENU);
 		s = list;
 		for (i=0 ; i<m_startServerMenu.numMaps ; i++) {
 			char	scratch[200];

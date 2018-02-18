@@ -160,7 +160,7 @@ typedef struct cgImport_s {
 	qBool		(*Key_CapslockOn) (void);
 	qBool		(*Key_ShiftDown) (void);
 
-	void		*(*Mem_Alloc) (size_t size, qBool zeroFill, const int tagNum, const char *fileName, const int fileLine);
+	void		*(*Mem_Alloc) (size_t size, const int tagNum, const char *fileName, const int fileLine);
 	size_t		(*Mem_Free) (const void *ptr, const char *fileName, const int fileLine);
 	size_t		(*Mem_FreeTag) (const int tagNum, const char *fileName, const int fileLine);
 	char		*(*Mem_StrDup) (const char *in, const int tagNum, const char *fileName, const int fileLine);

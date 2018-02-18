@@ -340,7 +340,7 @@ static void *GI_TagAlloc (size_t size, int tagNum)
 	if (tagNum < 0)
 		tagNum *= -1;
 
-	return _Mem_Alloc (size, qTrue, sv_gameSysPool, tagNum, "GAME DLL", 0);
+	return _Mem_Alloc (size, sv_gameSysPool, tagNum, "GAME DLL", 0);
 }
 
 /*

@@ -543,9 +543,9 @@ static void CGI_R_RenderScene (refDef_t *rd)
 CGI_Alloc
 ===============
 */
-static void *CGI_Alloc (size_t size, qBool zeroFill, const int tagNum, const char *fileName, const int fileLine)
+static void *CGI_Alloc (size_t size, const int tagNum, const char *fileName, const int fileLine)
 {
-	return _Mem_Alloc (size, zeroFill, cl_cGameSysPool, tagNum, fileName, fileLine);
+	return _Mem_Alloc (size, cl_cGameSysPool, tagNum, fileName, fileLine);
 }
 
 

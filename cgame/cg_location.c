@@ -116,7 +116,7 @@ void CG_LoadLocations (char *mapName)
 			break;
 
 		// Allocate
-		loc = CG_AllocTag (sizeof (cg_location_t), qTrue, CGTAG_LOCATION);
+		loc = CG_AllocTag (sizeof (cg_location_t), CGTAG_LOCATION);
 		loc->name = CG_TagStrDup (token, CGTAG_LOCATION);
 		Vec3Copy (location, loc->location);
 

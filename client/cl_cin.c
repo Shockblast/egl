@@ -122,7 +122,7 @@ void RoQ_ReadInfo (cinematic_t *cin)
 
 		if (cin->roqBuffer)
 			Mem_Free (cin->roqBuffer);
-		cin->roqBuffer = Mem_PoolAllocExt (cin->width*cin->height*4 * 2, qFalse, cl_cinSysPool, 0);
+		cin->roqBuffer = Mem_PoolAlloc (cin->width*cin->height*4 * 2, cl_cinSysPool, 0);
 		memset (cin->roqBuffer, 255, cin->width*cin->height*4 * 2);
 
 		cin->frames[0] = cin->roqBuffer;
@@ -340,12 +340,12 @@ static qBool CIN_LoadPCX (char *name, byte **pic, byte **palette, int *width, in
 
 	// FIXME: Some images with weird dimensions will crash if I don't do this...
 	x = max (pcx->yMax+1, pcx->xMax+1);
-	pix = out = Mem_PoolAllocExt (x * x, qFalse, cl_cinSysPool, 0);
+	pix = out = Mem_PoolAlloc (x * x, cl_cinSysPool, 0);
 	if (pic)
 		*pic = out;
 
 	if (palette) {
-		*palette = Mem_PoolAllocExt (768, qFalse, cl_cinSysPool, 0);
+		*palette = Mem_PoolAlloc (768, cl_cinSysPool, 0);
 		memcpy (*palette, (byte *)pcx + fileLen - 768, 768);
 	}
 
@@ -445,7 +445,7 @@ static void CIN_TableInit (void)
 	int		numNodes;
 	int		prev, j;
 
-	cl.cin.hBuffer = Mem_PoolAllocExt (MAX_CIN_HBUFFER, qFalse, cl_cinSysPool, 0);
+	cl.cin.hBuffer = Mem_PoolAlloc (MAX_CIN_HBUFFER, cl_cinSysPool, 0);
 	cl.cin.hNodes = Mem_PoolAlloc (256*256*2*4, cl_cinSysPool, 0);
 
 	for (prev=0 ; prev<256 ; prev++) {
@@ -792,10 +792,10 @@ void CIN_PlayCinematic (char *name)
 	cl.cin.sndChannels = LittleLong (cl.cin.sndChannels);
 
 	// Setup the streaming channel
-	cl.cin.sndBuffer = Mem_PoolAllocExt (MAX_CIN_SNDBUFF, qFalse, cl_cinSysPool, 0);
+	cl.cin.sndBuffer = Mem_PoolAlloc (MAX_CIN_SNDBUFF, cl_cinSysPool, 0);
 	cl.cin.sndRawChannel = Snd_RawStart ();
 	cl.cin.sndAL = (cl.cin.sndRawChannel) ? qTrue : qFalse;
-	cl.cin.vidBuffer = Mem_PoolAllocExt (256*256*sizeof(uint32), qFalse, cl_cinSysPool, 0);
+	cl.cin.vidBuffer = Mem_PoolAlloc (256*256*sizeof(uint32), cl_cinSysPool, 0);
 
 	// Setup the huff table
 	CIN_TableInit ();

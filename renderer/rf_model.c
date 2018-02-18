@@ -53,8 +53,7 @@ void R_ModelBounds (refModel_t *model, vec3_t mins, vec3_t maxs)
 
 // ============================================================================
 
-#define R_ModAllocZero(model,size) _Mem_Alloc ((size),qTrue,ri.modelSysPool,(model)->memTag,__FILE__,__LINE__)
-#define R_ModAlloc(model,size) _Mem_Alloc ((size),qFalse,ri.modelSysPool,(model)->memTag,__FILE__,__LINE__)
+#define R_ModAlloc(model,size) _Mem_Alloc ((size),ri.modelSysPool,(model)->memTag,__FILE__,__LINE__)
 
 /*
 ===============
@@ -995,7 +994,7 @@ static qBool SubdivideQ2Polygon (refModel_t *model, mBspSurface_t *surf, int num
 	}
 
 	// Add a point in the center to help keep warp valid
-	buffer = R_ModAllocZero (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t)));
+	buffer = R_ModAlloc (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t)));
 	poly = (mQ2BspPoly_t *)buffer;
 
 	poly->mesh.numVerts = numVerts+2;
@@ -1175,7 +1174,7 @@ static qBool SubdivideQ2BSPLMSurface_r (refModel_t *model, mBspSurface_t *surf, 
 	}
 
 	// Add a point in the center to help keep warp valid
-	buffer = R_ModAllocZero (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t) * 2));
+	buffer = R_ModAlloc (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t) * 2));
 	poly = (mQ2BspPoly_t *)buffer;
 
 	poly->mesh.numVerts = numVerts+2;
@@ -1323,14 +1322,14 @@ static qBool R_BuildQ2BSPSurface (refModel_t *model, mBspSurface_t *surf)
 
 	// Allocate space
 	if (ti->flags & (SURF_TEXINFO_SKY|SURF_TEXINFO_WARP)) {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (numVerts * sizeof (vec3_t) * 2)
 			+ (numIndexes * sizeof (index_t))
 			+ (numVerts * sizeof (vec2_t))
 			+ (numVerts * sizeof (bvec4_t)));
 	}
 	else {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (numVerts * sizeof (vec3_t) * 2)
 			+ (numIndexes * sizeof (index_t))
 			+ (numVerts * sizeof (vec2_t) * 2)
@@ -1471,14 +1470,14 @@ static qBool R_ConvertQ2BSPSurface (refModel_t *model, mBspSurface_t *surf)
 
 	// Allocate space
 	if (ti->flags & (SURF_TEXINFO_SKY|SURF_TEXINFO_WARP)) {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (totalVerts * sizeof (vec3_t) * 2)
 			+ (totalIndexes * sizeof (index_t))
 			+ (totalVerts * sizeof (vec2_t))
 			+ (totalVerts * sizeof (bvec4_t)));
 	}
 	else {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (totalVerts * sizeof (vec3_t) * 2)
 			+ (totalIndexes * sizeof (index_t))
 			+ (totalVerts * sizeof (vec2_t) * 2)
@@ -1754,7 +1753,7 @@ static qBool R_LoadQ2BSPVertexes (refModel_t *model, byte *byteBase, const dQ2Bs
 	}
 
 	model->q2BspModel.numVertexes = lump->fileLen / sizeof (*in);
-	model->q2BspModel.vertexes = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numVertexes);
+	model->q2BspModel.vertexes = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numVertexes);
 
 	//
 	// Byte swap
@@ -1787,7 +1786,7 @@ static qBool R_LoadQ2BSPEdges (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->q2BspModel.numEdges = lump->fileLen / sizeof (*in);
-	model->q2BspModel.edges = out = R_ModAllocZero (model, sizeof (*out) * (model->q2BspModel.numEdges + 1));
+	model->q2BspModel.edges = out = R_ModAlloc (model, sizeof (*out) * (model->q2BspModel.numEdges + 1));
 
 	//
 	// Byte swap
@@ -1824,7 +1823,7 @@ static qBool R_LoadQ2BSPSurfEdges (refModel_t *model, byte *byteBase, const dQ2B
 		return qFalse;
 	}
 
-	model->q2BspModel.surfEdges = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numSurfEdges);
+	model->q2BspModel.surfEdges = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numSurfEdges);
 
 	//
 	// Byte swap
@@ -1848,7 +1847,7 @@ static qBool R_LoadQ2BSPLighting (refModel_t *model, byte *byteBase, const dQ2Bs
 		return qTrue;
 	}
 
-	model->q2BspModel.lightData = R_ModAllocZero (model, lump->fileLen);	
+	model->q2BspModel.lightData = R_ModAlloc (model, lump->fileLen);	
 	memcpy (model->q2BspModel.lightData, byteBase + lump->fileOfs, lump->fileLen);
 
 	return qTrue;
@@ -1874,7 +1873,7 @@ static qBool R_LoadQ2BSPPlanes (refModel_t *model, byte *byteBase, const dQ2BspL
 	}
 
 	model->bspModel.numPlanes = lump->fileLen / sizeof (*in);
-	model->bspModel.planes = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numPlanes * 2);
+	model->bspModel.planes = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numPlanes * 2);
 
 	//
 	// Byte swap
@@ -1914,7 +1913,7 @@ static qBool R_LoadQ2BSPTexInfo (refModel_t *model, byte *byteBase, const dQ2Bsp
 	}
 
 	model->q2BspModel.numTexInfo = lump->fileLen / sizeof (*in);
-	model->q2BspModel.texInfo = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numTexInfo);
+	model->q2BspModel.texInfo = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numTexInfo);
 
 	//
 	// Byte swap
@@ -2003,7 +2002,7 @@ static qBool R_LoadQ2BSPFaces (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->bspModel.numSurfaces = lump->fileLen / sizeof (*in);
-	model->bspModel.surfaces = out= R_ModAllocZero (model, sizeof (*out) * model->bspModel.numSurfaces);
+	model->bspModel.surfaces = out= R_ModAlloc (model, sizeof (*out) * model->bspModel.numSurfaces);
 
 	R_Q2BSP_BeginBuildingLightmaps ();
 
@@ -2114,7 +2113,7 @@ static qBool R_LoadQ2BSPMarkSurfaces (refModel_t *model, byte *byteBase, const d
 	}
 
 	model->q2BspModel.numMarkSurfaces = lump->fileLen / sizeof (*in);
-	model->q2BspModel.markSurfaces = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numMarkSurfaces);
+	model->q2BspModel.markSurfaces = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numMarkSurfaces);
 
 	//
 	// Byte swap
@@ -2146,7 +2145,7 @@ static qBool R_LoadQ2BSPVisibility (refModel_t *model, byte *byteBase, const dQ2
 		return qTrue;
 	}
 
-	model->q2BspModel.vis = R_ModAllocZero (model, lump->fileLen);	
+	model->q2BspModel.vis = R_ModAlloc (model, lump->fileLen);	
 	memcpy (model->q2BspModel.vis, byteBase + lump->fileOfs, lump->fileLen);
 
 	model->q2BspModel.vis->numClusters = LittleLong (model->q2BspModel.vis->numClusters);
@@ -2217,7 +2216,7 @@ static qBool R_LoadQ2BSPLeafs (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->bspModel.numLeafs = lump->fileLen / sizeof (*in);
-	model->bspModel.leafs = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numLeafs);
+	model->bspModel.leafs = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numLeafs);
 
 	//
 	// Byte swap
@@ -2284,7 +2283,7 @@ static qBool R_LoadQ2BSPLeafs (refModel_t *model, byte *byteBase, const dQ2BspLu
 		if (!numFragSurfaces)
 			out->q2_firstDecalSurface = NULL;
 
-		out->q2_firstDecalSurface = R_ModAllocZero (model, sizeof (mBspSurface_t *) * (numFragSurfaces + 1));
+		out->q2_firstDecalSurface = R_ModAlloc (model, sizeof (mBspSurface_t *) * (numFragSurfaces + 1));
 
 		// Store fragmentable surfaces
 		numFragSurfaces = 0;
@@ -2331,7 +2330,7 @@ static qBool R_LoadQ2BSPNodes (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->bspModel.numNodes = lump->fileLen / sizeof (*in);
-	model->bspModel.nodes = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numNodes);
+	model->bspModel.nodes = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numNodes);
 
 	//
 	// Byte swap
@@ -2402,7 +2401,7 @@ static qBool R_LoadQ2BSPNodes (refModel_t *model, byte *byteBase, const dQ2BspLu
 		if (numLitSurfs)
 			size += numLitSurfs + 1;
 		size *= sizeof (mBspSurface_t *);
-		buffer = R_ModAllocZero (model, size);
+		buffer = R_ModAlloc (model, size);
 
 		out->q2_firstVisSurface = (mBspSurface_t **)buffer;
 		buffer += sizeof (mBspSurface_t *) * (numVisSurfs + 1);
@@ -2461,8 +2460,8 @@ static qBool R_LoadQ2BSPSubModels (refModel_t *model, byte *byteBase, const dQ2B
 		return qFalse;
 	}
 
-	model->bspModel.subModels = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numSubModels);
-	model->bspModel.inlineModels = R_ModAllocZero (model, sizeof (refModel_t) * model->bspModel.numSubModels);
+	model->bspModel.subModels = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numSubModels);
+	model->bspModel.inlineModels = R_ModAlloc (model, sizeof (refModel_t) * model->bspModel.numSubModels);
 
 	//
 	// Byte swap
@@ -2777,7 +2776,7 @@ static qBool R_LoadQ3BSPLighting (refModel_t *model, byte *byteBase, const dQ3Bs
 		}
 
 		model->q3BspModel.numLightmaps = lightLump->fileLen / Q3LIGHTMAP_SIZE;
-		model->q3BspModel.lightmapRects = R_ModAllocZero (model, model->q3BspModel.numLightmaps * sizeof (*model->q3BspModel.lightmapRects));
+		model->q3BspModel.lightmapRects = R_ModAlloc (model, model->q3BspModel.numLightmaps * sizeof (*model->q3BspModel.lightmapRects));
 	}
 
 	// Load the light grid
@@ -2788,7 +2787,7 @@ static qBool R_LoadQ3BSPLighting (refModel_t *model, byte *byteBase, const dQ3Bs
 
 	inGrid = (void *)(byteBase + gridLump->fileOfs);
 	model->q3BspModel.numLightGridElems = gridLump->fileLen / sizeof (*inGrid);
-	model->q3BspModel.lightGrid = R_ModAllocZero (model, model->q3BspModel.numLightGridElems * sizeof (*model->q3BspModel.lightGrid));
+	model->q3BspModel.lightGrid = R_ModAlloc (model, model->q3BspModel.numLightGridElems * sizeof (*model->q3BspModel.lightGrid));
 
 	memcpy (model->q3BspModel.lightGrid, inGrid, model->q3BspModel.numLightGridElems * sizeof (*model->q3BspModel.lightGrid));
 
@@ -2808,7 +2807,7 @@ static qBool R_LoadQ3BSPVisibility (refModel_t *model, byte *byteBase, const dQ3
 		return qTrue;
 	}
 
-	model->q3BspModel.vis = R_ModAllocZero (model, lump->fileLen);
+	model->q3BspModel.vis = R_ModAlloc (model, lump->fileLen);
 	memcpy (model->q3BspModel.vis, byteBase + lump->fileOfs, lump->fileLen);
 
 	model->q3BspModel.vis->numClusters = LittleLong (model->q3BspModel.vis->numClusters);
@@ -2839,7 +2838,7 @@ static qBool R_LoadQ3BSPVertexes (refModel_t *model, byte *byteBase, const dQ3Bs
 	}
 	count = lump->fileLen / sizeof(*in);
 
-	buffer = R_ModAllocZero (model, (count * sizeof (vec3_t) * 2)
+	buffer = R_ModAlloc (model, (count * sizeof (vec3_t) * 2)
 		+ (count * sizeof (vec2_t) * 2)
 		+ (count * sizeof (bvec4_t)));
 
@@ -2925,8 +2924,8 @@ static qBool R_LoadQ3BSPSubmodels (refModel_t *model, byte *byteBase, const dQ3B
 		return qFalse;
 	}
 
-	model->bspModel.subModels = out = R_ModAllocZero (model, model->bspModel.numSubModels * sizeof (*out));
-	model->bspModel.inlineModels = R_ModAllocZero (model, sizeof (refModel_t) * model->bspModel.numSubModels);
+	model->bspModel.subModels = out = R_ModAlloc (model, model->bspModel.numSubModels * sizeof (*out));
+	model->bspModel.inlineModels = R_ModAlloc (model, sizeof (refModel_t) * model->bspModel.numSubModels);
 
 	for (i=0 ; i<model->bspModel.numSubModels ; i++, in++, out++) {
 		// Spread the mins / maxs by a pixel
@@ -2964,7 +2963,7 @@ static qBool R_LoadQ3BSPShaderRefs (refModel_t *model, byte *byteBase, const dQ3
 	}
 
 	model->q3BspModel.numShaderRefs = lump->fileLen / sizeof (*in);
-	model->q3BspModel.shaderRefs = out = R_ModAllocZero (model, model->q3BspModel.numShaderRefs * sizeof (*out));
+	model->q3BspModel.shaderRefs = out = R_ModAlloc (model, model->q3BspModel.numShaderRefs * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numShaderRefs ; i++, in++, out++) {
 		Q_strncpyz (out->name, in->name, sizeof (out->name));
@@ -2994,7 +2993,7 @@ static mesh_t *R_CreateQ3BSPMeshForSurface (refModel_t *model, dQ3BspFace_t *in,
 		{
 			int r, g, b;
 
-			mesh = (mesh_t *)R_ModAllocZero (model, sizeof (mesh_t) + sizeof (vec3_t));
+			mesh = (mesh_t *)R_ModAlloc (model, sizeof (mesh_t) + sizeof (vec3_t));
 			mesh->vertexArray = (vec3_t *)((byte *)mesh + sizeof (mesh_t));
 			mesh->numVerts = 1;
 			mesh->indexArray = (index_t *)1;
@@ -3054,7 +3053,7 @@ static mesh_t *R_CreateQ3BSPMeshForSurface (refModel_t *model, dQ3BspFace_t *in,
 			out->q3_patchWidth = size[0];
 			out->q3_patchHeight = size[1];
 
-			buffer = R_ModAllocZero (model, sizeof (mesh_t)
+			buffer = R_ModAlloc (model, sizeof (mesh_t)
 				+ (numVerts * sizeof (vec2_t) * 2)
 				+ (numVerts * sizeof (vec3_t) * 2)
 				+ (numVerts * sizeof (bvec4_t))
@@ -3113,7 +3112,7 @@ static mesh_t *R_CreateQ3BSPMeshForSurface (refModel_t *model, dQ3BspFace_t *in,
 		{
 			int		firstVert = LittleLong (in->firstVert);
 
-			mesh = (mesh_t *)R_ModAllocZero (model, sizeof (mesh_t));
+			mesh = (mesh_t *)R_ModAlloc (model, sizeof (mesh_t));
 			mesh->numVerts = LittleLong (in->numVerts);
 			mesh->vertexArray = model->q3BspModel.vertexArray + firstVert;
 			mesh->normalsArray = model->q3BspModel.normalsArray + firstVert;
@@ -3195,7 +3194,7 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 	}
 
 	model->bspModel.numSurfaces = lump->fileLen / sizeof (*in);
-	model->bspModel.surfaces = out = R_ModAllocZero (model, model->bspModel.numSurfaces * sizeof (*out));
+	model->bspModel.surfaces = out = R_ModAlloc (model, model->bspModel.numSurfaces * sizeof (*out));
 
 	// Fill it in
 	for (surfNum=0 ; surfNum<model->bspModel.numSurfaces ; surfNum++, in++, out++) {
@@ -3307,7 +3306,7 @@ static qBool R_LoadQ3BSPNodes (refModel_t *model, byte *byteBase, const dQ3BspLu
 	}
 
 	model->bspModel.numNodes = lump->fileLen / sizeof(*in);
-	model->bspModel.nodes = out = R_ModAllocZero (model, model->bspModel.numNodes * sizeof (*out));
+	model->bspModel.nodes = out = R_ModAlloc (model, model->bspModel.numNodes * sizeof (*out));
 
 	for (i=0 ; i<model->bspModel.numNodes ; i++, in++, out++) {
 		out->c.plane = model->bspModel.planes + LittleLong (in->planeNum);
@@ -3375,7 +3374,7 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 	if (!model->q3BspModel.numFogs)
 		return qTrue;
 
-	model->q3BspModel.fogs = out = R_ModAllocZero (model, model->q3BspModel.numFogs * sizeof (*out));
+	model->q3BspModel.fogs = out = R_ModAlloc (model, model->q3BspModel.numFogs * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numFogs ; i++, in++, out++) {
 		Q_strncpyz (out->name, in->shader, sizeof (out->name));
@@ -3402,7 +3401,7 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 		}
 
 		out->numPlanes = LittleLong (brush->numSides);
-		out->planes = R_ModAllocZero (model, out->numPlanes * sizeof (cBspPlane_t));
+		out->planes = R_ModAlloc (model, out->numPlanes * sizeof (cBspPlane_t));
 
 		out->visiblePlane = model->bspModel.planes + LittleLong (brushSide[p].planeNum);
 		for (j=0 ; j<out->numPlanes; j++)
@@ -3445,7 +3444,7 @@ static qBool R_LoadQ3BSPLeafs (refModel_t *model, byte *byteBase, const dQ3BspLu
 	}
 
 	model->bspModel.numLeafs = lump->fileLen / sizeof (*in);
-	model->bspModel.leafs = out = R_ModAllocZero (model, model->bspModel.numLeafs * sizeof (*out));
+	model->bspModel.leafs = out = R_ModAlloc (model, model->bspModel.numLeafs * sizeof (*out));
 
 	for (i=0 ; i<model->bspModel.numLeafs ; i++, in++, out++) {
 		badBounds = qFalse;
@@ -3517,7 +3516,7 @@ static qBool R_LoadQ3BSPLeafs (refModel_t *model, byte *byteBase, const dQ3BspLu
 			size += numFragSurfaces + 1;
 		size *= sizeof (mBspSurface_t *);
 
-		buffer = (byte *) R_ModAllocZero (model, size);
+		buffer = (byte *) R_ModAlloc (model, size);
 		out->q3_firstVisSurface = (mBspSurface_t **)buffer;
 		buffer += (numVisSurfaces + 1) * sizeof (mBspSurface_t *);
 		if (numLitSurfaces) {
@@ -3627,7 +3626,7 @@ static qBool R_LoadQ3BSPEntities (refModel_t *model, byte *byteBase, const dQ3Bs
 	if (!total)
 		return qTrue;
 
-	out = R_ModAllocZero (model, total * sizeof (*out));
+	out = R_ModAlloc (model, total * sizeof (*out));
 	model->q3BspModel.worldLights = out;
 	model->q3BspModel.numWorldLights = total;
 
@@ -3713,7 +3712,7 @@ static qBool R_LoadQ3BSPIndexes (refModel_t *model, byte *byteBase, const dQ3Bsp
 	}
 
 	model->q3BspModel.numSurfIndexes = lump->fileLen / sizeof (*in);
-	model->q3BspModel.surfIndexes = out = R_ModAllocZero (model, model->q3BspModel.numSurfIndexes * sizeof (*out));
+	model->q3BspModel.surfIndexes = out = R_ModAlloc (model, model->q3BspModel.numSurfIndexes * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numSurfIndexes ; i++)
 		out[i] = LittleLong (in[i]);
@@ -3740,7 +3739,7 @@ static qBool R_LoadQ3BSPPlanes (refModel_t *model, byte *byteBase, const dQ3BspL
 	}
 
 	model->bspModel.numPlanes = lump->fileLen / sizeof (*in);
-	model->bspModel.planes = out = R_ModAllocZero (model, model->bspModel.numPlanes * sizeof (*out));
+	model->bspModel.planes = out = R_ModAlloc (model, model->bspModel.numPlanes * sizeof (*out));
 
 	for (i=0 ; i<model->bspModel.numPlanes ; i++, in++, out++) {
 		out->type = PLANE_NON_AXIAL;

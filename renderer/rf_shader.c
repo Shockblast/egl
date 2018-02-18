@@ -1962,7 +1962,7 @@ static void R_FinishShader (shader_t *shader, char *fileName)
 
 	// Fill deforms
 	if (shader->numDeforms) {
-		shader->deforms = Mem_PoolAllocExt (shader->numDeforms * sizeof (vertDeform_t), qFalse, ri.shaderSysPool, 0);
+		shader->deforms = Mem_PoolAlloc (shader->numDeforms * sizeof (vertDeform_t), ri.shaderSysPool, 0);
 		memcpy (shader->deforms, r_currDeforms, shader->numDeforms * sizeof (vertDeform_t));
 	}
 
@@ -1971,7 +1971,7 @@ static void R_FinishShader (shader_t *shader, char *fileName)
 	for (i=0 ; i<shader->numPasses ; i++)
 		size += r_currPasses[i].numTCMods * sizeof (tcMod_t);
 	if (size) {
-		buffer = Mem_PoolAllocExt (size, qFalse, ri.shaderSysPool, 0);
+		buffer = Mem_PoolAlloc (size, ri.shaderSysPool, 0);
 
 		// Fill passes
 		shader->passes = (shaderPass_t *)buffer;

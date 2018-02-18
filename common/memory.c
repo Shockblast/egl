@@ -313,7 +313,7 @@ _Mem_Alloc
 Optionally returns 0 filled memory allocated in a pool with a tag
 ========================
 */
-void *_Mem_Alloc (size_t size, qBool zeroFill, struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine)
+void *_Mem_Alloc (size_t size, struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine)
 {
 	memBlock_t	*mem;
 
@@ -331,22 +331,10 @@ void *_Mem_Alloc (size_t size, qBool zeroFill, struct memPool_s *pool, const int
 
 	// Add header and round to cacheline
 	size = (size + sizeof (memBlock_t) + sizeof (memBlockFoot_t) + 31) & ~31;
-#ifdef MEM_USE_CALLOC
-	if (zeroFill)
-		mem = calloc (1, size);
-	else
-		mem = malloc (size);
-#else
-	mem = malloc (size);
-#endif
+	mem = calloc (1, size);
+
 	if (!mem)
 		Com_Error (ERR_FATAL, "Mem_Alloc: failed on allocation of %i bytes\n" "alloc: %s:#%i", size, fileName, fileLine);
-
-#ifndef MEM_USE_CALLOC
-	// Zero fill
-	if (zeroFill)
-		memset (mem, 0, size);
-#endif
 
 	// For integrity checking and stats
 	pool->blockCount++;
@@ -393,7 +381,7 @@ char *_Mem_PoolStrDup (const char *in, struct memPool_s *pool, const int tagNum,
 {
 	char	*out;
 
-	out = _Mem_Alloc ((size_t)(strlen (in) + 1), qTrue, pool, tagNum, fileName, fileLine);
+	out = _Mem_Alloc ((size_t)(strlen (in) + 1), pool, tagNum, fileName, fileLine);
 	strcpy (out, in);
 
 	return out;

@@ -290,13 +290,13 @@ static void R_ParseProgramFile (char *fixedName, qBool baseDir, qBool vp, qBool 
 
 	// Copy the buffer, and make certain it's newline and null terminated
 	if (vp) {
-		vpBuf = (char *)Mem_PoolAllocExt (fileLen, qFalse, ri.programSysPool, 0);
+		vpBuf = (char *)Mem_PoolAlloc (fileLen, ri.programSysPool, 0);
 		memcpy (vpBuf, fileBuffer, fileLen);
 	} else {
 		vpBuf = NULL;
 	}
 	if (fp) {
-		fpBuf = (char *)Mem_PoolAllocExt (fileLen, qFalse, ri.programSysPool, 0);
+		fpBuf = (char *)Mem_PoolAlloc (fileLen, ri.programSysPool, 0);
 		memcpy (fpBuf, fileBuffer, fileLen);
 	} else {
 		fpBuf = NULL;

@@ -46,13 +46,13 @@ enum {
 };
 
 // Generic memory allocation
-#define CG_MemAlloc(size,zeroFill)		cgi.Mem_Alloc((size),(zeroFill),CGTAG_ANY,__FILE__,__LINE__)
+#define CG_MemAlloc(size)				cgi.Mem_Alloc((size),CGTAG_ANY,__FILE__,__LINE__)
 #define CG_MemFree(ptr)					cgi.Mem_Free((ptr),__FILE__,__LINE__)
 #define CG_StrDup(in)					cgi.Mem_StrDup((in),CGTAG_ANY,__FILE__,__LINE__)
 
 // Allocates to a tagged location
 // Useful for releasing entire blocks of memory at a time
-#define CG_AllocTag(size,zeroFill,tag)	cgi.Mem_Alloc((size),(zeroFill),(tag),__FILE__,__LINE__)
+#define CG_AllocTag(size,tag)			cgi.Mem_Alloc((size),(tag),__FILE__,__LINE__)
 #define CG_FreeTag(tag)					cgi.Mem_FreeTag((tag),__FILE__,__LINE__)
 #define CG_TagStrDup(in,tag)			cgi.Mem_StrDup((in),(tag),__FILE__,__LINE__)
 #define CG_MemTagSize(tag)				cgi.Mem_TagSize((tag))

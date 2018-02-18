@@ -865,7 +865,7 @@ static qBool event_newAction (evAction_t *newAction, evaType_t type, char *fileN
 			return qFalse;
 		}
 
-		newAction->command = GUI_AllocTag (strlen(charToken)+2, qTrue, GUITAG_SCRATCH);
+		newAction->command = GUI_AllocTag (strlen(charToken)+2, GUITAG_SCRATCH);
 		Q_snprintfz (newAction->command, strlen(charToken)+2, "%s\n", charToken);
 		break;
 
@@ -879,7 +879,7 @@ static qBool event_newAction (evAction_t *newAction, evaType_t type, char *fileN
 			return qFalse;
 		}
 
-		newAction->localSound = GUI_AllocTag (sizeof (eva_localSound_t), qTrue, GUITAG_SCRATCH);
+		newAction->localSound = GUI_AllocTag (sizeof (eva_localSound_t), GUITAG_SCRATCH);
 
 		Com_NormalizePath (newAction->localSound->name, sizeof (newAction->localSound->name), charToken);
 
@@ -899,7 +899,7 @@ static qBool event_newAction (evAction_t *newAction, evaType_t type, char *fileN
 			return qFalse;
 		}
 
-		newAction->named = GUI_AllocTag (sizeof (eva_named_t), qTrue, GUITAG_SCRATCH);
+		newAction->named = GUI_AllocTag (sizeof (eva_named_t), GUITAG_SCRATCH);
 
 		// Parse "[window::]event"
 		Q_strncpyz (target, charToken, sizeof (target));
@@ -945,7 +945,7 @@ static qBool event_newAction (evAction_t *newAction, evaType_t type, char *fileN
 			return qFalse;
 		}
 
-		newAction->set = GUI_AllocTag (sizeof (eva_set_t), qTrue, GUITAG_SCRATCH);
+		newAction->set = GUI_AllocTag (sizeof (eva_set_t), GUITAG_SCRATCH);
 
 		// Parse "[window::]register" destination
 		Q_strncpyz (target, charToken, sizeof (target));
@@ -1161,7 +1161,7 @@ static qBool itemDef_newEvent (evType_t type, char *fileName, gui_t *gui, parse_
 
 	// Storage space for children
 	newEvent->numActions = 0;
-	newEvent->actionList = GUI_AllocTag (sizeof (evAction_t) * MAX_EVENT_ACTIONS, qTrue, GUITAG_SCRATCH);
+	newEvent->actionList = GUI_AllocTag (sizeof (evAction_t) * MAX_EVENT_ACTIONS, GUITAG_SCRATCH);
 
 	// Parse the actions
 	for ( ; ; ) {
@@ -1223,7 +1223,7 @@ static qBool itemDef_newEvent (evType_t type, char *fileName, gui_t *gui, parse_
 	// Store events
 	actionList = newEvent->actionList;
 	if (newEvent->numActions) {
-		newEvent->actionList = GUI_AllocTag (sizeof (evAction_t) * newEvent->numActions, qFalse, GUITAG_SCRATCH);
+		newEvent->actionList = GUI_AllocTag (sizeof (evAction_t) * newEvent->numActions, GUITAG_SCRATCH);
 		memcpy (newEvent->actionList, actionList, sizeof (evAction_t) * newEvent->numActions);
 		Mem_Free (actionList);
 	}
@@ -2007,13 +2007,13 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 
 	case WTP_BIND:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.bindDef = GUI_AllocTag (sizeof (bindDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.bindDef = GUI_AllocTag (sizeof (bindDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.bindDef = newGUI->s.bindDef + 1;
 		break;
 
 	case WTP_CHECKBOX:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.checkDef = GUI_AllocTag (sizeof (checkDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.checkDef = GUI_AllocTag (sizeof (checkDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.checkDef = newGUI->s.checkDef + 1;
 
 		Q_strncpyz (newGUI->s.checkDef->offMatName, "guis/assets/textures/items/check_off.tga", sizeof (newGUI->s.checkDef->offMatName));
@@ -2022,19 +2022,19 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 
 	case WTP_CHOICE:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.choiceDef = GUI_AllocTag (sizeof (choiceDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.choiceDef = GUI_AllocTag (sizeof (choiceDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.choiceDef = newGUI->s.choiceDef + 1;
 		break;
 
 	case WTP_EDIT:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.editDef = GUI_AllocTag (sizeof (editDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.editDef = GUI_AllocTag (sizeof (editDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.editDef = newGUI->s.editDef + 1;
 		break;
 
 	case WTP_LIST:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.listDef = GUI_AllocTag (sizeof (listDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.listDef = GUI_AllocTag (sizeof (listDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.listDef = newGUI->s.listDef + 1;
 
 		newGUI->s.listDef->scrollBar[0] = qTrue;
@@ -2043,19 +2043,19 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 
 	case WTP_RENDER:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.renderDef = GUI_AllocTag (sizeof (renderDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.renderDef = GUI_AllocTag (sizeof (renderDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.renderDef = newGUI->s.renderDef + 1;
 		break;
 
 	case WTP_SLIDER:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.sliderDef = GUI_AllocTag (sizeof (sliderDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.sliderDef = GUI_AllocTag (sizeof (sliderDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.sliderDef = newGUI->s.sliderDef + 1;
 		break;
 
 	case WTP_TEXT:
 		newGUI->flags |= WFL_ITEM;
-		newGUI->s.textDef = GUI_AllocTag (sizeof (textDef_t) * 2, qTrue, GUITAG_SCRATCH);
+		newGUI->s.textDef = GUI_AllocTag (sizeof (textDef_t) * 2, GUITAG_SCRATCH);
 		newGUI->d.textDef = newGUI->s.textDef + 1;
 
 		Q_strncpyz (newGUI->s.textDef->fontName, "default", sizeof (newGUI->s.textDef->fontName));
@@ -2066,13 +2066,13 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 
 	// Storage space for children
 	newGUI->numChildren = 0;
-	newGUI->childList = GUI_AllocTag (sizeof (gui_t) * MAX_GUI_CHILDREN, qTrue, GUITAG_SCRATCH);
+	newGUI->childList = GUI_AllocTag (sizeof (gui_t) * MAX_GUI_CHILDREN, GUITAG_SCRATCH);
 	newGUI->numEvents = 0;
-	newGUI->eventList = GUI_AllocTag (sizeof (event_t) * MAX_GUI_EVENTS, qTrue, GUITAG_SCRATCH);
+	newGUI->eventList = GUI_AllocTag (sizeof (event_t) * MAX_GUI_EVENTS, GUITAG_SCRATCH);
 	newGUI->s.numDefFloats = 0;
-	newGUI->s.defFloatList = GUI_AllocTag (sizeof (defineFloat_t) * MAX_GUI_DEFINES, qTrue, GUITAG_SCRATCH);
+	newGUI->s.defFloatList = GUI_AllocTag (sizeof (defineFloat_t) * MAX_GUI_DEFINES, GUITAG_SCRATCH);
 	newGUI->s.numDefVecs = 0;
-	newGUI->s.defVecList = GUI_AllocTag (sizeof (defineVec_t) * MAX_GUI_DEFINES, qTrue, GUITAG_SCRATCH);
+	newGUI->s.defVecList = GUI_AllocTag (sizeof (defineVec_t) * MAX_GUI_DEFINES, GUITAG_SCRATCH);
 
 	// Parse the keys
 	for ( ; ; ) {
@@ -2149,7 +2149,7 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 	// Store children
 	childList = newGUI->childList;
 	if (newGUI->numChildren) {
-		newGUI->childList = GUI_AllocTag (sizeof (gui_t) * newGUI->numChildren, qFalse, GUITAG_SCRATCH);
+		newGUI->childList = GUI_AllocTag (sizeof (gui_t) * newGUI->numChildren, GUITAG_SCRATCH);
 		memcpy (newGUI->childList, childList, sizeof (gui_t) * newGUI->numChildren);
 	}
 	else
@@ -2159,7 +2159,7 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 	// Store events
 	eventList = newGUI->eventList;
 	if (newGUI->numEvents) {
-		newGUI->eventList = GUI_AllocTag (sizeof (event_t) * newGUI->numEvents, qFalse, GUITAG_SCRATCH);
+		newGUI->eventList = GUI_AllocTag (sizeof (event_t) * newGUI->numEvents, GUITAG_SCRATCH);
 		memcpy (newGUI->eventList, eventList, sizeof (event_t) * newGUI->numEvents);
 	}
 	else
@@ -2169,10 +2169,10 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 	// Store floats
 	defFloatList = newGUI->s.defFloatList;
 	if (newGUI->s.numDefFloats) {
-		newGUI->s.defFloatList = GUI_AllocTag (sizeof (defineFloat_t) * newGUI->s.numDefFloats, qFalse, GUITAG_SCRATCH);
+		newGUI->s.defFloatList = GUI_AllocTag (sizeof (defineFloat_t) * newGUI->s.numDefFloats, GUITAG_SCRATCH);
 		memcpy (newGUI->s.defFloatList, defFloatList, sizeof (defineFloat_t) * newGUI->s.numDefFloats);
 
-		newGUI->d.defFloatList = GUI_AllocTag (sizeof (defineFloat_t) * newGUI->s.numDefFloats, qFalse, GUITAG_SCRATCH);
+		newGUI->d.defFloatList = GUI_AllocTag (sizeof (defineFloat_t) * newGUI->s.numDefFloats, GUITAG_SCRATCH);
 		memcpy (newGUI->d.defFloatList, defFloatList, sizeof (defineFloat_t) * newGUI->d.numDefFloats);
 	}
 	else {
@@ -2184,10 +2184,10 @@ qBool GUI_NewWindowDef (char *fileName, gui_t *gui, parse_t *ps, char *keyName)
 	// Store vecs
 	defVecList = newGUI->s.defVecList;
 	if (newGUI->s.numDefVecs) {
-		newGUI->s.defVecList = GUI_AllocTag (sizeof (defineVec_t) * newGUI->s.numDefVecs, qFalse, GUITAG_SCRATCH);
+		newGUI->s.defVecList = GUI_AllocTag (sizeof (defineVec_t) * newGUI->s.numDefVecs, GUITAG_SCRATCH);
 		memcpy (newGUI->s.defVecList, defVecList, sizeof (defineVec_t) * newGUI->s.numDefVecs);
 
-		newGUI->d.defVecList = GUI_AllocTag (sizeof (defineVec_t) * newGUI->s.numDefVecs, qFalse, GUITAG_SCRATCH);
+		newGUI->d.defVecList = GUI_AllocTag (sizeof (defineVec_t) * newGUI->s.numDefVecs, GUITAG_SCRATCH);
 		memcpy (newGUI->d.defVecList, defVecList, sizeof (defineVec_t) * newGUI->d.numDefVecs);
 	}
 	else {

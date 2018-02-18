@@ -90,10 +90,10 @@ enum {
 	GUITAG_VARS,			// for GUI vars
 };
 
-#define GUI_AllocTag(size,zeroFill,tagNum)	_Mem_Alloc((size),(zeroFill),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
-#define GUI_FreeTag(tagNum)					_Mem_FreeTag(cl_guiSysPool,(tagNum),__FILE__,__LINE__)
-#define GUI_StrDup(in,tagNum)				_Mem_PoolStrDup((in),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
-#define GUI_MemFree(ptr)					_Mem_Free((ptr),__FILE__,__LINE__)
+#define GUI_AllocTag(size,tagNum)		_Mem_Alloc((size),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
+#define GUI_FreeTag(tagNum)				_Mem_FreeTag(cl_guiSysPool,(tagNum),__FILE__,__LINE__)
+#define GUI_StrDup(in,tagNum)			_Mem_PoolStrDup((in),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
+#define GUI_MemFree(ptr)				_Mem_Free((ptr),__FILE__,__LINE__)
 
 /*
 =============================================================================

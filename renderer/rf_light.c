@@ -941,8 +941,8 @@ void R_Q2BSP_BeginBuildingLightmaps (void)
 	r_q2_lmSize = size;
 
 	// Allocate buffers and clear values
-	r_q2_lmAllocated = Mem_PoolAllocExt (sizeof (int) * r_q2_lmSize, qTrue, ri.lightSysPool, 0);
-	r_q2_lmBuffer = Mem_PoolAllocExt (r_q2_lmSize*r_q2_lmSize*4, qFalse, ri.lightSysPool, 0);
+	r_q2_lmAllocated = Mem_PoolAlloc (sizeof (int) * r_q2_lmSize, ri.lightSysPool, 0);
+	r_q2_lmBuffer = Mem_PoolAlloc (r_q2_lmSize*r_q2_lmSize*4, ri.lightSysPool, 0);
 	memset (r_q2_lmBuffer, 255, r_q2_lmSize*r_q2_lmSize*4);
 
 	// Setup the base light styles
@@ -1448,7 +1448,7 @@ static int R_Q3BSP_PackLightmaps (int num, int w, int h, int size, const byte *d
 	if (rectSize > r_q3_lmBufferSize) {
 		if (r_q3_lmBuffer)
 			Mem_Free (r_q3_lmBuffer);
-		r_q3_lmBuffer = Mem_PoolAllocExt (rectSize, qFalse, ri.lightSysPool, 0);
+		r_q3_lmBuffer = Mem_PoolAlloc (rectSize, ri.lightSysPool, 0);
 		memset (r_q3_lmBuffer, 255, rectSize);
 		r_q3_lmBufferSize = rectSize;
 	}
@@ -1494,7 +1494,7 @@ void R_Q3BSP_BuildLightmaps (int numLightmaps, int w, int h, const byte *data, m
 	r_q3_lmMaxBlockSize = size;
 	size = w * h * Q3LIGHTMAP_BYTES;
 	r_q3_lmBufferSize = w * h * 4;
-	r_q3_lmBuffer = Mem_PoolAllocExt (r_q3_lmBufferSize, qFalse, ri.lightSysPool, 0);
+	r_q3_lmBuffer = Mem_PoolAlloc (r_q3_lmBufferSize, ri.lightSysPool, 0);
 
 	for (i=0 ; i<numLightmaps ; )
 		i += R_Q3BSP_PackLightmaps (numLightmaps - i, w, h, size, data + i * size, &rects[i]);
