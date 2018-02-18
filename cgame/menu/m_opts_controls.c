@@ -285,7 +285,7 @@ static void KeyBindingFunc (void *self)
 ControlsMenu_AddItems
 =============
 */
-static ControlsMenu_AddItems (void)
+static void ControlsMenu_AddItems (void)
 {
 	// Clear items
 	UI_StartFramework (&m_controlsMenu.frameWork, FWF_CENTERHEIGHT);

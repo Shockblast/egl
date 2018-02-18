@@ -131,9 +131,9 @@ static qBool R_LoadMD2Model (refModel_t *model)
 	int				skinWidth, skinHeight;
 	int				numVerts, numIndexes;
 	double			isw, ish;
-	int				indRemap[MD2_MAX_TRIANGLES*3];
-	index_t			tempIndex[MD2_MAX_TRIANGLES*3];
-	index_t			tempSTIndex[MD2_MAX_TRIANGLES*3];
+	static int		indRemap[MD2_MAX_TRIANGLES*3];
+	static index_t	tempIndex[MD2_MAX_TRIANGLES*3];
+	static index_t	tempSTIndex[MD2_MAX_TRIANGLES*3];
 	dMd2Coord_t		*inCoord;
 	dMd2Frame_t		*inFrame;
 	dMd2Header_t	*inModel;

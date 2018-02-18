@@ -372,7 +372,7 @@ qBool NET_GetPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *message)
 	netStats.sizeIn += ret;
 	netStats.packetsIn++;
 
-	if (ret == message->maxSize) {
+	if ((size_t) ret == message->maxSize) {
 		Com_Printf (PRNT_WARNING, "NET_GetPacket: Oversize packet from %s\n", NET_AdrToString (fromAddr));
 		return qFalse;
 	}

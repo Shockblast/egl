@@ -1534,7 +1534,6 @@ extern int ZEXPORT unzGetGlobalComment (file, szComment, uSizeBuf)
     char *szComment;
     uLong uSizeBuf;
 {
-    int err=UNZ_OK;
     unz_s* s;
     uLong uReadThis ;
     if (file==NULL)
@@ -1567,7 +1566,7 @@ extern uLong ZEXPORT unzGetOffset (file)
     unz_s* s;
 
     if (file==NULL)
-          return UNZ_PARAMERROR;
+          return (uLong) UNZ_PARAMERROR;
     s=(unz_s*)file;
     if (!s->current_file_ok)
       return 0;

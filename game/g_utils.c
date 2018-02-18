@@ -377,7 +377,7 @@ edict_t *G_Spawn (void)
 	}
 	
 	if (i == game.maxentities)
-		gi.error ("ED_Alloc: no free edicts");
+		Com_Error (ERR_FATAL, "ED_Alloc: no free edicts");
 		
 	globals.numEdicts++;
 	G_InitEdict (e);

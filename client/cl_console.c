@@ -119,12 +119,12 @@ If the line width has changed, reformat the buffer.
 */
 static void CL_ResizeConsole (console_t *console)
 {
-	int		width, oldWidth;
-	int		numLines, numChars;
-	int		oldTotalLines;
-	int		i, j;
-	char	tempbuf[CON_TEXTSIZE];
-	vec2_t	charSize;
+	int			width, oldWidth;
+	int			numLines, numChars;
+	int			oldTotalLines;
+	int			i, j;
+	static char	tempbuf[CON_TEXTSIZE];
+	vec2_t		charSize;
 
 	if (cls.refConfig.vidWidth < 1) {
 		// Video hasn't been initialized yet

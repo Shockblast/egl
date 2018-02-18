@@ -173,7 +173,10 @@ void UI_PopInterface (void)
 
 	// Fall back a layer
 	if (ui_layerDepth < 1)
+	{
 		Com_Error (ERR_FATAL, "UI_PopInterface: ui_layerDepth < 1");
+		return;
+	}
 	ui_layerDepth--;
 
 	uiState.activeUI = ui_layers[ui_layerDepth].frameWork;

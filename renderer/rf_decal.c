@@ -400,14 +400,15 @@ the input winding by six fragment planes.
 */
 static void R_Q3BSP_WindingClipFragment (vec3_t *wVerts, int numVerts, refFragment_t *fr)
 {
-	int			i, j;
-	int			stage, newc, numv;
-	cBspPlane_t	*plane;
-	qBool		front;
-	float		*v, *nextv, d;
-	float		dists[MAX_DECAL_VERTS+1];
-	int			sides[MAX_DECAL_VERTS+1];
-	vec3_t		*verts, *newverts, newv[2][MAX_DECAL_VERTS];
+	int				i, j;
+	int				stage, newc, numv;
+	cBspPlane_t		*plane;
+	qBool			front;
+	float			*v, *nextv, d;
+	static float	dists[MAX_DECAL_VERTS+1];
+	static int		sides[MAX_DECAL_VERTS+1];
+	vec3_t			*verts, *newverts;
+	static vec3_t	newv[2][MAX_DECAL_VERTS];
 
 	numv = numVerts;
 	verts = wVerts;
@@ -600,11 +601,12 @@ R_Q3BSP_FragmentNode
 */
 static void R_Q3BSP_FragmentNode (void)
 {
-	int				stackdepth = 0;
-	float			dist;
-	mBspNode_t		*node, *localStack[2048];
-	mBspLeaf_t		*leaf;
-	mBspSurface_t	*surf, **mark;
+	int					stackdepth = 0;
+	float				dist;
+	mBspNode_t			*node;
+	static mBspNode_t	*localStack[2048];
+	mBspLeaf_t			*leaf;
+	mBspSurface_t		*surf, **mark;
 
 	node = ri.scn.worldModel->bspModel.nodes;
 	for (stackdepth=0 ; ; ) {

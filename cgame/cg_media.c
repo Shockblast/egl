@@ -210,7 +210,8 @@ static void CG_MapMediaInit (void)
 	// Set sky textures and speed
 	CG_LoadingString ("Loading sky env...");
 	rotate = (float)atof (cg.configStrings[CS_SKYROTATE]);
-	sscanf (cg.configStrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]);
+	if (sscanf (cg.configStrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]) != 3)
+		Com_Error(ERR_FATAL, "Couldn't decode sky axis\n");
 	cgi.R_SetSky (cg.configStrings[CS_SKY], rotate, axis);
 }
 

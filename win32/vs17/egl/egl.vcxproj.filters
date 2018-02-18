@@ -147,9 +147,6 @@
     <ClInclude Include="..\..\..\renderer\r_typedefs.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\renderer\r_vbo.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\renderer\rb_local.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
@@ -371,9 +368,6 @@
     <ClCompile Include="..\..\..\renderer\r_math.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\renderer\r_vbo.c">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\renderer\rb_batch.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
@@ -447,9 +441,6 @@
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\renderer\rf_sprite.c">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\renderer\rf_video.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\renderer\rf_world.c">

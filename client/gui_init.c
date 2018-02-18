@@ -2341,7 +2341,7 @@ static void GUI_r_TouchGUI (gui_t *gui)
 	event_t		*event;
 	evAction_t	*action;
 	int			i, j;
-	short		index;
+	short		index = -1;
 
 	// Load generic media
 	if (gui->flags & WFL_MATERIAL) {

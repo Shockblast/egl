@@ -100,6 +100,9 @@
     <Link>
       <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)baseq2\$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -115,6 +118,9 @@
     <Link>
       <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)baseq2\$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -133,6 +139,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)baseq2\$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -151,6 +160,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)baseq2\$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\game\g_ai.c" />

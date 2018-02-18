@@ -47,7 +47,7 @@ static void HUD_DrawString (char *string, float x, float y, float centerwidth, q
 	char	line[1024];
 	int		width;
 	vec4_t	color;
-	vec2_t	charSize;
+	vec2_t	charSize = { 0, 0 };
 
 	Vec4Set (color, Q_colorWhite[0], Q_colorWhite[1], Q_colorWhite[2], scr_hudalpha->floatVal);
 	margin = x;

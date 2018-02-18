@@ -232,6 +232,8 @@ void Q_snprintfz (char *dest, size_t size, const char *fmt, ...)
 		va_end (argptr);
 
 		dest[size-1] = '\0';
+	} else {
+		dest[0] = '\0';
 	}
 }
 

@@ -163,7 +163,6 @@ static void DMASnd_TransferPaintBuffer (int endTime)
 
 	if (s_testsound->intVal) {
 		int		i;
-		int		count;
 
 		// Write a fixed sine wave
 		count = (endTime - snd_dmaPaintedTime);

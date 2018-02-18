@@ -754,7 +754,7 @@ R_AddQ3WorldToList
 */
 static void R_AddQ3WorldToList (void)
 {
-	uint32	startTime;
+	uint32	startTime = 0;
 
 	if (r_times->intVal)
 		startTime = Sys_UMilliseconds ();
@@ -890,7 +890,7 @@ R_AddWorldToList
 */
 void R_AddWorldToList (void)
 {
-	uint32	startTime;
+	uint32	startTime = 0;
 
 	R_ClearSky ();
 

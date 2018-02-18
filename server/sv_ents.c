@@ -559,7 +559,7 @@ void SV_RecordDemoMessage (void)
 	edict_t			*ent;
 	entityStateOld_t	nostate;
 	netMsg_t		buf;
-	byte			buf_data[32768];
+	static byte		buf_data[32768];
 	int				len;
 
 	if (!svs.demoFile)

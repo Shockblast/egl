@@ -1554,11 +1554,11 @@ typedef struct floodFill_s {
 
 static void R_FloodFillSkin (byte *skin, int skinWidth, int skinHeight)
 {
-	byte		fillColor;
-	floodFill_t	fifo[FLOODFILL_FIFO_SIZE];
-	int			inpt = 0, outpt = 0;
-	int			filledColor;
-	int			i;
+	byte				fillColor;
+	static floodFill_t	fifo[FLOODFILL_FIFO_SIZE];
+	int					inpt = 0, outpt = 0;
+	int					filledColor;
+	int					i;
 
 	// Assume this is the pixel to fill
 	fillColor = *skin;
@@ -2360,7 +2360,9 @@ static void R_ScreenShot_f (void)
 	f = fopen (checkName, "wb");
 	if (shotNum == 1000 || !f) {
 		Com_Printf (PRNT_WARNING, "R_ScreenShot_f: Couldn't create a file\n"); 
-		fclose (f);
+
+		if (f)
+			fclose (f);
 		return;
 	}
 

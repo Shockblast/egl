@@ -212,7 +212,7 @@ Com_NormalizePath
 void Com_NormalizePath (char *dest, size_t size, const char *source)
 {
 	size_t	i, len;
-	size_t	lastDot;
+	int		lastDot;
 	qBool	twoDots;
 
 	//
@@ -227,7 +227,7 @@ void Com_NormalizePath (char *dest, size_t size, const char *source)
 		case '\\':
 		case '/':
 			// Remove "./" but not "../"
-			if (lastDot == len-1 && !twoDots)
+			if (lastDot == (int) (len-1) && !twoDots)
 				dest[len--] = '/';
 			else
 				dest[len++] = '/';
@@ -235,11 +235,11 @@ void Com_NormalizePath (char *dest, size_t size, const char *source)
 
 		case '.':
 			// Store the location of the last dot for later extension stripping
-			if (lastDot == len-1)
+			if (lastDot == (int) (len-1))
 				twoDots = qTrue;
 			else
 				twoDots = qFalse;
-			lastDot = len;
+			lastDot = (int) len;
 
 			// Intentional fall through
 		default:
@@ -356,7 +356,7 @@ void Com_StripPadding (char *in, char *dest)
 			*dest++ = *in++;
 		}
 		else
-			*in++;
+			in++;
 	}
 	*dest = '\0';
 

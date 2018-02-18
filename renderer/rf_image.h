@@ -82,7 +82,6 @@ typedef struct image_s {
 } image_t;
 
 #define MAX_IMAGES			1024			// maximum local images
-extern uint32				r_numImages;
 
 #define FOGTEX_WIDTH		256
 #define FOGTEX_HEIGHT		32

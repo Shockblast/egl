@@ -196,7 +196,8 @@ void CG_AddDecals (void)
 	cgDecal_t	*d, *next, *hNode;
 	float		lifeTime, finalTime;
 	float		fade;
-	int			i, flags, type;
+	int			i, type;
+	uint32		flags;
 	vec4_t		color;
 	vec3_t		temp;
 	bvec4_t		outColor;

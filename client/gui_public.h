@@ -30,6 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 =============================================================================
 */
 
+typedef struct gui_s gui_t;
+typedef struct guiVar_s guiVar_t;
+
 //
 // gui_cursor.c
 //
@@ -39,12 +42,12 @@ void		GUI_MoveMouse (int xMove, int yMove);
 // gui_events.c
 //
 void		GUI_NamedGlobalEvent (char *name);
-void		GUI_NamedGUIEvent (struct gui_s *gui, char *name);
+void		GUI_NamedGUIEvent (gui_t *gui, char *name);
 
 //
 // gui_init.c
 //
-struct gui_s *GUI_RegisterGUI (char *name);
+gui_t *GUI_RegisterGUI (char *name);
 
 void		GUI_BeginRegistration (void);
 void		GUI_RegisterSounds (void);
@@ -61,8 +64,8 @@ void		GUI_KeyDown (keyNum_t keyNum);
 //
 // gui_main.c
 //
-void		GUI_OpenGUI (struct gui_s *gui);
-void		GUI_CloseGUI (struct gui_s *gui);
+void		GUI_OpenGUI (gui_t *gui);
+void		GUI_CloseGUI (gui_t *gui);
 void		GUI_CloseAllGUIs (void);
 
 void		GUI_Refresh (void);
@@ -71,10 +74,10 @@ void		GUI_Refresh (void);
 // gui_vars.c
 //
 
-struct guiVar_s	*GUIVar_Register (char *name, guiVarType_t type);
-qBool		GUIVar_GetFloatValue (struct guiVar_s *var, float *dest);
-qBool		GUIVar_GetStrValue (struct guiVar_s *var, char *dest, size_t size);
-qBool		GUIVar_GetVecValue (struct guiVar_s *var, vec4_t dest);
-void		GUIVar_SetFloatValue (struct guiVar_s *var, float value);
-void		GUIVar_SetStrValue (struct guiVar_s *var, char *value);
-void		GUIVar_SetVecValue (struct guiVar_s *var, vec4_t value);
+guiVar_t	*GUIVar_Register (char *name, guiVarType_t type);
+qBool		GUIVar_GetFloatValue (guiVar_t *var, float *dest);
+qBool		GUIVar_GetStrValue (guiVar_t *var, char *dest, size_t size);
+qBool		GUIVar_GetVecValue (guiVar_t *var, vec4_t dest);
+void		GUIVar_SetFloatValue (guiVar_t *var, float value);
+void		GUIVar_SetStrValue (guiVar_t *var, char *value);
+void		GUIVar_SetVecValue (guiVar_t *var, vec4_t value);

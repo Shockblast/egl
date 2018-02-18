@@ -277,7 +277,7 @@ Adds scene items to the desired list
 */
 void R_RenderToList (refDef_t *rd, meshList_t *list)
 {
-	uint32	startTime;
+	uint32	startTime = 0;
 	int		i;
 
 	if (r_times->intVal)

@@ -3167,7 +3167,7 @@ R_ShaderInit
 */
 void R_ShaderInit (void)
 {
-	char			*fileList[MAX_SHADERS];
+	static char		*fileList[MAX_SHADERS];
 	char			fixedName[MAX_QPATH];
 	size_t			numFiles, i;
 	shPathType_t	pathType;

@@ -435,7 +435,7 @@ void Conbuf_AppendText (const char *pMsg)
 {
 #define CONSOLE_BUFFER_SIZE		16384
 
-	char buffer[CONSOLE_BUFFER_SIZE*2];
+	static char buffer[CONSOLE_BUFFER_SIZE*2];
 	char *b = buffer;
 	const char *msg;
 	int bufLen;

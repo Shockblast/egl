@@ -836,8 +836,10 @@ void Cmd_Say_f (edict_t *ent, qBool team, qBool arg0)
             return;
         }
         i = cl->flood_whenhead - flood_msgs->floatVal + 1;
+
         if (i < 0)
             i = (sizeof(cl->flood_when)/sizeof(cl->flood_when[0])) + i;
+
 		if (cl->flood_when[i] && 
 			level.time - cl->flood_when[i] < flood_persecond->floatVal) {
 			cl->flood_locktill = level.time + flood_waitdelay->floatVal;

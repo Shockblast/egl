@@ -48,6 +48,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # pragma intrinsic(memcmp)
 
+# define NO_RETURN __declspec(noreturn)
+
 # define GL_DRIVERNAME		"opengl32.dll"
 # define AL_DRIVERNAME		"openal32.dll"
 
@@ -86,6 +88,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #  define AL_DRIVERNAME		"libopenal.so.0"
 #  define GL_FORCEFINISH
 
+#  define NO_RETURN __attribute__((noreturn))
+
 #  define HAVE_INLINE
 #  define HAVE_STRCASECMP
 
@@ -121,6 +125,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #  else
 #   include <stdint.h>
 #  endif
+
+#  define NO_RETURN __attribute__((noreturn))
 
 #  define BUILDSTRING		"FreeBSD"
 
@@ -766,7 +772,7 @@ typedef enum {
 	ERR_DROP,				// print to console and disconnect from game
 	ERR_DISCONNECT			// don't kill server
 } comError_t;
-void	Com_Error (comError_t code, char *fmt, ...);
+NO_RETURN void	Com_Error (comError_t code, char *fmt, ...);
 
 //
 // styles for R_DrawString/Char

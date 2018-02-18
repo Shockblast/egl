@@ -125,7 +125,7 @@ meshBuffer_t *R_AddMeshToList (shader_t *shader, float shaderTime, refEntity_t *
 		mb->sortKey |= 1 << 27;									// [2^27]
 
 	// Stupidity check
-	assert ((mb->sortKey & (MBT_MAX-1)) == meshType);
+	assert ((mb->sortKey & (MBT_MAX-1)) == (uint32) meshType);
 	assert (&ri.scn.entityList[(mb->sortKey >> 5) & (MAX_REF_ENTITIES-1)] != ent);
 	return mb;
 }
@@ -142,7 +142,7 @@ static void R_QSortMeshBuffers (meshBuffer_t *meshes, int Li, int Ri)
 {
 	int		li, ri, stackDepth, total;
 	meshBuffer_t median, tempbuf;
-	int		localStack[QSORT_MAX_STACKDEPTH];
+	static int	localStack[QSORT_MAX_STACKDEPTH];
 
 	stackDepth = 0;
 	total = Ri + 1;
@@ -245,7 +245,7 @@ R_SortMeshList
 */
 void R_SortMeshList (void)
 {
-	uint32	startTime;
+	uint32	startTime = 0;
 	int		i;
 
 	if (r_debugSorting->intVal)
@@ -505,7 +505,7 @@ R_DrawMeshList
 void R_DrawMeshList (qBool triangleOutlines)
 {
 	meshBuffer_t	*mb;
-	uint32			startTime;
+	uint32			startTime = 0;
 	meshType_t		meshType;
 	int				i, j;
 

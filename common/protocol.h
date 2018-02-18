@@ -339,15 +339,15 @@ typedef struct netChan_s {
 	uint16		protocol;
 
 	// Sequencing variables
-	int			incomingSequence;
-	int			incomingAcknowledged;
-	int			incomingReliableAcknowledged;	// single bit
-	int			incomingReliableSequence;		// single bit, maintained local
+	uint32		incomingSequence;
+	uint32		incomingAcknowledged;
+	uint32		incomingReliableAcknowledged;	// single bit
+	uint32		incomingReliableSequence;		// single bit, maintained local
 	qBool		gotReliable;
 
-	int			outgoingSequence;
-	int			reliableSequence;				// single bit
-	int			lastReliableSequence;			// sequence number of last send
+	uint32		outgoingSequence;
+	uint32		reliableSequence;				// single bit
+	uint32		lastReliableSequence;			// sequence number of last send
 
 	// Reliable staging and holding areas
 	netMsg_t	message;		// writing buffer to send to server

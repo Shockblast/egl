@@ -4324,7 +4324,6 @@ qBool QGL_Init (const char *dllName)
 
 		Com_Printf (0, "QGL_Init: LoadLibrary ( \"%s\" )", GL_DRIVERNAME);
 		if (!(glwState.hInstOpenGL = LoadLibrary (GL_DRIVERNAME))) {
-			char *buf = NULL;
 
 			FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 							NULL,

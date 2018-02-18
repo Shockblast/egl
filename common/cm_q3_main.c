@@ -388,11 +388,11 @@ CM_Q3BSP_CreatePatch
 */
 static void CM_Q3BSP_CreatePatch (cpatch_t *patch, int numverts, vec4_t *verts, int *patch_cp)
 {
-    int			step[2], size[2], flat[2], i, u, v;
-	vec4_t		points[MAX_Q3BSP_CM_PATCH_VERTS];
-	vec3_t		tverts[4], tverts2[4];
-	cbrush_t	*brush;
-	cBspPlane_t	mainplane;
+    int				step[2], size[2], flat[2], i, u, v;
+	static vec4_t	points[MAX_Q3BSP_CM_PATCH_VERTS];
+	vec3_t			tverts[4], tverts2[4];
+	cbrush_t		*brush;
+	cBspPlane_t		mainplane;
 
 	// Find the degree of subdivision in the u and v directions
 	Patch_GetFlatness2 (CM_SUBDIVLEVEL, verts, patch_cp, flat);
@@ -470,7 +470,7 @@ static void CM_Q3BSP_CreatePatchesForLeafs (void)
 	cface_t			*face;
 	cBspSurface_t	*surf;
 	cpatch_t		*patch;
-	int				checkout[MAX_Q3BSP_CM_FACES];
+	static int		checkout[MAX_Q3BSP_CM_FACES];
 
 	memset (checkout, -1, sizeof(int)*MAX_Q3BSP_CM_FACES);
 

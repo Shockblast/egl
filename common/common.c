@@ -284,7 +284,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error (comError_t code, char *fmt, ...)
+NO_RETURN void Com_Error (comError_t code, char *fmt, ...)
 {
 	va_list			argptr;
 	static char		msg[MAX_COMPRINT];

@@ -84,7 +84,7 @@ void RB_StateForBits (uint32 bits1)
 
 		if (diff & (SB1_BLENDSRC_BITS|SB1_BLENDDST_BITS)
 		&& bits1 & (SB1_BLENDSRC_BITS|SB1_BLENDDST_BITS)) {
-			GLenum	sFactor, dFactor;
+			GLenum	sFactor = GL_ONE, dFactor = GL_ONE;
 
 			switch (bits1 & SB1_BLENDSRC_BITS) {
 			case SB1_BLENDSRC_ZERO:					sFactor = GL_ZERO;					break;

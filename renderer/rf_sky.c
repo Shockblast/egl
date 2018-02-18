@@ -79,25 +79,24 @@ static void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
 
 	if (stage == 6) {
 		// Fully clipped, so draw it
-		int		i, j;
-		vec3_t	v, av;
+		vec3_t	vt, av;
 		float	s, t, dv;
 		int		axis;
 		float	*vp;
 
 		// Decide which face it maps to
-		Vec3Clear (v);
+		Vec3Clear (vt);
 		for (i=0, vp=vecs ; i<nump ; i++, vp+=3)
-			Vec3Add (vp, v, v);
+			Vec3Add (vp, vt, vt);
 
-		Vec3Set (av, (float)fabs (v[0]), (float)fabs (v[1]), (float)fabs (v[2]));
+		Vec3Set (av, (float)fabs (vt[0]), (float)fabs (vt[1]), (float)fabs (vt[2]));
 
 		if (av[0] > av[1] && av[0] > av[2])
-			axis = (v[0] < 0) ? 1 : 0;
+			axis = (vt[0] < 0) ? 1 : 0;
 		else if (av[1] > av[2] && av[1] > av[0])
-			axis = (v[1] < 0) ? 3 : 2;
+			axis = (vt[1] < 0) ? 3 : 2;
 		else
-			axis = (v[2] < 0) ? 5 : 4;
+			axis = (vt[2] < 0) ? 5 : 4;
 
 		// Project new texture coords
 		for (i=0 ; i<nump ; i++, vecs+=3) {

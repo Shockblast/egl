@@ -109,6 +109,9 @@
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -126,6 +129,9 @@
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -144,6 +150,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -162,6 +171,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\client\cl_keys.h" />
@@ -285,7 +297,6 @@
     <ClCompile Include="..\..\..\renderer\rf_skeletal.c" />
     <ClCompile Include="..\..\..\renderer\rf_sky.c" />
     <ClCompile Include="..\..\..\renderer\rf_sprite.c" />
-    <ClCompile Include="..\..\..\renderer\rf_video.c" />
     <ClCompile Include="..\..\..\renderer\rf_world.c" />
     <ClCompile Include="..\..\..\renderer\r_glstate.c" />
     <ClCompile Include="..\..\..\renderer\r_math.c" />

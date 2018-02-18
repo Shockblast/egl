@@ -355,10 +355,10 @@ static qBool Key_SubComplete (char *source, char *dest, size_t size, qBool doAli
 
 static qBool Key_FileSubComplete (char *source, char *dest, size_t size, char *path, char *filter, char *ext, qBool recurse, qBool stripExt)
 {
-	char	*fileList[FS_MAX_FINDFILES];
-	size_t	numFiles, len, i, j, pathLen;
-	int		matchFiles;
-	char	*p;
+	static char	*fileList[FS_MAX_FINDFILES];
+	size_t		numFiles, len, i, j, pathLen;
+	int			matchFiles;
+	char		*p;
 
 	// Clear
 	memset (key_shortMatch, 0, sizeof (key_shortMatch));

@@ -57,7 +57,7 @@ static void DownloadCallback (void *self)
 		cgi.Cvar_SetValue ("allow_download", f->curValue, qFalse);
 	else if (f == &m_downloadOptionsMenu.download_maps_toggle)
 		cgi.Cvar_SetValue ("allow_download_maps", f->curValue, qFalse);
-	else if (f == &m_downloadOptionsMenu.download_models_toggle, qFalse)
+	else if (f == &m_downloadOptionsMenu.download_models_toggle)
 		cgi.Cvar_SetValue ("allow_download_models", f->curValue, qFalse);
 	else if (f == &m_downloadOptionsMenu.download_players_toggle)
 		cgi.Cvar_SetValue ("allow_download_players", f->curValue, qFalse);

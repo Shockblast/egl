@@ -335,7 +335,7 @@ sfxCache_t *Snd_LoadSound (sfx_t *s)
     char		namebuffer[MAX_QPATH];
 	byte		*data;
 	wavInfo_t	info;
-	int			len;
+	int			len = 0;
 	float		stepscale;
 	sfxCache_t	*sc;
 	int			fileLen;

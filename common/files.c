@@ -269,9 +269,9 @@ FS_CopyFile
 */
 void FS_CopyFile (char *src, char *dst)
 {
-	FILE	*f1, *f2;
-	size_t	l;
-	byte	buffer[65536];
+	FILE		*f1, *f2;
+	size_t		l;
+	static byte	buffer[65536];
 
 	if (fs_developer->intVal)
 		Com_Printf (0, "FS_CopyFile (%s, %s)\n", src, dst);
@@ -560,7 +560,7 @@ void FS_Seek (fileHandle_t fileNum, long offset, fsSeekOrigin_t seekOrigin)
 	fsHandleIndex_t	*handle;
 	unz_file_info	info;
 	int				remaining = 0, r, len;
-	byte			dummy[0x8000];
+	static byte		dummy[0x8000];
 
 	handle = FS_GetHandle (fileNum);
 	if (handle->regFile) {
@@ -995,13 +995,13 @@ of the list so they override previous pack files.
 */
 mPack_t *FS_LoadPAK (char *fileName, qBool complain)
 {
-	dPackHeader_t	header;
-	mPackFile_t		*outPackFile;
-	mPack_t			*outPack;
-	FILE			*handle;
-	dPackFile_t		info[PAK_MAX_FILES];
-	size_t			i, numFiles;
-	uint32			hashValue;
+	dPackHeader_t		header;
+	mPackFile_t			*outPackFile;
+	mPack_t				*outPack;
+	FILE				*handle;
+	static dPackFile_t	info[PAK_MAX_FILES];
+	size_t				i, numFiles;
+	uint32				hashValue;
 
 	// Open
 	handle = fopen (fileName, "rb");
@@ -1389,7 +1389,7 @@ size_t FS_FindFiles (char *path, char *filter, char *extension, char **fileList,
 	char		*name;
 	char		dir[MAX_OSPATH];
 	char		ext[MAX_QEXT];
-	char		*dirFiles[FS_MAX_FINDFILES];
+	static char	*dirFiles[FS_MAX_FINDFILES];
 	size_t		dirCount, i, j, k;
 
 	// Sanity check

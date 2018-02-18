@@ -231,7 +231,6 @@ void SV_LinkEdict (edict_t *ent)
 	if (ent->solid == SOLID_BSP && (ent->s.angles[0] || ent->s.angles[1] || ent->s.angles[2])) {
 		// Expand for rotation
 		float		rMax, v;
-		int			i;
 
 		rMax = 0;
 		for (i=0 ; i<3 ; i++) {
