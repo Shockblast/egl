@@ -237,6 +237,8 @@ void CG_BlasterGoldParticles (vec3_t org, vec3_t dir)
 			PART_STYLE_QUAD,
 			0);
 	}
+
+	CG_ColorFlash(org, (int)((org[0]+org[1]+org[3]) / 3.0), 200, 1, 1, 0);
 }
 
 
@@ -1336,7 +1338,7 @@ void CG_BlasterTip (vec3_t start, vec3_t end)
 			palRed (0xe0 + rnum),				palGreen (0xe0 + rnum),				palBlue (0xe0 + rnum),
 			palRed (0xe0 + rnum2),				palGreen (0xe0 + rnum2),			palBlue (0xe0 + rnum2),
 			0.9f + (frand() * 0.1f),			-1.0f / (0.25f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
-			5 + crand (),						16 + (crand () * 8),
+			2 + crand (),						12 + (crand () * 2),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,
 			PART_STYLE_QUAD,
@@ -1365,7 +1367,7 @@ void CG_BlasterTip (vec3_t start, vec3_t end)
 			palRed (0xe0 + rnum),				palGreen (0xe0 + rnum),				palBlue (0xe0 + rnum),
 			palRed (0xe0 + rnum2),				palGreen (0xe0 + rnum2),			palBlue (0xe0 + rnum2),
 			1.0f,								-15,
-			4 + (frand () * 4),					1.5f + (frand () * 2.5f),
+			3 + frand (),						1.5f + frand (),
 			PT_BLASTER_RED,						PF_NOCLOSECULL,
 			0,									qFalse,
 			PART_STYLE_QUAD,
