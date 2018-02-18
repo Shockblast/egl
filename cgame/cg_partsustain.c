@@ -140,7 +140,7 @@ static void CG_Nukeblast (cgSustainPfx_t *self)
 				0,								0,								5 + (frand () * 6),
 				rnum,							rnum,							rnum,
 				rnum2,							rnum2,							rnum2,
-				0.75f + (crand () * 0.1f),		-2.0f / (1.5f + (cg_particleSmokeLinger->floatVal * 0.4f) + (crand () * 0.2f)),
+				0.75f + (crand () * 0.1f),		-2.0f / (1.5f + (cg.smokeLingerScale * 4.0f) + (crand () * 0.2f)),
 				(150 + (crand () * 5)),			(150 + (crand () * 20)),
 				pRandSmoke (),					PF_SHADE,
 				pSmokeThink,					qTrue,

@@ -208,6 +208,30 @@ void CG_UpdateCvars (qBool forceUpdate)
 		else if (cg_particleMax->intVal < 0)
 			cgi.Cvar_VariableSetValue (cg_particleMax, 0, qTrue);
 	}
+
+	// cg_particleGore
+	if (cg_particleGore->modified || forceUpdate) {
+		cg_particleGore->modified = qFalse;
+		if (cg_particleGore->floatVal < 0.0f)
+			cgi.Cvar_VariableSetValue(cg_particleGore, 0.0f, qTrue);
+		else if (cg_particleGore->floatVal > 10.0f)
+			cgi.Cvar_VariableSetValue(cg_particleGore, 10.0f, qTrue);
+
+		// 0.0-10.0 -> 0.0-1.0
+		cg.goreScale = cg_particleGore->floatVal * 0.1f;
+	}
+
+	// cg_particleSmokeLinger
+	if (cg_particleSmokeLinger->modified || forceUpdate) {
+		cg_particleSmokeLinger->modified = qFalse;
+		if (cg_particleSmokeLinger->floatVal < 0.0f)
+			cgi.Cvar_VariableSetValue(cg_particleSmokeLinger, 0.0f, qTrue);
+		else if (cg_particleSmokeLinger->floatVal > 10.0f)
+			cgi.Cvar_VariableSetValue(cg_particleSmokeLinger, 10.0f, qTrue);
+
+		// 0.0-10.0 -> 0.0-1.0
+		cg.smokeLingerScale = cg_particleGore->floatVal * 0.1f;
+	}
 }
 
 /*

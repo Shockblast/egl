@@ -336,6 +336,48 @@ void pFlareThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color
 
 /*
 ===============
+pLight70Think
+===============
+*/
+void pLight70Think(struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time)
+{
+	if (cg_particleShading->intVal) {
+		// Update lighting
+		if (cg.refreshTime >= p->nextLightingTime) {
+			cgi.R_LightPoint(p->org, p->lighting);
+
+			switch(cg_particleShading->intVal) {
+			case 1: p->nextLightingTime = cg.refreshTime + 33.0f; // 30 FPS
+			case 2: p->nextLightingTime = cg.refreshTime + 16.5f; // 60 FPS
+			// Otherwise always update
+			}
+		}
+
+		// Apply lighting
+		float lightest = 0;
+		for (int j=0 ; j<3 ; j++) {
+			color[j] = ((0.7f*p->lighting[j]) + 0.3f) * p->color[j];
+			if (color[j] > lightest)
+				lightest = color[j];
+		}
+
+		// Normalize
+		if (lightest > 255.0)
+		{
+			color[0] *= 255.0f / lightest;
+			color[1] *= 255.0f / lightest;
+			color[2] *= 255.0f / lightest;
+		}
+
+		// FIXME: Always think so that the cached lighting values are applied
+		p->thinkNext = cg.refreshTime;// + THINK_DELAY_EXPENSIVE;
+	}
+
+	p->thinkNext = qTrue;
+}
+
+/*
+===============
 pRailSpiralThink
 ===============
 */

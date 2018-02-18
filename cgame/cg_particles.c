@@ -307,7 +307,7 @@ void CG_AddParticles (void)
 		}
 
 		// Particle shading
-		if (p->flags & PF_SHADE && cg_particleShading->intVal) {
+		if ((p->flags & PF_SHADE) && cg_particleShading->intVal) {
 			cgi.R_LightPoint (p->org, shade);
 
 			lightest = 0;

@@ -212,6 +212,12 @@ typedef struct cgState_s {
 	// Enhanced protocol support
 	//
 	qBool				strafeHack;
+	
+	//
+	// Effects
+	//
+	float				goreScale; // 0.0-1.0
+	float				smokeLingerScale; // 0.0-1.0
 } cgState_t;
 
 extern cgState_t	cg;

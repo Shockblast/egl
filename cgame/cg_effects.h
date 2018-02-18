@@ -372,6 +372,10 @@ typedef struct cgParticle_s {
 	void				(*think)(struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 	qBool				thinkNext;
 
+	// For the lighting think functions
+	vec3_t				lighting;
+	float				nextLightingTime;
+
 	// Passed to refresh
 	refPoly_t			outPoly;
 	bvec4_t				outColor[4];
@@ -519,6 +523,7 @@ void	pFastSmokeThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t c
 void	pFireThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pFireTrailThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pFlareThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
+void	pLight70Think (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pRailSpiralThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pRicochetSparkThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pSlowFireThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
