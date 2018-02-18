@@ -1269,6 +1269,11 @@ static qBool ShdPass_DepthWrite (shader_t *shader, shaderPass_t *pass, parse_t *
 	return qTrue;
 }
 
+static qBool ShdPass_Emissive (shader_t *shader, shaderPass_t *pass, parse_t *ps, char *fileName)
+{
+	return qTrue;
+}
+
 // ==========================================================================
 
 static shaderKey_t r_shaderPassKeys[] = {
@@ -1315,6 +1320,7 @@ static shaderKey_t r_shaderPassKeys[] = {
 	{ "notdetail",			&ShdPass_NotDetail			},
 
 	{ "depthwrite",			&ShdPass_DepthWrite			},
+	{ "emissive",			&ShdPass_Emissive			},
 
 	{ NULL,					NULL						}
 };
