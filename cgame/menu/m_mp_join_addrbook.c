@@ -67,7 +67,7 @@ static void AddrBookMenu_Init (void)
 	m_addressBookMenu.banner.generic.type			= UITYPE_IMAGE;
 	m_addressBookMenu.banner.generic.flags			= UIF_NOSELECT|UIF_CENTERED;
 	m_addressBookMenu.banner.generic.name			= NULL;
-	m_addressBookMenu.banner.shader					= uiMedia.banners.addressBook;
+	m_addressBookMenu.banner.mat					= uiMedia.banners.addressBook;
 
 	UI_AddItem (&m_addressBookMenu.frameWork,		&m_addressBookMenu.banner);
 

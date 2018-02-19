@@ -32,9 +32,9 @@ static float	scr_centerTime_Off;
 CG_RegisterPic
 =============
 */
-struct shader_s *CG_RegisterPic (char *name)
+struct material_s *CG_RegisterPic (char *name)
 {
-	struct shader_s	*shader;
+	struct material_s	*mat;
 	char			fullName[MAX_QPATH];
 
 	if (!name)
@@ -44,14 +44,14 @@ struct shader_s *CG_RegisterPic (char *name)
 
 	if ((name[0] != '/') && (name[0] != '\\')) {
 		Q_snprintfz (fullName, sizeof (fullName), "pics/%s.tga", name);
-		shader = cgi.R_RegisterPic (fullName);
+		mat = cgi.R_RegisterPic (fullName);
 	}
 	else {
 		Q_strncpyz (fullName, name+1, sizeof (fullName));
-		shader = cgi.R_RegisterPic (fullName);
+		mat = cgi.R_RegisterPic (fullName);
 	}
 
-	return shader;
+	return mat;
 }
 
 /*
@@ -251,9 +251,9 @@ static void SCR_DrawCrosshair (void)
 		return;
 
 	if (crosshair->modified)
-		CG_CrosshairShaderInit ();
+		CG_CrosshairMaterialInit ();
 
-	if (!cgMedia.crosshairShader)
+	if (!cgMedia.crosshairMat)
 		return;
 
 	color[3] = ch_alpha->floatVal;
@@ -266,8 +266,8 @@ static void SCR_DrawCrosshair (void)
 				clamp (ch_blue->floatVal, 0, 1),
 				clamp (color[3], 0, 1));
 
-	cgi.R_GetImageSize (cgMedia.crosshairShader, &width, &height);
-	cgi.R_DrawPic (cgMedia.crosshairShader, 0,
+	cgi.R_GetImageSize (cgMedia.crosshairMat, &width, &height);
+	cgi.R_DrawPic (cgMedia.crosshairMat, 0,
 		(cg.refConfig.vidWidth * 0.5) - (width * ch_scale->floatVal * 0.5) + ch_xOffset->floatVal,
 		(cg.refConfig.vidHeight * 0.5) - (height * ch_scale->floatVal * 0.5) + ch_yOffset->floatVal,
 		width * ch_scale->floatVal,
@@ -294,9 +294,9 @@ static void SCR_DrawLagIcon (void)
 		return;
 
 	Vec4Set (color, Q_colorWhite[0], Q_colorWhite[1], Q_colorWhite[2], scr_hudalpha->floatVal);
-	cgi.R_GetImageSize (cgMedia.hudNetShader, &width, &height);
+	cgi.R_GetImageSize (cgMedia.hudNetMat, &width, &height);
 	cgi.R_DrawPic (
-		cgMedia.hudNetShader, 0, 64, 0,
+		cgMedia.hudNetMat, 0, 64, 0,
 		width * cg.hudScale[0],
 		height * cg.hudScale[1],
 		0, 0, 1, 1, color);
@@ -321,9 +321,9 @@ static void SCR_DrawPause (void)
 		return;
 
 	Vec4Set (color, Q_colorWhite[0], Q_colorWhite[1], Q_colorWhite[2], scr_hudalpha->floatVal);
-	cgi.R_GetImageSize (cgMedia.hudPausedShader, &width, &height);
+	cgi.R_GetImageSize (cgMedia.hudPausedMat, &width, &height);
 	cgi.R_DrawPic (
-		cgMedia.hudPausedShader, 0,
+		cgMedia.hudPausedMat, 0,
 		(cg.refConfig.vidWidth - (width*cg.hudScale[0]))*0.5,
 		((cg.refConfig.vidHeight*0.5) - (height*cg.hudScale[1])),
 		width*cg.hudScale[0], height*cg.hudScale[1],

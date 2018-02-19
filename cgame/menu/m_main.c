@@ -107,43 +107,43 @@ static void MainMenu_Init (void)
 
 	m_mainMenu.game_menu.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.game_menu.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELBAR;
-	m_mainMenu.game_menu.shader				= uiMedia.menus.mainGame;
-	m_mainMenu.game_menu.hoverShader		= uiMedia.menus.mainGameSel;
+	m_mainMenu.game_menu.mat				= uiMedia.menus.mainGame;
+	m_mainMenu.game_menu.hoverMat			= uiMedia.menus.mainGameSel;
 	m_mainMenu.game_menu.generic.callBack	= SP_Menu;
 
 	m_mainMenu.multiplayer_menu.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.multiplayer_menu.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELBAR;
-	m_mainMenu.multiplayer_menu.shader				= uiMedia.menus.mainMultiplayer;
-	m_mainMenu.multiplayer_menu.hoverShader			= uiMedia.menus.mainMultiplayerSel;
+	m_mainMenu.multiplayer_menu.mat					= uiMedia.menus.mainMultiplayer;
+	m_mainMenu.multiplayer_menu.hoverMat			= uiMedia.menus.mainMultiplayerSel;
 	m_mainMenu.multiplayer_menu.generic.callBack	= MP_Menu;
 
 	m_mainMenu.options_menu.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.options_menu.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELBAR;
-	m_mainMenu.options_menu.shader				= uiMedia.menus.mainOptions;
-	m_mainMenu.options_menu.hoverShader			= uiMedia.menus.mainOptionsSel;
+	m_mainMenu.options_menu.mat					= uiMedia.menus.mainOptions;
+	m_mainMenu.options_menu.hoverMat			= uiMedia.menus.mainOptionsSel;
 	m_mainMenu.options_menu.generic.callBack	= OPTS_Menu;
 
 	m_mainMenu.video_menu.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.video_menu.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELBAR;
-	m_mainMenu.video_menu.shader			= uiMedia.menus.mainVideo;
-	m_mainMenu.video_menu.hoverShader		= uiMedia.menus.mainVideoSel;
+	m_mainMenu.video_menu.mat				= uiMedia.menus.mainVideo;
+	m_mainMenu.video_menu.hoverMat			= uiMedia.menus.mainVideoSel;
 	m_mainMenu.video_menu.generic.callBack	= VID_Menu;
 
 	m_mainMenu.quit_menu.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.quit_menu.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELBAR;
-	m_mainMenu.quit_menu.shader				= uiMedia.menus.mainQuit;
-	m_mainMenu.quit_menu.hoverShader		= uiMedia.menus.mainQuitSel;
+	m_mainMenu.quit_menu.mat				= uiMedia.menus.mainQuit;
+	m_mainMenu.quit_menu.hoverMat			= uiMedia.menus.mainQuitSel;
 	m_mainMenu.quit_menu.generic.callBack	= QUIT_Menu;
 
 	m_mainMenu.plaque_pic.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.plaque_pic.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELECT;
-	m_mainMenu.plaque_pic.shader			= uiMedia.menus.mainPlaque;
-	m_mainMenu.plaque_pic.hoverShader		= NULL;
+	m_mainMenu.plaque_pic.mat				= uiMedia.menus.mainPlaque;
+	m_mainMenu.plaque_pic.hoverMat			= NULL;
 
 	m_mainMenu.idlogo_pic.generic.type		= UITYPE_IMAGE;
 	m_mainMenu.idlogo_pic.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELECT;
-	m_mainMenu.idlogo_pic.shader			= uiMedia.menus.mainLogo;
-	m_mainMenu.idlogo_pic.hoverShader		= NULL;
+	m_mainMenu.idlogo_pic.mat				= uiMedia.menus.mainLogo;
+	m_mainMenu.idlogo_pic.hoverMat			= NULL;
 
 	UI_AddItem (&m_mainMenu.frameWork,		&m_mainMenu.game_menu);
 	UI_AddItem (&m_mainMenu.frameWork,		&m_mainMenu.multiplayer_menu);

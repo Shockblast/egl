@@ -2165,13 +2165,13 @@ qBool R_UpdateTexture (char *name, byte *data, int width, int height)
 R_GetImageSize
 ===============
 */
-void R_GetImageSize (shader_t *shader, int *width, int *height)
+void R_GetImageSize (material_t *mat, int *width, int *height)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	image_t			*image;
 	int				i;
 
-	if (!shader || !shader->numPasses) {
+	if (!mat || !mat->numPasses) {
 		if (width)
 			*width = 0;
 		if (height)
@@ -2180,8 +2180,8 @@ void R_GetImageSize (shader_t *shader, int *width, int *height)
 	}
 
 	image = NULL;
-	for (i=0, pass=shader->passes ; i<shader->numPasses ; pass++, i++) {
-		if (i != shader->sizeBase)
+	for (i=0, pass=mat->passes ; i<mat->numPasses ; pass++, i++) {
+		if (i != mat->sizeBase)
 			continue;
 
 		image = pass->animImages[0];

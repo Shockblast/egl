@@ -62,7 +62,7 @@ static void QuitMenu_Init (void)
 	m_quitMenu.banner.generic.type			= UITYPE_IMAGE;
 	m_quitMenu.banner.generic.flags			= UIF_NOSELECT|UIF_CENTERED;
 	m_quitMenu.banner.generic.name			= NULL;
-	m_quitMenu.banner.shader				= uiMedia.banners.quit;
+	m_quitMenu.banner.mat				= uiMedia.banners.quit;
 
 	m_quitMenu.yes_action.generic.type		= UITYPE_ACTION;
 	m_quitMenu.yes_action.generic.flags		= UIF_CENTERED|UIF_LARGE|UIF_SHADOW;

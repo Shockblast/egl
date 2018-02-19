@@ -158,29 +158,29 @@ void CG_AddViewWeapon (void)
 	gun.flags |= RF_DEPTHHACK;
 	if (gun.flags & RF_SHELLMASK) {
 		if (gun.flags & RF_SHELL_DOUBLE) {
-			gun.skin = cgMedia.modelShellDouble;
+			gun.material = cgMedia.modelShellDouble;
 			cgi.R_AddEntity (&gun);
 		}
 		if (gun.flags & RF_SHELL_HALF_DAM) {
-			gun.skin = cgMedia.modelShellHalfDam;
+			gun.material = cgMedia.modelShellHalfDam;
 			cgi.R_AddEntity (&gun);
 		}
 
 		if (gun.flags & RF_SHELL_RED && gun.flags & RF_SHELL_GREEN && gun.flags & RF_SHELL_BLUE) {
-			gun.skin = cgMedia.modelShellGod;
+			gun.material = cgMedia.modelShellGod;
 			cgi.R_AddEntity (&gun);
 		}
 		else {
 			if (gun.flags & RF_SHELL_RED) {
-				gun.skin = cgMedia.modelShellRed;
+				gun.material = cgMedia.modelShellRed;
 				cgi.R_AddEntity (&gun);
 			}
 			if (gun.flags & RF_SHELL_GREEN) {
-				gun.skin = cgMedia.modelShellGreen;
+				gun.material = cgMedia.modelShellGreen;
 				cgi.R_AddEntity (&gun);
 			}
 			if (gun.flags & RF_SHELL_BLUE) {
-				gun.skin = cgMedia.modelShellBlue;
+				gun.material = cgMedia.modelShellBlue;
 				cgi.R_AddEntity (&gun);
 			}
 		}

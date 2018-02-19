@@ -857,7 +857,7 @@ void CL_DrawConsole (void)
 	conColor[1] = Q_colorWhite[1];
 	conColor[2] = Q_colorWhite[2];
 	conColor[3] = con_alpha->floatVal;
-	R_DrawPic (clMedia.consoleShader, 0, 0, -(cls.refConfig.vidHeight - cls.refConfig.vidHeight*frac), cls.refConfig.vidWidth, cls.refConfig.vidHeight, 0, 0, 1, 1, conColor);
+	R_DrawPic (clMedia.consoleMaterial, 0, 0, -(cls.refConfig.vidHeight - cls.refConfig.vidHeight*frac), cls.refConfig.vidWidth, cls.refConfig.vidHeight, 0, 0, 1, 1, conColor);
 
 	// Version
 	Q_snprintfz (version, sizeof (version), "EGL v%s", EGL_VERSTR);

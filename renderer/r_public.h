@@ -120,8 +120,8 @@ typedef struct cinematic_s {
 // rf_2d.c
 //
 
-void		R_DrawPic (struct shader_s *shader, float shaderTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
-void		R_DrawRectangle (struct shader_s *shader, float shaderTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
+void		R_DrawPic (struct material_s *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
+void		R_DrawRectangle (struct material_s *mat, float matTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
 
 //
 // rf_cull.c
@@ -153,7 +153,7 @@ size_t		R_DrawStringLen (struct font_s *font, float x, float y, float xScale, fl
 //
 
 qBool		R_UpdateTexture (char *name, byte *data, int width, int height);
-void		R_GetImageSize (struct shader_s *shader, int *width, int *height);
+void		R_GetImageSize (struct material_s *mat, int *width, int *height);
 
 //
 // rf_init.c
@@ -186,7 +186,7 @@ void		R_EndFrame (void);
 
 void		R_ClearScene (void);
 
-void		R_AddDecal (refDecal_t *decal, bvec4_t color, struct shader_s *material, float materialTime);
+void		R_AddDecal (refDecal_t *decal, bvec4_t color, struct material_s *material, float materialTime);
 void		R_AddEntity (refEntity_t *ent);
 void		R_AddPoly (refPoly_t *poly);
 void		R_AddLight (vec3_t org, float intensity, float r, float g, float b);
@@ -208,12 +208,12 @@ struct refModel_s *R_RegisterModel (char *name);
 void		R_ModelBounds (struct refModel_s *model, vec3_t mins, vec3_t maxs);
 
 //
-// rf_shader.c
+// rf_material.c
 //
 
-struct shader_s *R_RegisterPic (char *name);
-struct shader_s *R_RegisterPoly (char *name);
-struct shader_s *R_RegisterSkin (char *name);
+struct material_s *R_RegisterPic (char *name);
+struct material_s *R_RegisterPoly (char *name);
+struct material_s *R_RegisterSkin (char *name);
 
 //
 // rf_sky.c

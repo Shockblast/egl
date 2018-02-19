@@ -409,8 +409,8 @@ static qBool R_LoadMD2Model (refModel_t *model)
 			continue;
 
 		Q_strncpyz (outSkins->name, temp, sizeof (outSkins->name));
-		outSkins->skin = R_RegisterSkin (outSkins->name);
-		if (!outSkins->skin)
+		outSkins->material = R_RegisterSkin (outSkins->name);
+		if (!outSkins->material)
 			Com_DevPrintf (PRNT_WARNING, "R_LoadMD2Model: '%s' could not load skin '%s'\n", model->name, outSkins->name);
 	}
 
@@ -656,9 +656,9 @@ static qBool R_LoadMD3Model (refModel_t *model)
 				continue;
 
 			Q_strncpyz (outSkin->name, inSkin->name, sizeof (outSkin->name));
-			outSkin->skin = R_RegisterSkin (outSkin->name);
+			outSkin->material = R_RegisterSkin (outSkin->name);
 
-			if (!outSkin->skin)
+			if (!outSkin->material)
 				Com_DevPrintf (PRNT_WARNING, "R_LoadMD3Model: '%s' could not load skin '%s' on mesh '%s'\n",
 								model->name, outSkin->name, outMesh->name);
 		}
@@ -835,11 +835,11 @@ static qBool R_LoadSP2Model (refModel_t *model)
 		outFrames->radius	= (float)sqrt ((outFrames->width*outFrames->width) + (outFrames->height*outFrames->height));
 		model->radius		= max (model->radius, outFrames->radius);
 
-		// Register the shader
+		// Register the material
 		Q_strncpyz (outFrames->name, inFrames->name, sizeof (outFrames->name));
-		outFrames->skin = R_RegisterPoly (outFrames->name);
+		outFrames->material = R_RegisterPoly (outFrames->name);
 
-		if (!outFrames->skin)
+		if (!outFrames->material)
 			Com_DevPrintf (PRNT_WARNING, "R_LoadSP2Model: '%s' could not load skin '%s'\n", model->name, outFrames->name);
 	}
 
@@ -879,14 +879,14 @@ R_GetImageTCSize
 This is just a duplicate of R_GetImageSize modified to get the texcoord size for Q2BSP surfaces
 ================
 */
-static void R_GetImageTCSize (shader_t *shader, int *tcWidth, int *tcHeight)
+static void R_GetImageTCSize (material_t *mat, int *tcWidth, int *tcHeight)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	image_t			*image;
 	int				i;
 	int				passNum;
 
-	if (!shader || !shader->numPasses) {
+	if (!mat || !mat->numPasses) {
 		if (tcWidth)
 			*tcWidth = 64;
 		if (tcHeight)
@@ -896,8 +896,8 @@ static void R_GetImageTCSize (shader_t *shader, int *tcWidth, int *tcHeight)
 
 	image = NULL;
 	passNum = 0;
-	for (i=0, pass=shader->passes ; i<shader->numPasses ; pass++, i++) {
-		if (passNum++ != shader->sizeBase)
+	for (i=0, pass=mat->passes ; i<mat->numPasses ; pass++, i++) {
+		if (passNum++ != mat->sizeBase)
 			continue;
 
 		image = pass->animImages[0];
@@ -1937,36 +1937,36 @@ static qBool R_LoadQ2BSPTexInfo (refModel_t *model, byte *byteBase, const dQ2Bsp
 		//
 		out->surfParams = 0;
 		if (out->flags & SURF_TEXINFO_TRANS33)
-			out->surfParams |= SHADER_SURF_TRANS33;
+			out->surfParams |= MAT_SURF_TRANS33;
 		if (out->flags & SURF_TEXINFO_TRANS66)
-			out->surfParams |= SHADER_SURF_TRANS66;
+			out->surfParams |= MAT_SURF_TRANS66;
 		if (out->flags & SURF_TEXINFO_WARP)
-			out->surfParams |= SHADER_SURF_WARP;
+			out->surfParams |= MAT_SURF_WARP;
 		if (out->flags & SURF_TEXINFO_FLOWING)
-			out->surfParams |= SHADER_SURF_FLOWING;
+			out->surfParams |= MAT_SURF_FLOWING;
 		if (!(out->flags & SURF_TEXINFO_WARP))
-			out->surfParams |= SHADER_SURF_LIGHTMAP;
+			out->surfParams |= MAT_SURF_LIGHTMAP;
 
 		//
-		// Register textures and shaders
+		// Register textures and materials
 		//
 		if (out->flags & SURF_TEXINFO_SKY) {
-			out->shader = r_noShaderSky;
+			out->mat = r_noMaterialSky;
 		}
 		else {
 			Q_snprintfz (out->texName, sizeof (out->texName), "textures/%s.wal", in->texture);
-			out->shader = R_RegisterTexture (out->texName, out->surfParams);
-			if (!out->shader) {
+			out->mat = R_RegisterTexture (out->texName, out->surfParams);
+			if (!out->mat) {
 				Com_Printf (PRNT_WARNING, "Couldn't load %s\n", out->texName);
 
-				if (out->surfParams & SHADER_SURF_LIGHTMAP)
-					out->shader = r_noShaderLightmap;
+				if (out->surfParams & MAT_SURF_LIGHTMAP)
+					out->mat = r_noMaterialLightmap;
 				else
-					out->shader = r_noShader;
+					out->mat = r_noMaterial;
 			}
 		}
 
-		R_GetImageTCSize (out->shader, &out->width, &out->height);
+		R_GetImageTCSize (out->mat, &out->width, &out->height);
 	}
 
 	//
@@ -2067,8 +2067,8 @@ static qBool R_LoadQ2BSPFaces (refModel_t *model, byte *byteBase, const dQ2BspLu
 			}
 
 			// WARP surfaces have no lightmap
-			if (out->q2_texInfo->shader && out->q2_texInfo->shader->flags & SHADER_SUBDIVIDE) {
-				if (!R_SubdivideQ2BSPSurface (model, out, out->q2_texInfo->shader->subdivide)
+			if (out->q2_texInfo->mat && out->q2_texInfo->mat->flags & MAT_SUBDIVIDE) {
+				if (!R_SubdivideQ2BSPSurface (model, out, out->q2_texInfo->mat->subdivide)
 				|| !R_ConvertQ2BSPSurface (model, out))
 					return qFalse;
 			}
@@ -2079,8 +2079,8 @@ static qBool R_LoadQ2BSPFaces (refModel_t *model, byte *byteBase, const dQ2BspLu
 			// The rest do
 			R_Q2BSP_CreateSurfaceLightmap (out);
 
-			if (out->q2_texInfo->shader && out->q2_texInfo->shader->flags & SHADER_SUBDIVIDE) {
-				if (!R_SubdivideQ2BSPLMSurface (model, out, out->q2_texInfo->shader->subdivide)
+			if (out->q2_texInfo->mat && out->q2_texInfo->mat->flags & MAT_SUBDIVIDE) {
+				if (!R_SubdivideQ2BSPLMSurface (model, out, out->q2_texInfo->mat->subdivide)
 				|| !R_ConvertQ2BSPSurface (model, out))
 					return qFalse;
 			}
@@ -2174,9 +2174,9 @@ static qBool R_Q2BSP_SurfPotentiallyVisible (mBspSurface_t *surf)
 
 	if (!surf->mesh || RB_InvalidMesh (surf->mesh))
 		return qFalse;
-	if (!surf->q2_texInfo->shader)
+	if (!surf->q2_texInfo->mat)
 		return qFalse;
-	if (!surf->q2_texInfo->shader->numPasses)
+	if (!surf->q2_texInfo->mat->numPasses)
 		return qFalse;
 
 	return qTrue;
@@ -2194,7 +2194,7 @@ static qBool R_Q2BSP_SurfPotentiallyFragmented (mBspSurface_t *surf)
 {
 	if (surf->q2_texInfo->flags & SURF_TEXINFO_NODRAW)
 		return qFalse;
-	if (surf->q2_texInfo->shader->flags & SHADER_NOMARK)
+	if (surf->q2_texInfo->mat->flags & MAT_NOMARK)
 		return qFalse;
 
 	return qTrue;
@@ -2608,7 +2608,7 @@ mQ3BspFog_t *R_FogForSphere (const vec3_t center, const float radius)
 	defaultFog = NULL;
 	fog = ri.scn.worldModel->q3BspModel.fogs;
 	for (i=0 ; i<ri.scn.worldModel->q3BspModel.numFogs ; i++, fog++) {
-		if (!fog->shader || !fog->name[0])
+		if (!fog->mat || !fog->name[0])
 			continue;
 		if (!fog->visiblePlane) {
 			defaultFog = fog;
@@ -2723,8 +2723,8 @@ qBool R_Q3BSP_SurfPotentiallyLit (mBspSurface_t *surf)
 
 	if (surf->q3_faceType == FACETYPE_FLARE)
 		return qFalse;
-	if (surf->q3_shaderRef->shader
-	&& surf->q3_shaderRef->shader->flags & (SHADER_FLARE|SHADER_SKY))
+	if (surf->q3_shaderRef->mat
+	&& surf->q3_shaderRef->mat->flags & (MAT_FLARE|MAT_SKY))
 		return qFalse;
 
 	return qTrue;
@@ -2743,9 +2743,9 @@ qBool R_Q3BSP_SurfPotentiallyVisible (mBspSurface_t *surf)
 
 	if (!surf->mesh || RB_InvalidMesh (surf->mesh))
 		return qFalse;
-	if (!surf->q3_shaderRef->shader)
+	if (!surf->q3_shaderRef->mat)
 		return qFalse;
-	if (!surf->q3_shaderRef->shader->numPasses)
+	if (!surf->q3_shaderRef->mat->numPasses)
 		return qFalse;
 
 	return qTrue;
@@ -2969,7 +2969,7 @@ static qBool R_LoadQ3BSPShaderRefs (refModel_t *model, byte *byteBase, const dQ3
 		Q_strncpyz (out->name, in->name, sizeof (out->name));
 		out->flags = LittleLong (in->flags);
 		out->contents = LittleLong (in->contents);
-		out->shader = NULL;
+		out->mat = NULL;
 	}
 
 	return qTrue;
@@ -3138,7 +3138,7 @@ static void R_FixAutosprites (mBspSurface_t *surf)
 	vec2_t		*stArray;
 	index_t		*quad;
 	mesh_t		*mesh;
-	shader_t	*shader;
+	material_t	*mat;
 	int			i, j;
 
 	if ((surf->q3_faceType != FACETYPE_PLANAR && surf->q3_faceType != FACETYPE_TRISURF) || !surf->q3_shaderRef)
@@ -3148,15 +3148,15 @@ static void R_FixAutosprites (mBspSurface_t *surf)
 	if (!mesh || !mesh->numIndexes || mesh->numIndexes % 6)
 		return;
 
-	shader = surf->q3_shaderRef->shader;
-	if (!shader || !shader->numDeforms || !(shader->flags & SHADER_AUTOSPRITE))
+	mat = surf->q3_shaderRef->mat;
+	if (!mat || !mat->numDeforms || !(mat->flags & MAT_AUTOSPRITE))
 		return;
 
-	for (i=0 ; i<shader->numDeforms ; i++)
-		if (shader->deforms[i].type == DEFORMV_AUTOSPRITE)
+	for (i=0 ; i<mat->numDeforms ; i++)
+		if (mat->deforms[i].type == DEFORMV_AUTOSPRITE)
 			break;
 
-	if (i == shader->numDeforms)
+	if (i == mat->numDeforms)
 		return;
 
 	stArray = mesh->coordArray;
@@ -3226,12 +3226,12 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 		shaderRef = model->q3BspModel.shaderRefs + shaderNum;
 		out->q3_shaderRef = shaderRef;
 
-		if (!shaderRef->shader) {
+		if (!shaderRef->mat) {
 			if (out->q3_faceType == FACETYPE_FLARE) {
-				shaderRef->shader = R_RegisterFlare (shaderRef->name);
-				if (!shaderRef->shader) {
+				shaderRef->mat = R_RegisterFlare (shaderRef->name);
+				if (!shaderRef->mat) {
 					Com_Printf (PRNT_WARNING, "Couldn't load (flare): '%s'\n", shaderRef->name);
-					shaderRef->shader = r_noShader;
+					shaderRef->mat = r_noMaterial;
 				}
 			}
 			else {
@@ -3239,17 +3239,17 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 					if (out->q3_faceType != FACETYPE_TRISURF && !r_vertexLighting->intVal && out->lmTexNum < 0)
 						Com_DevPrintf (PRNT_WARNING, "WARNING: surface '%s' has a lightmap but no lightmap stage!\n", shaderRef->name);
 
-					shaderRef->shader = R_RegisterTextureVertex (shaderRef->name);
-					if (!shaderRef->shader) {
+					shaderRef->mat = R_RegisterTextureVertex (shaderRef->name);
+					if (!shaderRef->mat) {
 						Com_Printf (PRNT_WARNING, "Couldn't load (vertex): '%s'\n", shaderRef->name);
-						shaderRef->shader = r_noShader;
+						shaderRef->mat = r_noMaterial;
 					}
 				}
 				else {
-					shaderRef->shader = R_RegisterTextureLM (shaderRef->name);
-					if (!shaderRef->shader) {
+					shaderRef->mat = R_RegisterTextureLM (shaderRef->name);
+					if (!shaderRef->mat) {
 						Com_Printf (PRNT_WARNING, "Couldn't load (lm): '%s'\n", shaderRef->name);
-						shaderRef->shader = r_noShaderLightmap;
+						shaderRef->mat = r_noMaterialLightmap;
 					}
 				}
 			}
@@ -3259,7 +3259,7 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 		fogNum = LittleLong (in->fogNum);
 		if (fogNum != -1 && fogNum < model->q3BspModel.numFogs) {
 			fog = model->q3BspModel.fogs + fogNum;
-			if (fog->numPlanes && fog->shader && fog->name[0])
+			if (fog->numPlanes && fog->mat && fog->name[0])
 				out->q3_fog = fog;
 		}
 
@@ -3377,8 +3377,8 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 	model->q3BspModel.fogs = out = R_ModAlloc (model, model->q3BspModel.numFogs * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numFogs ; i++, in++, out++) {
-		Q_strncpyz (out->name, in->shader, sizeof (out->name));
-		out->shader = R_RegisterTextureLM (in->shader);
+		Q_strncpyz (out->name, in->mat, sizeof (out->name));
+		out->mat = R_RegisterTextureLM (in->mat);
 
 		p = LittleLong (in->brushNum);
 		if (p == -1)
@@ -3388,7 +3388,7 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 		p = LittleLong (brush->firstSide);
 		if (p == -1) {
 			out->name[0] = '\0';
-			out->shader = NULL;
+			out->mat = NULL;
 			continue;
 		}
 		brushSide = inBrushSides + p;
@@ -3396,7 +3396,7 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 		p = LittleLong (in->visibleSide);
 		if (p == -1) {
 			out->name[0] = '\0';
-			out->shader = NULL;
+			out->mat = NULL;
 			continue;
 		}
 
@@ -3967,11 +3967,11 @@ static void R_TouchModel (refModel_t *model)
 		for (i=0, aliasMesh=aliasModel->meshes ; i<aliasModel->numMeshes ; aliasMesh++, i++) {
 			for (j=0, aliasSkin=aliasMesh->skins ; j<aliasMesh->numSkins ; aliasSkin++, j++) {
 				if (!aliasSkin->name[0]) {
-					aliasSkin->skin = NULL;
+					aliasSkin->material = NULL;
 					continue;
 				}
 
-				aliasSkin->skin = R_RegisterSkin (aliasSkin->name);
+				aliasSkin->material = R_RegisterSkin (aliasSkin->name);
 			}
 		}
 		break;
@@ -3979,16 +3979,16 @@ static void R_TouchModel (refModel_t *model)
 	case MODEL_Q2BSP:
 		for (i=0, ti=model->q2BspModel.texInfo ; i<model->q2BspModel.numTexInfo ; ti++, i++) {
 			if (ti->flags & SURF_TEXINFO_SKY) {
-				ti->shader = r_noShaderSky;
+				ti->mat = r_noMaterialSky;
 				continue;
 			}
 
-			ti->shader = R_RegisterTexture (ti->texName, ti->surfParams);
-			if (!ti->shader) {
-				if (ti->surfParams & SHADER_SURF_LIGHTMAP)
-					ti->shader = r_noShaderLightmap;
+			ti->mat = R_RegisterTexture (ti->texName, ti->surfParams);
+			if (!ti->mat) {
+				if (ti->surfParams & MAT_SURF_LIGHTMAP)
+					ti->mat = r_noMaterialLightmap;
 				else
-					ti->shader = r_noShader;
+					ti->mat = r_noMaterial;
 			}
 		}
 
@@ -4000,30 +4000,30 @@ static void R_TouchModel (refModel_t *model)
 			shaderref = surf->q3_shaderRef;
 
 			if (surf->q3_faceType == FACETYPE_FLARE) {
-				shaderref->shader = R_RegisterFlare (shaderref->name);
-				if (!shaderref->shader)
-					shaderref->shader = r_noShader;
+				shaderref->mat = R_RegisterFlare (shaderref->name);
+				if (!shaderref->mat)
+					shaderref->mat = r_noMaterial;
 			}
 			else {
 				if (surf->q3_faceType == FACETYPE_TRISURF || r_vertexLighting->intVal || surf->lmTexNum < 0) {
-					shaderref->shader = R_RegisterTextureVertex (shaderref->name);
-					if (!shaderref->shader)
-						shaderref->shader = r_noShader;
+					shaderref->mat = R_RegisterTextureVertex (shaderref->name);
+					if (!shaderref->mat)
+						shaderref->mat = r_noMaterial;
 				}
 				else {
-					shaderref->shader = R_RegisterTextureLM (shaderref->name);
-					if (!shaderref->shader)
-						shaderref->shader = r_noShaderLightmap;
+					shaderref->mat = R_RegisterTextureLM (shaderref->name);
+					if (!shaderref->mat)
+						shaderref->mat = r_noMaterialLightmap;
 				}
 			}
 		}
 
 		for (i=0, fog=model->q3BspModel.fogs ; i<model->q3BspModel.numFogs ; fog++, i++) {
 			if (!fog->name[0]) {
-				fog->shader = NULL;
+				fog->mat = NULL;
 				continue;
 			}
-			fog->shader = R_RegisterTextureLM (fog->name);
+			fog->mat = R_RegisterTextureLM (fog->name);
 		}
 
 		R_TouchLightmaps ();
@@ -4033,11 +4033,11 @@ static void R_TouchModel (refModel_t *model)
 		spriteModel = model->spriteModel;
 		for (i=0, spriteFrame=spriteModel->frames ; i<spriteModel->numFrames ; spriteFrame++, i++) {
 			if (!spriteFrame) {
-				spriteFrame->skin = NULL;
+				spriteFrame->material = NULL;
 				continue;
 			}
 
-			spriteFrame->skin = R_RegisterPoly (spriteFrame->name);
+			spriteFrame->material = R_RegisterPoly (spriteFrame->name);
 		}
 		break;
 	}

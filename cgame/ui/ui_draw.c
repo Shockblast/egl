@@ -229,26 +229,26 @@ static void Field_Draw (uiField_t *f)
 
 static void Image_Draw (uiImage_t *i)
 {
-	struct	shader_s *shader;
+	struct	material_s *mat;
 	float	x, y;
 	int		width, height;
 
 	if (!i)
 		return;
 
-	if ((uiState.cursorItem && uiState.cursorItem == i) && i->hoverShader)
-		shader = i->hoverShader;
+	if ((uiState.cursorItem && uiState.cursorItem == i) && i->hoverMat)
+		mat = i->hoverMat;
 	else
-		shader = i->shader;
-	if (!shader)
-		shader = cgMedia.whiteTexture;
+		mat = i->mat;
+	if (!mat)
+		mat = cgMedia.whiteTexture;
 
 	if (i->width || i->height) {
 		width = i->width;
 		height = i->height;
 	}
 	else {
-		cgi.R_GetImageSize (shader, &width, &height);
+		cgi.R_GetImageSize (mat, &width, &height);
 		i->width = width;
 		i->height = height;
 	}
@@ -264,7 +264,7 @@ static void Image_Draw (uiImage_t *i)
 
 	y = i->generic.y + i->generic.parent->y;
 
-	cgi.R_DrawPic (shader, 0, x, y,
+	cgi.R_DrawPic (mat, 0, x, y,
 				width, height,
 				0, 0, 1, 1, Q_colorWhite);
 }

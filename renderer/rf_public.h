@@ -33,8 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define MAX_ADDITIVE_BUFFER		8192
 #define MAX_POSTPROC_BUFFER		64
 
-#define MAX_MESH_KEYS			(SHADER_SORT_OPAQUE+1)
-#define MAX_ADDITIVE_KEYS		(SHADER_SORT_NEAREST-SHADER_SORT_OPAQUE)
+#define MAX_MESH_KEYS			(MAT_SORT_OPAQUE+1)
+#define MAX_ADDITIVE_KEYS		(MAT_SORT_NEAREST-MAT_SORT_OPAQUE)
 
 enum { // meshFeatures_t
 	MF_NONBATCHED		= 1 << 0,
@@ -82,10 +82,10 @@ typedef struct mesh_s {
 
 typedef struct meshBuffer_s {
 	uint32					sortKey;
-	float					shaderTime;
+	float					matTime;
 
 	refEntity_t				*entity;
-	shader_t				*shader;
+	material_t				*mat;
 	struct mQ3BspFog_s		*fog;
 	void					*mesh;
 } meshBuffer_t;

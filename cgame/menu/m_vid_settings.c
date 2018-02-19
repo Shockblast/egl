@@ -287,7 +287,7 @@ static void VIDSettingsMenu_Init (void)
 	m_vidSettingsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_vidSettingsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_vidSettingsMenu.banner.generic.name		= NULL;
-	m_vidSettingsMenu.banner.shader				= uiMedia.banners.video;
+	m_vidSettingsMenu.banner.mat				= uiMedia.banners.video;
 
 	m_vidSettingsMenu.header.generic.type		= UITYPE_ACTION;
 	m_vidSettingsMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

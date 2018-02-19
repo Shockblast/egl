@@ -46,18 +46,18 @@ void R_AddSP2ModelToList (refEntity_t *ent)
 {
 	mSpriteModel_t	*spriteModel;
 	mSpriteFrame_t	*spriteFrame;
-	shader_t		*shader;
+	material_t		*mat;
 
 	spriteModel = ent->model->spriteModel;
 	spriteFrame = &spriteModel->frames[ent->frame % spriteModel->numFrames];
-	shader = spriteFrame->skin;
+	mat = spriteFrame->material;
 
-	if (!shader) {
-		Com_DevPrintf (PRNT_WARNING, "R_AddSP2ModelToList: '%s' has a NULL shader\n", ent->model->name);
+	if (!mat) {
+		Com_DevPrintf (PRNT_WARNING, "R_AddSP2ModelToList: '%s' has a NULL material\n", ent->model->name);
 		return;
 	}
 
-	R_AddMeshToList (shader, ent->shaderTime, ent, R_FogForSphere (ent->origin, spriteFrame->radius), MBT_SP2, spriteModel);
+	R_AddMeshToList (mat, ent->matTime, ent, R_FogForSphere (ent->origin, spriteFrame->radius), MBT_SP2, spriteModel);
 }
 
 
@@ -135,7 +135,7 @@ void R_DrawSP2Model (meshBuffer_t *mb)
 	//
 	// Push
 	//
-	features = MF_TRIFAN|MF_NOCULL|MF_NONBATCHED|mb->shader->features;
+	features = MF_TRIFAN|MF_NOCULL|MF_NONBATCHED|mb->mat->features;
 	if (gl_shownormals->intVal)
 		features |= MF_NORMALS;
 
@@ -227,7 +227,7 @@ void R_PushFlare (meshBuffer_t *mb)
 	r_flareMesh.coordArray = r_flareCoords;
 	r_flareMesh.colorArray = r_flareColors;
 
-	features = MF_NOCULL|MF_TRIFAN|mb->shader->features;
+	features = MF_NOCULL|MF_TRIFAN|mb->mat->features;
 	if (r_debugBatching->intVal == 2)
 		features |= MF_NONBATCHED;
 

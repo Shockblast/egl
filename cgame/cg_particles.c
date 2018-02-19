@@ -140,7 +140,7 @@ void	CG_SpawnParticle (float org0,					float org1,					float org2,
 	Vec4Set (p->color, red, green, blue, alpha);
 	Vec4Set (p->colorVel, redVel, greenVel, blueVel, alphaVel);
 
-	p->shader = cgMedia.particleTable[type%PT_PICTOTAL];
+	p->mat = cgMedia.particleTable[type%PT_PICTOTAL];
 	p->style = style;
 	p->flags = flags;
 
@@ -180,7 +180,7 @@ void CG_ClearParticles (void)
 		cg_particleList[i].outPoly.colors = cg_particleList[i].outColor;
 		cg_particleList[i].outPoly.texCoords = cg_particleList[i].outCoords;
 		cg_particleList[i].outPoly.vertices = cg_particleList[i].outVertices;
-		cg_particleList[i].outPoly.shaderTime = 0;
+		cg_particleList[i].outPoly.matTime = 0;
 	}
 
 	cg_particleList[MAX_PARTICLES-1].next = NULL;
@@ -447,7 +447,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = scale;
 
@@ -495,7 +495,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = Vec3Dist (org, delta);
 
@@ -547,7 +547,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = scale;
 
@@ -616,7 +616,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = scale;
 

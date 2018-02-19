@@ -88,7 +88,7 @@ void R_AddDecalsToList (void)
 			continue;
 
 		// Add to the list
-		R_AddMeshToList (d->poly.shader, d->poly.shaderTime, NULL, fog, MBT_DECAL, d);
+		R_AddMeshToList (d->poly.mat, d->poly.matTime, NULL, fog, MBT_DECAL, d);
 		ri.scn.drawnDecals++;
 	}
 }

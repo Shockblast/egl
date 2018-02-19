@@ -249,7 +249,7 @@ static void StartServerMenu_Init (void)
 	m_startServerMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_startServerMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_startServerMenu.banner.generic.name		= NULL;
-	m_startServerMenu.banner.shader				= uiMedia.banners.startServer;
+	m_startServerMenu.banner.mat				= uiMedia.banners.startServer;
 
 	m_startServerMenu.startmap_list.generic.type	= UITYPE_SPINCONTROL;
 	m_startServerMenu.startmap_list.generic.name	= "Initial map";

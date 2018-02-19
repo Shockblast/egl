@@ -183,7 +183,7 @@ typedef struct cgImport_s {
 	void		(*NET_GetUserCmd) (int frame, userCmd_t *cmd);
 	int			(*NET_GetUserCmdTime) (int frame);
 
-	void		(*R_AddDecal) (refDecal_t *decal, bvec4_t color, struct shader_s *material, float materialTime);
+	void		(*R_AddDecal) (refDecal_t *decal, bvec4_t color, struct material_s *material, float materialTime);
 	void		(*R_AddEntity) (refEntity_t *ent);
 	void		(*R_AddPoly) (refPoly_t *poly);
 	void		(*R_AddLight) (vec3_t org, float intensity, float r, float g, float b);
@@ -200,11 +200,11 @@ typedef struct cgImport_s {
 	size_t		(*R_DrawString) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
 	size_t		(*R_DrawStringLen) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color);
 
-	void		(*R_DrawPic) (struct shader_s *shader, float shaderTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
-	void		(*R_DrawRectangle) (struct shader_s *shader, float shaderTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
+	void		(*R_DrawPic) (struct material_s *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
+	void		(*R_DrawRectangle) (struct material_s *mat, float matTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
 
 	void		(*R_GetRefConfig) (refConfig_t *outConfig);
-	void		(*R_GetImageSize) (struct shader_s *shader, int *width, int *height);
+	void		(*R_GetImageSize) (struct material_s *mat, int *width, int *height);
 
 	qBool		(*R_CreateDecal) (refDecal_t *d, vec3_t origin, vec3_t direction, float angle, float size);
 	qBool		(*R_FreeDecal) (refDecal_t *d);
@@ -218,9 +218,9 @@ typedef struct cgImport_s {
 	void		(*R_BeginFrame) (float cameraSeparation);
 	void		(*R_EndFrame) (void);
 
-	struct shader_s *(*R_RegisterPic) (char *name);
-	struct shader_s *(*R_RegisterPoly) (char *name);
-	struct shader_s *(*R_RegisterSkin) (char *name);
+	struct material_s *(*R_RegisterPic) (char *name);
+	struct material_s *(*R_RegisterPoly) (char *name);
+	struct material_s *(*R_RegisterSkin) (char *name);
 
 	void		(*R_LightPoint) (vec3_t point, vec3_t light);
 	void		(*R_TransformVectorToScreen) (refDef_t *rd, vec3_t in, vec2_t out);

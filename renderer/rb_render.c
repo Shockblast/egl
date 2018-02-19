@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 // Rendering paths
-static void				(*RB_ModifyTextureCoords) (shaderPass_t *pass, texUnit_t texUnit);
+static void				(*RB_ModifyTextureCoords) (matPass_t *pass, texUnit_t texUnit);
 
 // Backend data
 rbData_t				rb;
@@ -43,22 +43,22 @@ static vec2_t			rb_outCoordArray[MAX_TEXUNITS][RB_MAX_VERTS];
 static vec3_t			rb_outVertexArray[RB_MAX_VERTS];
 
 // Dynamic data
-static shaderPass_t		*rb_accumPasses[MAX_TEXUNITS];
+static matPass_t		*rb_accumPasses[MAX_TEXUNITS];
 static int				rb_numPasses;
 static int				rb_numOldPasses;
 
 static qBool			rb_arraysLocked;
 static qBool			rb_triangleOutlines;
-static float			rb_shaderTime;
+static float			rb_matTime;
 static uint32			rb_stateBits1;
 
 // Static data
 static qBool			rb_matrixCoords;		// Texture coordinate math done using texture matrices
 static int				rb_identityLighting;
 
-static shaderPass_t		rb_dLightPass;
-static shaderPass_t		rb_fogPass;
-static shaderPass_t		rb_lightMapPass;
+static matPass_t		rb_dLightPass;
+static matPass_t		rb_fogPass;
+static matPass_t		rb_lightMapPass;
 
 float					rb_sinTable[FTABLE_SIZE];
 float					rb_triangleTable[FTABLE_SIZE];
@@ -131,7 +131,7 @@ void RB_ResetPointers (void)
 	rb.curModel = NULL;
 	rb.curPatchWidth = 0;
 	rb.curPatchHeight = 0;
-	rb.curShader = NULL;
+	rb.curMat = NULL;
 
 	rb.curTexFog = NULL;
 	rb.curColorFog = NULL;
@@ -156,14 +156,14 @@ void RB_ResetPointers (void)
 RB_SetupColorFog
 =============
 */
-static void RB_SetupColorFog (const shaderPass_t *pass, int numColors)
+static void RB_SetupColorFog (const matPass_t *pass, int numColors)
 {
 	byte	*bArray;
 	double	dist, vdist;
 	cBspPlane_t *fogPlane, globalFogPlane;
 	vec3_t	viewtofog;
 	double	fogNormal[3], vpnNormal[3];
-	double	fogDist, vpnDist, fogShaderDist;
+	double	fogDist, vpnDist, fogMatDist;
 	int		fogptype;
 	qBool	alphaFog;
 	float	c, a;
@@ -183,10 +183,10 @@ static void RB_SetupColorFog (const shaderPass_t *pass, int numColors)
 		fogPlane = &globalFogPlane;
 	}
 
-	fogShaderDist = rb.curColorFog->shader->fogDist;
+	fogMatDist = rb.curColorFog->mat->fogDist;
 	dist = PlaneDiff (ri.def.viewOrigin, fogPlane);
 
-	if (rb.curShader->flags & SHADER_SKY) {
+	if (rb.curMat->flags & MAT_SKY) {
 		if (dist > 0)
 			Vec3Scale (fogPlane->normal, -dist, viewtofog);
 		else
@@ -195,13 +195,13 @@ static void RB_SetupColorFog (const shaderPass_t *pass, int numColors)
 	else
 		Vec3Copy (rb.curEntity->origin, viewtofog);
 
-	vpnNormal[0] = DotProduct (rb.curEntity->axis[0], ri.def.viewAxis[0]) * fogShaderDist * rb.curEntity->scale;
-	vpnNormal[1] = DotProduct (rb.curEntity->axis[1], ri.def.viewAxis[0]) * fogShaderDist * rb.curEntity->scale;
-	vpnNormal[2] = DotProduct (rb.curEntity->axis[2], ri.def.viewAxis[0]) * fogShaderDist * rb.curEntity->scale;
+	vpnNormal[0] = DotProduct (rb.curEntity->axis[0], ri.def.viewAxis[0]) * fogMatDist * rb.curEntity->scale;
+	vpnNormal[1] = DotProduct (rb.curEntity->axis[1], ri.def.viewAxis[0]) * fogMatDist * rb.curEntity->scale;
+	vpnNormal[2] = DotProduct (rb.curEntity->axis[2], ri.def.viewAxis[0]) * fogMatDist * rb.curEntity->scale;
 	vpnDist = ((ri.def.viewOrigin[0] - viewtofog[0]) * ri.def.viewAxis[0][0]
 				+ (ri.def.viewOrigin[1] - viewtofog[1]) * ri.def.viewAxis[0][1]
 				+ (ri.def.viewOrigin[2] - viewtofog[2]) * ri.def.viewAxis[0][2])
-				* fogShaderDist;
+				* fogMatDist;
 
 	bArray = rb_outColorArray[0];
 	if (dist < 0) {
@@ -226,13 +226,13 @@ static void RB_SetupColorFog (const shaderPass_t *pass, int numColors)
 		fogNormal[2] = DotProduct (rb.curEntity->axis[2], fogPlane->normal) * rb.curEntity->scale;
 		fogptype = (fogNormal[0] == 1.0 ? PLANE_X : (fogNormal[1] == 1.0 ? PLANE_Y : (fogNormal[2] == 1.0 ? PLANE_Z : PLANE_NON_AXIAL)));
 		if (fogptype > 2)
-			Vec3Scale (fogNormal, fogShaderDist, fogNormal);
-		fogDist = (fogPlane->dist - DotProduct (viewtofog, fogPlane->normal)) * fogShaderDist;
-		dist *= fogShaderDist;
+			Vec3Scale (fogNormal, fogMatDist, fogNormal);
+		fogDist = (fogPlane->dist - DotProduct (viewtofog, fogPlane->normal)) * fogMatDist;
+		dist *= fogMatDist;
 
 		for (i=0 ; i<numColors ; i++, bArray+=4) {
 			if (fogptype < 3)
-				vdist = rb.inVertices[i][fogptype] * fogShaderDist - fogDist;
+				vdist = rb.inVertices[i][fogptype] * fogMatDist - fogDist;
 			else
 				vdist = DotProduct (rb.inVertices[i], fogNormal) - fogDist;
 
@@ -259,9 +259,9 @@ static void RB_SetupColorFog (const shaderPass_t *pass, int numColors)
 RB_SetupColorFast
 =============
 */
-static qBool RB_SetupColorFast (const shaderPass_t *pass)
+static qBool RB_SetupColorFast (const matPass_t *pass)
 {
-	const shaderFunc_t *rgbGenFunc, *alphaGenFunc;
+	const materialFunc_t *rgbGenFunc, *alphaGenFunc;
 	byte		*inArray;
 	bvec4_t		color;
 	float		*table, c, a;
@@ -289,7 +289,7 @@ static qBool RB_SetupColorFast (const shaderPass_t *pass)
 
 	case RGB_GEN_COLORWAVE:
 		table = RB_TableForFunc (rgbGenFunc->type);
-		c = rb_shaderTime * rgbGenFunc->args[3] + rgbGenFunc->args[2];
+		c = rb_matTime * rgbGenFunc->args[3] + rgbGenFunc->args[2];
 		c = FTABLE_EVALUATE(table, c) * rgbGenFunc->args[1] + rgbGenFunc->args[0];
 		a = pass->rgbGen.fArgs[0] * c; color[0] = FloatToByte (bound (0, a, 1));
 		a = pass->rgbGen.fArgs[1] * c; color[1] = FloatToByte (bound (0, a, 1));
@@ -329,7 +329,7 @@ static qBool RB_SetupColorFast (const shaderPass_t *pass)
 
 	case ALPHA_GEN_WAVE:
 		table = RB_TableForFunc (alphaGenFunc->type);
-		a = alphaGenFunc->args[2] + rb_shaderTime * alphaGenFunc->args[3];
+		a = alphaGenFunc->args[2] + rb_matTime * alphaGenFunc->args[3];
 		a = FTABLE_EVALUATE(table, a) * alphaGenFunc->args[1] + alphaGenFunc->args[0];
 		color[3] = FloatToByte (bound (0.0f, a, 1.0f));
 		break;
@@ -349,9 +349,9 @@ static qBool RB_SetupColorFast (const shaderPass_t *pass)
 RB_SetupColor
 =============
 */
-static void RB_SetupColor (const shaderPass_t *pass)
+static void RB_SetupColor (const matPass_t *pass)
 {
-	const shaderFunc_t *rgbGenFunc, *alphaGenFunc;
+	const materialFunc_t *rgbGenFunc, *alphaGenFunc;
 	int		r, g, b;
 	float	*table, c, a;
 	byte	*bArray, *inArray;
@@ -362,7 +362,7 @@ static void RB_SetupColor (const shaderPass_t *pass)
 	alphaGenFunc = &pass->alphaGen.func;
 
 	// Optimal case
-	if (pass->flags & SHADER_PASS_NOCOLORARRAY && !rb.curColorFog) {
+	if (pass->flags & MAT_PASS_NOCOLORARRAY && !rb.curColorFog) {
 		if (RB_SetupColorFast (pass))
 			return;
 		numColors = 1;
@@ -405,7 +405,7 @@ static void RB_SetupColor (const shaderPass_t *pass)
 
 	case RGB_GEN_COLORWAVE:
 		table = RB_TableForFunc (rgbGenFunc->type);
-		c = rb_shaderTime * rgbGenFunc->args[3] + rgbGenFunc->args[2];
+		c = rb_matTime * rgbGenFunc->args[3] + rgbGenFunc->args[2];
 		c = FTABLE_EVALUATE(table, c) * rgbGenFunc->args[1] + rgbGenFunc->args[0];
 		a = pass->rgbGen.fArgs[0] * c; r = FloatToByte (bound (0, a, 1));
 		a = pass->rgbGen.fArgs[1] * c; g = FloatToByte (bound (0, a, 1));
@@ -476,9 +476,9 @@ static void RB_SetupColor (const shaderPass_t *pass)
 
 	case RGB_GEN_FOG:
 		for (i=0 ; i<numColors ; i++, bArray+=4) {
-			bArray[0] = rb.curTexFog->shader->fogColor[0];
-			bArray[1] = rb.curTexFog->shader->fogColor[1];
-			bArray[2] = rb.curTexFog->shader->fogColor[2];
+			bArray[0] = rb.curTexFog->mat->fogColor[0];
+			bArray[1] = rb.curTexFog->mat->fogColor[1];
+			bArray[2] = rb.curTexFog->mat->fogColor[2];
 		}
 		break;
 
@@ -506,7 +506,7 @@ static void RB_SetupColor (const shaderPass_t *pass)
 
 	case ALPHA_GEN_WAVE:
 		table = RB_TableForFunc (alphaGenFunc->type);
-		a = alphaGenFunc->args[2] + rb_shaderTime * alphaGenFunc->args[3];
+		a = alphaGenFunc->args[2] + rb_matTime * alphaGenFunc->args[3];
 		a = FTABLE_EVALUATE(table, a) * alphaGenFunc->args[1] + alphaGenFunc->args[0];
 		b = FloatToByte (bound (0.0f, a, 1.0f));
 		for (i=0 ; i<numColors ; i++, bArray+=4)
@@ -583,7 +583,7 @@ static void RB_SetupColor (const shaderPass_t *pass)
 
 	case ALPHA_GEN_FOG:
 		for (i=0 ; i<numColors ; i++, bArray+=4)
-			bArray[3] = rb.curTexFog->shader->fogColor[3];
+			bArray[3] = rb.curTexFog->mat->fogColor[3];
 		break;
 
 	default:
@@ -648,7 +648,7 @@ static const float r_warpSinTable[] = {
 	-1.530735f,	-1.439580f,	-1.347560f,	-1.254725f,	-1.161140f,	-1.066850f,	-0.971920f,	-0.876405f,
 	-0.780360f,	-0.683850f,	-0.586920f,	-0.489643f,	-0.392069f,	 -0.294259f,-0.196270f,	-0.098165f
 };
-static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
+static void RB_VertexTCBaseGeneric (matPass_t *pass, texUnit_t texUnit)
 {
 	float		*outCoords, depth;
 	vec3_t		transform;
@@ -761,8 +761,8 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 
 	case TC_GEN_WARP:
 		for (i=0 ; i<rb.numVerts ; i++, outCoords+=2) {
-			outCoords[0] = rb.inCoords[i][0] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][1]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
-			outCoords[1] = rb.inCoords[i][1] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][0]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			outCoords[0] = rb.inCoords[i][0] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][1]*8.0f + rb_matTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			outCoords[1] = rb.inCoords[i][1] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][0]*8.0f + rb_matTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
 		}
 		break;
 
@@ -773,7 +773,7 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 		{
 			int			fogPtype;
 			cBspPlane_t	*fogPlane, globalFogPlane;
-			shader_t	*fogShader;
+			material_t	*fogMat;
 			vec3_t		viewtofog;
 			double		fogNormal[3], vpnNormal[3];
 			double		dist, vdist, fogDist, vpnDist;
@@ -786,11 +786,11 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 				globalFogPlane.type = PLANE_Z;
 				fogPlane = &globalFogPlane;
 			}
-			fogShader = rb.curTexFog->shader;
+			fogMat = rb.curTexFog->mat;
 
 			// Distance to fog
 			dist = PlaneDiff (ri.def.viewOrigin, fogPlane);
-			if (rb.curShader->flags & SHADER_SKY) {
+			if (rb.curMat->flags & MAT_SKY) {
 				if (dist > 0)
 					Vec3MA (ri.def.viewOrigin, -dist, fogPlane->normal, viewtofog);
 				else
@@ -799,7 +799,7 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 			else
 				Vec3Copy (rb.curEntity->origin, viewtofog);
 
-			Vec3Scale (ri.def.viewAxis[0], fogShader->fogDist, fogVPN);
+			Vec3Scale (ri.def.viewAxis[0], fogMat->fogDist, fogVPN);
 
 			// Fog settings
 			fogNormal[0] = DotProduct (rb.curEntity->axis[0], fogPlane->normal) * rb.curEntity->scale;
@@ -850,7 +850,7 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 
 			outCoords = rb_outCoordArray[texUnit][0];
 			for (i=0 ; i<rb.numVerts ; i++, outCoords+=2)
-				outCoords[1] *= fogShader->fogDist + 1.5f/(float)FOGTEX_HEIGHT;
+				outCoords[1] *= fogMat->fogDist + 1.5f/(float)FOGTEX_HEIGHT;
 		}
 		break;
 
@@ -861,7 +861,7 @@ static void RB_VertexTCBaseGeneric (shaderPass_t *pass, texUnit_t texUnit)
 
 	qglTexCoordPointer (2, GL_FLOAT, 0, rb_outCoordArray[texUnit][0]);
 }
-static void RB_ModifyTextureCoordsGeneric (shaderPass_t *pass, texUnit_t texUnit)
+static void RB_ModifyTextureCoordsGeneric (matPass_t *pass, texUnit_t texUnit)
 {
 	int		i, j;
 	float	*table;
@@ -876,7 +876,7 @@ static void RB_ModifyTextureCoordsGeneric (shaderPass_t *pass, texUnit_t texUnit
 
 		switch (tcMod->type) {
 		case TC_MOD_ROTATE:
-			cost = tcMod->args[0] * rb_shaderTime;
+			cost = tcMod->args[0] * rb_matTime;
 			sint = RB_FastSin (cost);
 			cost = RB_FastSin (cost + 0.25);
 
@@ -900,7 +900,7 @@ static void RB_ModifyTextureCoordsGeneric (shaderPass_t *pass, texUnit_t texUnit
 
 		case TC_MOD_TURB:
 			t1 = tcMod->args[1];
-			t2 = tcMod->args[2] + rb_shaderTime * tcMod->args[3];
+			t2 = tcMod->args[2] + rb_matTime * tcMod->args[3];
 
 			for (j=0 ; j<rb.numVerts ; j++, tcArray+=2) {
 				tcArray[0] = tcArray[0] + t1 * RB_FastSin (tcArray[0] * t1 + t2);
@@ -910,7 +910,7 @@ static void RB_ModifyTextureCoordsGeneric (shaderPass_t *pass, texUnit_t texUnit
 
 		case TC_MOD_STRETCH:
 			table = RB_TableForFunc (tcMod->args[0]);
-			t2 = tcMod->args[3] + rb_shaderTime * tcMod->args[4];
+			t2 = tcMod->args[3] + rb_matTime * tcMod->args[4];
 			t1 = FTABLE_EVALUATE(table, t2) * tcMod->args[2] + tcMod->args[1];
 			t1 = t1 ? 1.0f / t1 : 1.0f;
 			t2 = 0.5f - 0.5f * t1;
@@ -922,8 +922,8 @@ static void RB_ModifyTextureCoordsGeneric (shaderPass_t *pass, texUnit_t texUnit
 			break;
 
 		case TC_MOD_SCROLL:
-			t1 = tcMod->args[0] * rb_shaderTime; t1 = t1 - floor (t1);
-			t2 = tcMod->args[1] * rb_shaderTime; t2 = t2 - floor (t2);
+			t1 = tcMod->args[0] * rb_matTime; t1 = t1 - floor (t1);
+			t2 = tcMod->args[1] * rb_matTime; t2 = t2 - floor (t2);
 
 			for (j=0 ; j<rb.numVerts ; j++, tcArray+=2) {
 				tcArray[0] = tcArray[0] + t1;
@@ -955,7 +955,7 @@ RB_ModifyTextureCoordsMatrix
 Matrix path
 =============
 */
-static void RB_ApplyTCModsMatrix (shaderPass_t *pass, mat4x4_t result)
+static void RB_ApplyTCModsMatrix (matPass_t *pass, mat4x4_t result)
 {
 	mat4x4_t	m1, m2;
 	float		t1, t2, sint, cost;
@@ -966,7 +966,7 @@ static void RB_ApplyTCModsMatrix (shaderPass_t *pass, mat4x4_t result)
 	for (i=0, tcMod=pass->tcMods ; i<pass->numTCMods ; tcMod++, i++) {
 		switch (tcMod->type) {
 		case TC_MOD_ROTATE:
-			cost = tcMod->args[0] * rb_shaderTime;
+			cost = tcMod->args[0] * rb_matTime;
 			sint = RB_FastSin (cost);
 			cost = RB_FastSin (cost + 0.25);
 			m2[0] =  cost, m2[1] = sint, m2[12] =  0.5f * (sint - cost + 1);
@@ -981,13 +981,13 @@ static void RB_ApplyTCModsMatrix (shaderPass_t *pass, mat4x4_t result)
 
 		case TC_MOD_TURB:
 			t1 = (1.0f / 4.0f);
-			t2 = tcMod->args[2] + rb_shaderTime * tcMod->args[3];
+			t2 = tcMod->args[2] + rb_matTime * tcMod->args[3];
 			Matrix4_Scale2D (result, 1 + (tcMod->args[1] * RB_FastSin (t2) + tcMod->args[0]) * t1, 1 + (tcMod->args[1] * RB_FastSin (t2 + 0.25f) + tcMod->args[0]) * t1);
 			break;
 
 		case TC_MOD_STRETCH:
 			table = RB_TableForFunc (tcMod->args[0]);
-			t2 = tcMod->args[3] + rb_shaderTime * tcMod->args[4];
+			t2 = tcMod->args[3] + rb_matTime * tcMod->args[4];
 			t1 = FTABLE_EVALUATE (table, t2) * tcMod->args[2] + tcMod->args[1];
 			t1 = t1 ? 1.0f / t1 : 1.0f;
 			t2 = 0.5f - 0.5f * t1;
@@ -995,8 +995,8 @@ static void RB_ApplyTCModsMatrix (shaderPass_t *pass, mat4x4_t result)
 			break;
 
 		case TC_MOD_SCROLL:
-			t1 = tcMod->args[0] * rb_shaderTime; t1 = t1 - floor (t1);
-			t2 = tcMod->args[1] * rb_shaderTime; t2 = t2 - floor (t2);
+			t1 = tcMod->args[0] * rb_matTime; t1 = t1 - floor (t1);
+			t2 = tcMod->args[1] * rb_matTime; t2 = t2 - floor (t2);
 			Matrix4_Translate2D (result, t1, t2);
 			break;
 
@@ -1013,7 +1013,7 @@ static void RB_ApplyTCModsMatrix (shaderPass_t *pass, mat4x4_t result)
 		}
 	}
 }
-static qBool RB_VertexTCBaseMatrix (shaderPass_t *pass, texUnit_t texUnit, mat4x4_t matrix)
+static qBool RB_VertexTCBaseMatrix (matPass_t *pass, texUnit_t texUnit, mat4x4_t matrix)
 {
 	vec3_t		transform;
 	vec3_t		n, projection;
@@ -1133,8 +1133,8 @@ static qBool RB_VertexTCBaseMatrix (shaderPass_t *pass, texUnit_t texUnit, mat4x
 
 	case TC_GEN_WARP:
 		for (i=0 ; i<rb.numVerts ; i++) {
-			rb_outCoordArray[texUnit][i][0] = rb.inCoords[i][0] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][1]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
-			rb_outCoordArray[texUnit][i][1] = rb.inCoords[i][1] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][0]*8.0f + rb_shaderTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			rb_outCoordArray[texUnit][i][0] = rb.inCoords[i][0] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][1]*8.0f + rb_matTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
+			rb_outCoordArray[texUnit][i][1] = rb.inCoords[i][1] + (r_warpSinTable[(uint8_t) (((rb.inCoords[i][0]*8.0f + rb_matTime) * (256.0f / (M_PI * 2.0f)))) & 255] * (1.0/64));
 		}
 
 		qglTexCoordPointer (2, GL_FLOAT, 0, rb_outCoordArray[texUnit][0]);
@@ -1147,7 +1147,7 @@ static qBool RB_VertexTCBaseMatrix (shaderPass_t *pass, texUnit_t texUnit, mat4x
 		{
 			int			fogPtype;
 			cBspPlane_t	*fogPlane, globalFogPlane;
-			shader_t	*fogShader;
+			material_t	*fogMat;
 			vec3_t		viewtofog;
 			double		fogNormal[3], vpnNormal[3];
 			double		dist, vdist, fogDist, vpnDist;
@@ -1160,15 +1160,15 @@ static qBool RB_VertexTCBaseMatrix (shaderPass_t *pass, texUnit_t texUnit, mat4x
 				globalFogPlane.type = PLANE_Z;
 				fogPlane = &globalFogPlane;
 			}
-			fogShader = rb.curTexFog->shader;
+			fogMat = rb.curTexFog->mat;
 
-			matrix[0] = matrix[5] = fogShader->fogDist;
+			matrix[0] = matrix[5] = fogMat->fogDist;
 			matrix[13] = 1.5/(float)FOGTEX_HEIGHT;
 
 			// Distance to fog
 			dist = PlaneDiff (ri.def.viewOrigin, fogPlane);
 
-			if (rb.curShader->flags & SHADER_SKY) {
+			if (rb.curMat->flags & MAT_SKY) {
 				if (dist > 0)
 					Vec3MA (ri.def.viewOrigin, -dist, fogPlane->normal, viewtofog);
 				else
@@ -1234,7 +1234,7 @@ static qBool RB_VertexTCBaseMatrix (shaderPass_t *pass, texUnit_t texUnit, mat4x
 	assert (0);
 	return qTrue;
 }
-static void RB_ModifyTextureCoordsMatrix (shaderPass_t *pass, texUnit_t texUnit)
+static void RB_ModifyTextureCoordsMatrix (matPass_t *pass, texUnit_t texUnit)
 {
 	mat4x4_t	m1, m2, result;
 	qBool		identityMatrix;
@@ -1281,15 +1281,15 @@ static void RB_DeformVertices (void)
 	vec3_t			tv, rot_centre;
 
 	// Deformations
-	vertDeform = &rb.curShader->deforms[0];
-	for (i=0 ; i<rb.curShader->numDeforms ; i++, vertDeform++) {
+	vertDeform = &rb.curMat->deforms[0];
+	for (i=0 ; i<rb.curMat->numDeforms ; i++, vertDeform++) {
 		switch (vertDeform->type) {
 		case DEFORMV_NONE:
 			break;
 
 		case DEFORMV_WAVE:
 			table = RB_TableForFunc (vertDeform->func.type);
-			now = vertDeform->func.args[2] + vertDeform->func.args[3] * rb_shaderTime;
+			now = vertDeform->func.args[2] + vertDeform->func.args[3] * rb_matTime;
 
 			for (j=0 ; j<rb.numVerts ; j++) {
 				deflect = (rb.inVertices[j][0] + rb.inVertices[j][1] + rb.inVertices[j][2]) * vertDeform->args[0] + now;
@@ -1301,7 +1301,7 @@ static void RB_DeformVertices (void)
 			break;
 
 		case DEFORMV_NORMAL:
-			args[0] = vertDeform->args[1] * rb_shaderTime;
+			args[0] = vertDeform->args[1] * rb_matTime;
 
 			for (j=0 ; j<rb.numVerts ; j++) {
 				args[1] = rb.inNormals[j][2] * args[0];
@@ -1318,7 +1318,7 @@ static void RB_DeformVertices (void)
 		case DEFORMV_BULGE:
 			args[0] = vertDeform->args[0] / (float)rb.curPatchHeight;
 			args[1] = vertDeform->args[1];
-			args[2] = rb_shaderTime / (vertDeform->args[2] * rb.curPatchWidth);
+			args[2] = rb_matTime / (vertDeform->args[2] * rb.curPatchWidth);
 
 			for (l=0, p=0 ; l<rb.curPatchHeight ; l++) {
 				deflect = RB_FastSin ((float)l * args[0] + args[2]) * args[1];
@@ -1329,7 +1329,7 @@ static void RB_DeformVertices (void)
 
 		case DEFORMV_MOVE:
 			table = RB_TableForFunc (vertDeform->func.type);
-			deflect = vertDeform->func.args[2] + rb_shaderTime * vertDeform->func.args[3];
+			deflect = vertDeform->func.args[2] + rb_matTime * vertDeform->func.args[3];
 			deflect = FTABLE_EVALUATE(table, deflect) * vertDeform->func.args[1] + vertDeform->func.args[0];
 
 			for (j=0 ; j<rb.numVerts ; j++)
@@ -1666,17 +1666,17 @@ static void RB_CleanUpTextureUnits (void)
 
 /*
 =============
-RB_BindShaderPass
+RB_BindMaterialPass
 =============
 */
-static void RB_BindShaderPass (shaderPass_t *pass, image_t *image, texUnit_t texUnit)
+static void RB_BindMaterialPass (matPass_t *pass, image_t *image, texUnit_t texUnit)
 {
 	if (!image) {
 		// Find the texture
-		if (pass->flags & SHADER_PASS_LIGHTMAP)
+		if (pass->flags & MAT_PASS_LIGHTMAP)
 			image = r_lmTextures[rb.curLMTexNum];
-		else if (pass->flags & SHADER_PASS_ANIMMAP)
-			image = pass->animImages[(int)(pass->animFPS * rb_shaderTime) % pass->animNumImages];
+		else if (pass->flags & MAT_PASS_ANIMMAP)
+			image = pass->animImages[(int)(pass->animFPS * rb_matTime) % pass->animNumImages];
 		else
 			image = pass->animImages[0];
 
@@ -1705,7 +1705,7 @@ static void RB_BindShaderPass (shaderPass_t *pass, image_t *image, texUnit_t tex
 RB_SetupPassState
 =============
 */
-static void RB_SetupPassState (shaderPass_t *pass, qBool mTex)
+static void RB_SetupPassState (matPass_t *pass, qBool mTex)
 {
 	program_t	*program;
 	uint32		sb1;
@@ -1713,7 +1713,7 @@ static void RB_SetupPassState (shaderPass_t *pass, qBool mTex)
 	sb1 = rb_stateBits1|pass->stateBits1;
 
 	// Vertex program
-	if (pass->flags & SHADER_PASS_VERTEXPROGRAM) {
+	if (pass->flags & MAT_PASS_VERTEXPROGRAM) {
 		program = pass->vertProgPtr;
 
 		qglEnable (GL_VERTEX_PROGRAM_ARB);
@@ -1727,13 +1727,13 @@ static void RB_SetupPassState (shaderPass_t *pass, qBool mTex)
 		qglProgramLocalParameter4fARB (GL_VERTEX_PROGRAM_ARB, 5, rb.curEntity->axis[0][0], rb.curEntity->axis[0][1], rb.curEntity->axis[0][2], 0);
 		qglProgramLocalParameter4fARB (GL_VERTEX_PROGRAM_ARB, 6, rb.curEntity->axis[1][0], rb.curEntity->axis[1][1], rb.curEntity->axis[1][2], 0);
 		qglProgramLocalParameter4fARB (GL_VERTEX_PROGRAM_ARB, 7, rb.curEntity->axis[2][0], rb.curEntity->axis[2][1], rb.curEntity->axis[2][2], 0);
-		qglProgramLocalParameter4fARB (GL_VERTEX_PROGRAM_ARB, 8, rb_shaderTime, 0, 0, 0);
+		qglProgramLocalParameter4fARB (GL_VERTEX_PROGRAM_ARB, 8, rb_matTime, 0, 0, 0);
 	}
 	else if (ri.config.extVertexProgram)
 		qglDisable (GL_VERTEX_PROGRAM_ARB);
 
 	// Fragment program
-	if (pass->flags & SHADER_PASS_FRAGMENTPROGRAM) {
+	if (pass->flags & MAT_PASS_FRAGMENTPROGRAM) {
 		program = pass->fragProgPtr;
 
 		qglEnable (GL_FRAGMENT_PROGRAM_ARB);
@@ -1747,13 +1747,13 @@ static void RB_SetupPassState (shaderPass_t *pass, qBool mTex)
 		qglProgramLocalParameter4fARB (GL_FRAGMENT_PROGRAM_ARB, 5, rb.curEntity->axis[0][0], rb.curEntity->axis[0][1], rb.curEntity->axis[0][2], 0);
 		qglProgramLocalParameter4fARB (GL_FRAGMENT_PROGRAM_ARB, 6, rb.curEntity->axis[1][0], rb.curEntity->axis[1][1], rb.curEntity->axis[1][2], 0);
 		qglProgramLocalParameter4fARB (GL_FRAGMENT_PROGRAM_ARB, 7, rb.curEntity->axis[2][0], rb.curEntity->axis[2][1], rb.curEntity->axis[2][2], 0);
-		qglProgramLocalParameter4fARB (GL_FRAGMENT_PROGRAM_ARB, 8, rb_shaderTime, 0, 0, 0);
+		qglProgramLocalParameter4fARB (GL_FRAGMENT_PROGRAM_ARB, 8, rb_matTime, 0, 0, 0);
 	}
 	else if (ri.config.extFragmentProgram)
 		qglDisable (GL_FRAGMENT_PROGRAM_ARB);
 
 	// Blending
-	if (pass->flags & SHADER_PASS_BLEND) {
+	if (pass->flags & MAT_PASS_BLEND) {
 		sb1 |= SB1_BLEND_ON;
 	}
 	else if (rb.curEntity->flags & RF_TRANSLUCENT) {
@@ -1765,7 +1765,7 @@ static void RB_SetupPassState (shaderPass_t *pass, qBool mTex)
 	// Nasty hack!!!
 	if (!rb_glState.in2D) {
 		qglDepthFunc (pass->depthFunc);
-		if (pass->flags & SHADER_PASS_DEPTHWRITE && !(rb.curEntity->flags & RF_TRANSLUCENT)) // FIXME: necessary Quake2 hack
+		if (pass->flags & MAT_PASS_DEPTHWRITE && !(rb.curEntity->flags & RF_TRANSLUCENT)) // FIXME: necessary Quake2 hack
 			sb1 |= SB1_DEPTHMASK_ON;
 	}
 
@@ -1796,12 +1796,12 @@ static void RB_RenderDLights (void)
 	vec3_t			tempVec, lightOrigin;
 	float			scale;
 	GLfloat			s[4], t[4], r[4];
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	uint32			num;
 
 	// Set state
 	pass = rb_accumPasses[0];
-	RB_BindShaderPass (pass, ri.dLightTexture, 0);
+	RB_BindMaterialPass (pass, ri.dLightTexture, 0);
 	RB_SetupPassState (pass, qFalse);
 	RB_TextureEnv (GL_MODULATE);
 
@@ -1908,11 +1908,11 @@ RB_RenderGeneric
 */
 static void RB_RenderGeneric (void)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 
 	pass = rb_accumPasses[0];
 
-	RB_BindShaderPass (pass, NULL, 0);
+	RB_BindMaterialPass (pass, NULL, 0);
 	RB_SetupColor (pass);
 	RB_SetupPassState (pass, qFalse);
 	if (pass->blendMode == GL_REPLACE)
@@ -1931,19 +1931,19 @@ RB_RenderCombine
 */
 static void RB_RenderCombine (void)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	int				i;
 
 	pass = rb_accumPasses[0];
 
-	RB_BindShaderPass (pass, NULL, 0);
+	RB_BindMaterialPass (pass, NULL, 0);
 	RB_SetupColor (pass);
 	RB_SetupPassState (pass, qTrue);
 	RB_TextureEnv (GL_MODULATE);
 
 	for (i=1 ; i<rb_numPasses ; i++) {
 		pass = rb_accumPasses[i];
-		RB_BindShaderPass (pass, NULL, i);
+		RB_BindMaterialPass (pass, NULL, i);
 
 		switch (pass->blendMode) {
 		case GL_REPLACE:
@@ -2115,19 +2115,19 @@ RB_RenderMTex
 */
 static void RB_RenderMTex (void)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	int				i;
 
 	pass = rb_accumPasses[0];
 
-	RB_BindShaderPass (pass, NULL, 0);
+	RB_BindMaterialPass (pass, NULL, 0);
 	RB_SetupColor (pass);
 	RB_SetupPassState (pass, qTrue);
 	RB_TextureEnv (GL_MODULATE);
 
 	for (i=1 ; i<rb_numPasses ; i++) {
 		pass = rb_accumPasses[i];
-		RB_BindShaderPass (pass, NULL, i);
+		RB_BindMaterialPass (pass, NULL, i);
 		RB_TextureEnv (pass->blendMode);
 	}
 
@@ -2168,9 +2168,9 @@ static void RB_RenderAccumulatedPasses (void)
 RB_AccumulatePass
 =============
 */
-static void RB_AccumulatePass (shaderPass_t *pass)
+static void RB_AccumulatePass (matPass_t *pass)
 {
-	shaderPass_t	*prevPass;
+	matPass_t	*prevPass;
 	qBool			accum;
 
 	ri.pc.meshPasses++;
@@ -2182,7 +2182,7 @@ static void RB_AccumulatePass (shaderPass_t *pass)
 	}
 
 	// Dynamic lights never accumulate
-	if (pass->flags & SHADER_PASS_DLIGHT) {
+	if (pass->flags & MAT_PASS_DLIGHT) {
 		if (rb.curDLightBits && ri.scn.numDLights) {
 			RB_RenderAccumulatedPasses ();
 
@@ -2255,23 +2255,23 @@ static void RB_AccumulatePass (shaderPass_t *pass)
 
 /*
 =============
-RB_SetupShaderState
+RB_SetupMaterialState
 =============
 */
-static void RB_SetupShaderState (shader_t *shader)
+static void RB_SetupMaterialState (material_t *mat)
 {
 	rb_stateBits1 = 0;
 
 	// Culling
 	if (gl_cull->intVal && !(rb.curMeshFeatures & MF_NOCULL)) {
-		switch (shader->cullType) {
-		case SHADER_CULL_FRONT:
+		switch (mat->cullType) {
+		case MAT_CULL_FRONT:
 			rb_stateBits1 |= SB1_CULL_FRONT;
 			break;
-		case SHADER_CULL_BACK:
+		case MAT_CULL_BACK:
 			rb_stateBits1 |= SB1_CULL_BACK;
 			break;
-		case SHADER_CULL_NONE:
+		case MAT_CULL_NONE:
 			break;
 		default:
 			assert (0);
@@ -2283,12 +2283,12 @@ static void RB_SetupShaderState (shader_t *shader)
 		return;
 
 	// Polygon offset
-	if (shader->flags & SHADER_POLYGONOFFSET)
+	if (mat->flags & MAT_POLYGONOFFSET)
 		rb_stateBits1 |= SB1_POLYOFFSET_ON;
 
 	// Depth range
-	if (shader->flags & SHADER_DEPTHRANGE) {
-		qglDepthRange (shader->depthNear, shader->depthFar);
+	if (mat->flags & MAT_DEPTHRANGE) {
+		qglDepthRange (mat->depthNear, mat->depthFar);
 	}
 	else if (rb.curEntity->flags & RF_DEPTHHACK)
 		qglDepthRange (0, 0.3f);
@@ -2296,8 +2296,8 @@ static void RB_SetupShaderState (shader_t *shader)
 		qglDepthRange (0, 1);
 
 	// Depth testing
-	// FIXME: SHADER_NODEPTH option?
-	if (!(shader->flags & SHADER_FLARE) && !rb_glState.in2D)
+	// FIXME: MAT_NODEPTH option?
+	if (!(mat->flags & MAT_FLARE) && !rb_glState.in2D)
 		rb_stateBits1 |= SB1_DEPTHTEST_ON;
 }
 
@@ -2424,7 +2424,7 @@ This is the entry point for rendering just about everything
 void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 {
 	mBspSurface_t	*surf;
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	qBool			debugLightmap, addDlights;
 	int				i;
 
@@ -2433,7 +2433,7 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 
 	// Collect mesh buffer values
 	rb.curMeshType = mb->sortKey & (MBT_MAX-1);
-	rb.curShader = mb->shader;
+	rb.curMat = mb->mat;
 	rb.curEntity = mb->entity;
 	rb.curModel = mb->entity->model;
 
@@ -2451,7 +2451,7 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 		rb.curPatchHeight = ((mBspSurface_t *)mb->mesh)->q3_patchHeight;
 
 		surf = (mBspSurface_t *)mb->mesh;
-		if (!(rb.curShader->flags & SHADER_FLARE) && surf->dLightFrame == ri.frameCount) {
+		if (!(rb.curMat->flags & MAT_FLARE) && surf->dLightFrame == ri.frameCount) {
 			rb.curDLightBits = surf->dLightBits;
 			addDlights = qTrue;
 		}
@@ -2467,18 +2467,18 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 
 	// Set time
 	if (rb_glState.in2D)
-		rb_shaderTime = Sys_Milliseconds () * 0.001f;
+		rb_matTime = Sys_Milliseconds () * 0.001f;
 	else
-		rb_shaderTime = ri.def.time;
-	rb_shaderTime -= mb->shaderTime;
-	if (rb_shaderTime < 0)
-		rb_shaderTime = 0;
+		rb_matTime = ri.def.time;
+	rb_matTime -= mb->matTime;
+	if (rb_matTime < 0)
+		rb_matTime = 0;
 
 	// State
-	RB_SetupShaderState (rb.curShader);
+	RB_SetupMaterialState (rb.curMat);
 
 	// Setup vertices
-	if (rb.curShader->numDeforms) {
+	if (rb.curMat->numDeforms) {
 		RB_DeformVertices ();
 		qglVertexPointer (3, GL_FLOAT, 0, rb_outVertexArray);
 	}
@@ -2503,9 +2503,9 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 		return;
 	}
 
-	// Set fog shaders
-	if (mb->fog && mb->fog->shader) {
-		if ((rb.curShader->sortKey <= SHADER_SORT_PARTICLE+1 && rb.curShader->flags & (SHADER_DEPTHWRITE|SHADER_SKY)) || rb.curShader->fogDist)
+	// Set fog materials
+	if (mb->fog && mb->fog->mat) {
+		if ((rb.curMat->sortKey <= MAT_SORT_PARTICLE+1 && rb.curMat->flags & (MAT_DEPTHWRITE|MAT_SKY)) || rb.curMat->fogDist)
 			rb.curTexFog = mb->fog;
 		else
 			rb.curColorFog = mb->fog;
@@ -2513,8 +2513,8 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 
 	// Accumulate passes and render
 	debugLightmap = qFalse;
-	for (i=0, pass=mb->shader->passes ; i<mb->shader->numPasses ; pass++, i++) {
-		if (pass->flags & SHADER_PASS_LIGHTMAP) {
+	for (i=0, pass=mb->mat->passes ; i<mb->mat->numPasses ; pass++, i++) {
+		if (pass->flags & MAT_PASS_LIGHTMAP) {
 			if (rb.curLMTexNum < 0)
 				continue;
 			debugLightmap = (gl_lightmap->intVal);
@@ -2522,16 +2522,16 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 		else if (!pass->animNumImages)
 			continue;
 		if (r_detailTextures->intVal) {
-			if (pass->flags & SHADER_PASS_NOTDETAIL)
+			if (pass->flags & MAT_PASS_NOTDETAIL)
 				continue;
 		}
-		else if (pass->flags & SHADER_PASS_DETAIL)
+		else if (pass->flags & MAT_PASS_DETAIL)
 			continue;
 
 		// Accumulate
 		RB_AccumulatePass (pass);
 
-		if (pass->flags & SHADER_PASS_LIGHTMAP) {
+		if (pass->flags & MAT_PASS_LIGHTMAP) {
 			RB_AccumulatePass (&rb_dLightPass);
 			addDlights = qFalse;
 		}
@@ -2541,10 +2541,10 @@ void RB_RenderMeshBuffer (meshBuffer_t *mb, qBool shadowPass)
 		// Accumulate a lightmap pass for debugging purposes
 		RB_AccumulatePass (&rb_lightMapPass);
 	}
-	else if (rb.curTexFog && rb.curTexFog->shader) {
+	else if (rb.curTexFog && rb.curTexFog->mat) {
 		// Accumulate fog
 		rb_fogPass.animImages[0] = ri.fogTexture;
-		if (!mb->shader->numPasses || rb.curShader->fogDist || rb.curShader->flags & SHADER_SKY)
+		if (!mb->mat->numPasses || rb.curMat->fogDist || rb.curMat->flags & MAT_SKY)
 			rb_fogPass.depthFunc = GL_LEQUAL;
 		else
 			rb_fogPass.depthFunc = GL_EQUAL;
@@ -2725,7 +2725,7 @@ void RB_EndFrame (void)
 RB_Init
 =============
 */
-void R_PassStateBits (shaderPass_t *pass);
+void R_PassStateBits (matPass_t *pass);
 void RB_Init (void)
 {
 	int		i;
@@ -2754,8 +2754,8 @@ void RB_Init (void)
 		rb_identityLighting = 255;
 
 	// Quake3 BSP specific dynamic light pass
-	memset (&rb_dLightPass, 0, sizeof (shaderPass_t));
-	rb_dLightPass.flags = SHADER_PASS_DLIGHT|SHADER_PASS_BLEND;
+	memset (&rb_dLightPass, 0, sizeof (matPass_t));
+	rb_dLightPass.flags = MAT_PASS_DLIGHT|MAT_PASS_BLEND;
 	rb_dLightPass.tcGen = TC_GEN_DLIGHT,
 	rb_dLightPass.depthFunc = GL_EQUAL;
 	rb_dLightPass.blendSource = GL_DST_COLOR;
@@ -2764,8 +2764,8 @@ void RB_Init (void)
 	R_PassStateBits (&rb_dLightPass);
 
 	// Create the fog pass
-	memset (&rb_fogPass, 0, sizeof (shaderPass_t));
-	rb_fogPass.flags = SHADER_PASS_BLEND|SHADER_PASS_NOCOLORARRAY;
+	memset (&rb_fogPass, 0, sizeof (matPass_t));
+	rb_fogPass.flags = MAT_PASS_BLEND|MAT_PASS_NOCOLORARRAY;
 	rb_fogPass.tcGen = TC_GEN_FOG;
 	rb_fogPass.blendMode = GL_DECAL;
 	rb_fogPass.blendSource = GL_SRC_ALPHA;
@@ -2776,8 +2776,8 @@ void RB_Init (void)
 	R_PassStateBits (&rb_fogPass);
 
 	// Togglable solid lightmap overlay
-	memset (&rb_lightMapPass, 0, sizeof (shaderPass_t));
-	rb_lightMapPass.flags = SHADER_PASS_LIGHTMAP|SHADER_PASS_NOCOLORARRAY;
+	memset (&rb_lightMapPass, 0, sizeof (matPass_t));
+	rb_lightMapPass.flags = MAT_PASS_LIGHTMAP|MAT_PASS_NOCOLORARRAY;
 	rb_lightMapPass.tcGen = TC_GEN_LIGHTMAP;
 	rb_lightMapPass.depthFunc = GL_EQUAL;
 	rb_lightMapPass.blendMode = GL_REPLACE;

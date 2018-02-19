@@ -44,12 +44,12 @@ static bvec4_t		rb_2DColors[4];
 R_DrawPic
 =============
 */
-void R_DrawPic (shader_t *shader, float shaderTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color)
+void R_DrawPic (material_t *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color)
 {
 	meshFeatures_t	features;
 	int				bColor;
 
-	if (!shader)
+	if (!mat)
 		return;
 
 	// FIXME: Normalize and FloatToByte?
@@ -82,13 +82,13 @@ void R_DrawPic (shader_t *shader, float shaderTime, float x, float y, int w, int
 	rb_2DTexCoords[3][1] = t2;
 	*(int *)rb_2DColors[3] = bColor;
 
-	rb_2DMBuffer.shader = shader;
-	rb_2DMBuffer.shaderTime = shaderTime;
+	rb_2DMBuffer.mat = mat;
+	rb_2DMBuffer.matTime = matTime;
 
-	features = MF_TRIFAN|shader->features;
+	features = MF_TRIFAN|mat->features;
 	if (gl_shownormals->intVal)
 		features |= MF_NORMALS;
-//	if (!(shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+//	if (!(mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 		features |= MF_NONBATCHED;
 
 	RB_PushMesh (&rb_2DMesh, features);
@@ -101,12 +101,12 @@ void R_DrawPic (shader_t *shader, float shaderTime, float x, float y, int w, int
 R_DrawRectangle
 =============
 */
-void R_DrawRectangle (shader_t *shader, float shaderTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color)
+void R_DrawRectangle (material_t *mat, float matTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color)
 {
 	meshFeatures_t	features;
 	int				bColor;
 
-	if (!shader)
+	if (!mat)
 		return;
 
 	// FIXME: Normalize and FloatToByte?
@@ -139,13 +139,13 @@ void R_DrawRectangle (shader_t *shader, float shaderTime, vec2_t tl, vec2_t tr, 
 	rb_2DTexCoords[3][1] = t2;
 	*(int *)rb_2DColors[3] = bColor;
 
-	rb_2DMBuffer.shader = shader;
-	rb_2DMBuffer.shaderTime = shaderTime;
+	rb_2DMBuffer.mat = mat;
+	rb_2DMBuffer.matTime = matTime;
 
-	features = MF_TRIFAN|shader->features;
+	features = MF_TRIFAN|mat->features;
 	if (gl_shownormals->intVal)
 		features |= MF_NORMALS;
-//	if (!(shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+//	if (!(mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 		features |= MF_NONBATCHED;
 
 	RB_PushMesh (&rb_2DMesh, features);

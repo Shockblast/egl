@@ -327,7 +327,7 @@ void R_AddAliasModelToList (refEntity_t *ent)
 {
 	mAliasModel_t	*model;
 	mAliasMesh_t	*aliasMesh;
-	shader_t		*shader;
+	material_t		*mat;
 	int				meshNum;
 	vec3_t			meshOrigin;
 
@@ -363,31 +363,31 @@ void R_AddAliasModelToList (refEntity_t *ent)
 		}
 
 		// Find the skin for this mesh
-		if (ent->skin) {
+		if (ent->material) {
 			// Custom player skin
-			shader = ent->skin;
+			mat = ent->material;
 		}
 		else {
 			if (ent->skinNum >= MD2_MAX_SKINS) {
 				// Server's only send MD2 skinNums anyways
-				shader = aliasMesh->skins[0].skin;
+				mat = aliasMesh->skins[0].material;
 			}
 			else if (ent->skinNum >= 0 && ent->skinNum < aliasMesh->numSkins) {
-				shader = aliasMesh->skins[ent->skinNum].skin;
-				if (!shader)
-					shader = aliasMesh->skins[0].skin;
+				mat = aliasMesh->skins[ent->skinNum].material;
+				if (!mat)
+					mat = aliasMesh->skins[0].material;
 			}
 			else {
-				shader = aliasMesh->skins[0].skin;
+				mat = aliasMesh->skins[0].material;
 			}
 		}
 
-		if (!shader) {
-			Com_DevPrintf (PRNT_WARNING, "R_AddAliasModelToList: '%s' has a NULL shader\n", ent->model->name);
+		if (!mat) {
+			Com_DevPrintf (PRNT_WARNING, "R_AddAliasModelToList: '%s' has a NULL material\n", ent->model->name);
 			return;
 		}
 
-		R_AddMeshToList (shader, ent->shaderTime, ent, R_FogForSphere (meshOrigin, r_aliasRadius), MBT_ALIAS, aliasMesh);
+		R_AddMeshToList (mat, ent->matTime, ent, R_FogForSphere (meshOrigin, r_aliasRadius), MBT_ALIAS, aliasMesh);
 	}
 }
 
@@ -427,7 +427,7 @@ void R_DrawAliasModel (meshBuffer_t *mb, qBool shadowPass)
 		if (!aliasMesh->neighbors)
 			return;
 #endif
-		if (mb->shader->flags & SHADER_NOSHADOW)
+		if (mb->mat->flags & MAT_NOSHADOW)
 			return;
 	}
 
@@ -452,7 +452,7 @@ void R_DrawAliasModel (meshBuffer_t *mb, qBool shadowPass)
 
 	// Interpolation calculations
 	backLerp = ent->backLerp;
-	if (!r_lerpmodels->intVal || mb->shader->flags & SHADER_NOLERP)
+	if (!r_lerpmodels->intVal || mb->mat->flags & MAT_NOLERP)
 		backLerp = 0;
 	frontLerp = 1.0f - backLerp;
 
@@ -465,8 +465,8 @@ void R_DrawAliasModel (meshBuffer_t *mb, qBool shadowPass)
 	move[2] = frame->translate[2] + (move[2] - frame->translate[2]) * backLerp;
 
 	// Mesh features
-	features = MF_NONBATCHED | mb->shader->features;
-	if (mb->shader->features & SHADER_AUTOSPRITE)
+	features = MF_NONBATCHED | mb->mat->features;
+	if (mb->mat->features & MAT_AUTOSPRITE)
 		features |= MF_NOCULL;
 
 	if (shadowPass) {

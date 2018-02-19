@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "rb_qgl.h"
 #include "rf_image.h"
 #include "rf_program.h"
-#include "rf_shader.h"
+#include "rf_material.h"
 #include "rf_public.h"
 #include "rb_public.h"
 #include "rf_model.h"
@@ -591,9 +591,9 @@ typedef struct refMedia_s {
 	struct font_s		*defaultFont;
 
 	// This is hacky but necessary, fuck you Quake2.
-	shader_t			*worldLavaCaustics;
-	shader_t			*worldSlimeCaustics;
-	shader_t			*worldWaterCaustics;
+	material_t			*worldLavaCaustics;
+	material_t			*worldSlimeCaustics;
+	material_t			*worldWaterCaustics;
 } refMedia_t;
 
 // FIXME: some of this can be moved to ri...
@@ -713,10 +713,10 @@ typedef struct refRegist_s {
 	uint32				modelsSeaked;
 	uint32				modelsTouched;
 
-	// Shaders
-	uint32				shadersReleased;
-	uint32				shadersSeaked;
-	uint32				shadersTouched;
+	// Materials
+	uint32				matsReleased;
+	uint32				matsSeaked;
+	uint32				matsTouched;
 } refRegist_t;
 
 typedef struct refInfo_s {
@@ -763,8 +763,8 @@ typedef struct refInfo_s {
 
 	// Internal textures
 	image_t				*noTexture;			// use for bad textures
-	image_t				*whiteTexture;		// used in shaders/fallback
-	image_t				*blackTexture;		// used in shaders/fallback
+	image_t				*whiteTexture;		// used in materials/fallback
+	image_t				*blackTexture;		// used in materials/fallback
 	image_t				*cinTexture;		// allocates memory on load as to not every cin frame
 	image_t				*dLightTexture;		// dynamic light texture for q3 bsp
 	image_t				*fogTexture;		// fog texture for q3 bsp
@@ -777,7 +777,7 @@ typedef struct refInfo_s {
 	struct memPool_s	*lightSysPool;
 	struct memPool_s	*modelSysPool;
 	struct memPool_s	*programSysPool;
-	struct memPool_s	*shaderSysPool;
+	struct memPool_s	*matSysPool;
 
 	// Misc
 	refConfig_t			config;			// Information output to the client/cgame

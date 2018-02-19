@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -213,11 +213,10 @@
     <ClInclude Include="..\..\..\renderer\rf_defpal.h" />
     <ClInclude Include="..\..\..\renderer\rf_image.h" />
     <ClInclude Include="..\..\..\renderer\rf_local.h" />
+    <ClInclude Include="..\..\..\renderer\rf_material.h" />
     <ClInclude Include="..\..\..\renderer\rf_model.h" />
     <ClInclude Include="..\..\..\renderer\rf_program.h" />
     <ClInclude Include="..\..\..\renderer\rf_public.h" />
-    <ClInclude Include="..\..\..\renderer\rf_shader.h" />
-    <ClInclude Include="..\..\..\renderer\r_glstate.h" />
     <ClInclude Include="..\..\..\renderer\r_local.h" />
     <ClInclude Include="..\..\..\renderer\r_public.h" />
     <ClInclude Include="..\..\..\renderer\r_typedefs.h" />
@@ -284,21 +283,18 @@
     <ClCompile Include="..\..\..\renderer\rf_alias.c" />
     <ClCompile Include="..\..\..\renderer\rf_cull.c" />
     <ClCompile Include="..\..\..\renderer\rf_decal.c" />
-    <ClCompile Include="..\..\..\renderer\rf_entity.c" />
     <ClCompile Include="..\..\..\renderer\rf_font.c" />
     <ClCompile Include="..\..\..\renderer\rf_image.c" />
     <ClCompile Include="..\..\..\renderer\rf_init.c" />
     <ClCompile Include="..\..\..\renderer\rf_light.c" />
     <ClCompile Include="..\..\..\renderer\rf_main.c" />
+    <ClCompile Include="..\..\..\renderer\rf_material.c" />
     <ClCompile Include="..\..\..\renderer\rf_meshbuffer.c" />
     <ClCompile Include="..\..\..\renderer\rf_model.c" />
     <ClCompile Include="..\..\..\renderer\rf_program.c" />
-    <ClCompile Include="..\..\..\renderer\rf_shader.c" />
-    <ClCompile Include="..\..\..\renderer\rf_skeletal.c" />
     <ClCompile Include="..\..\..\renderer\rf_sky.c" />
     <ClCompile Include="..\..\..\renderer\rf_sprite.c" />
     <ClCompile Include="..\..\..\renderer\rf_world.c" />
-    <ClCompile Include="..\..\..\renderer\r_glstate.c" />
     <ClCompile Include="..\..\..\renderer\r_math.c" />
     <ClCompile Include="..\..\..\server\sv_ccmds.c" />
     <ClCompile Include="..\..\..\server\sv_ents.c" />

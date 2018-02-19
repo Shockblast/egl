@@ -272,7 +272,7 @@ typedef struct cgDecal_s {
 
 	float				lifeTime;
 
-	struct				shader_s *shader;
+	struct				material_s *mat;
 	uint32				flags;
 
 	void				(*think)(struct cgDecal_s *d, vec4_t color, int *type, uint32 *flags);
@@ -363,7 +363,7 @@ typedef struct cgParticle_s {
 	float				size;
 	float				sizeVel;
 
-	struct				shader_s *shader;
+	struct				material_s *mat;
 	byte				style;
 	uint32				flags;
 

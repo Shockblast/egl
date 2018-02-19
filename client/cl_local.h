@@ -130,10 +130,10 @@ typedef struct clMedia_s {
 	struct sfx_s		*talkSfx;
 
 	// images
-	struct shader_s		*cinMaterial;
-	struct shader_s		*consoleShader;
-	struct shader_s		*whiteTexture;
-	struct shader_s		*blackTexture;
+	struct material_s		*cinMaterial;
+	struct material_s		*consoleMaterial;
+	struct material_s		*whiteTexture;
+	struct material_s		*blackTexture;
 } clMedia_t;
 
 extern clMedia_t	clMedia;

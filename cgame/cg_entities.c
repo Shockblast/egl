@@ -388,34 +388,34 @@ static void CG_AddEntityShells (refEntity_t *ent)
 {
 	// Double
 	if (ent->flags & RF_SHELL_DOUBLE) {
-		ent->skin = cgMedia.modelShellDouble;
+		ent->material = cgMedia.modelShellDouble;
 		cgi.R_AddEntity (ent);
 	}
 	// Half-dam
 	if (ent->flags & RF_SHELL_HALF_DAM) {
-		ent->skin = cgMedia.modelShellHalfDam;
+		ent->material = cgMedia.modelShellHalfDam;
 		cgi.R_AddEntity (ent);
 	}
 
 	// God mode
 	if (ent->flags & RF_SHELL_RED && ent->flags & RF_SHELL_GREEN && ent->flags & RF_SHELL_BLUE) {
-		ent->skin = cgMedia.modelShellGod;
+		ent->material = cgMedia.modelShellGod;
 		cgi.R_AddEntity (ent);
 	}
 	else {
 		// Red
 		if (ent->flags & RF_SHELL_RED) {
-			ent->skin = cgMedia.modelShellRed;
+			ent->material = cgMedia.modelShellRed;
 			cgi.R_AddEntity (ent);
 		}
 		// Green
 		if (ent->flags & RF_SHELL_GREEN) {
-			ent->skin = cgMedia.modelShellGreen;
+			ent->material = cgMedia.modelShellGreen;
 			cgi.R_AddEntity (ent);
 		}
 		// Blue
 		if (ent->flags & RF_SHELL_BLUE) {
-			ent->skin = cgMedia.modelShellBlue;
+			ent->material = cgMedia.modelShellBlue;
 			cgi.R_AddEntity (ent);
 		}
 	}
@@ -571,25 +571,25 @@ void CG_AddPacketEntities (void)
 				// Use custom player skin
 				ent.skinNum = 0;
 				clInfo = &cg.clientInfo[state->skinNum & 0xff];
-				ent.skin = clInfo->skin;
+				ent.material = clInfo->material;
 				ent.model = clInfo->model;
-				if (!ent.skin || !ent.model) {
-					ent.skin = cg.baseClientInfo.skin;
+				if (!ent.material || !ent.model) {
+					ent.material = cg.baseClientInfo.material;
 					ent.model = cg.baseClientInfo.model;
 				}
 
 				//PGM
 				if (ent.flags & RF_USE_DISGUISE) {
-					if (!Q_strnicmp ((char *)ent.skin, "players/male", 12)) {
-						ent.skin = cgMedia.maleDisguiseSkin;
+					if (!Q_strnicmp ((char *)ent.material, "players/male", 12)) {
+						ent.material = cgMedia.maleDisguiseSkin;
 						ent.model = cgMedia.maleDisguiseModel;
 					}
-					else if (!Q_strnicmp ((char *)ent.skin, "players/female", 14)) {
-						ent.skin = cgMedia.femaleDisguiseSkin;
+					else if (!Q_strnicmp ((char *)ent.material, "players/female", 14)) {
+						ent.material = cgMedia.femaleDisguiseSkin;
 						ent.model = cgMedia.femaleDisguiseModel;
 					}
-					else if (!Q_strnicmp ((char *)ent.skin, "players/cyborg", 14)) {
-						ent.skin = cgMedia.cyborgDisguiseSkin;
+					else if (!Q_strnicmp ((char *)ent.material, "players/cyborg", 14)) {
+						ent.material = cgMedia.cyborgDisguiseSkin;
 						ent.model = cgMedia.cyborgDisguiseModel;
 					}
 				}
@@ -597,7 +597,7 @@ void CG_AddPacketEntities (void)
 			}
 			else {
 				ent.skinNum = state->skinNum;
-				ent.skin = NULL;
+				ent.material = NULL;
 				ent.model = cg.modelCfgDraw[state->modelIndex];
 			}
 		}
@@ -849,7 +849,7 @@ void CG_AddPacketEntities (void)
 
 		// Linked models
 		if (state->modelIndex2) {
-			ent.skin = NULL;	// Never use a custom skin on others
+			ent.material = NULL;	// Never use a custom material on others
 			ent.skinNum = 0;
 
 			if (state->modelIndex2 == 255) {
@@ -891,7 +891,7 @@ void CG_AddPacketEntities (void)
 		}
 
 		if (state->modelIndex3) {
-			ent.skin = NULL;	// Never use a custom skin on others
+			ent.material = NULL;	// Never use a custom material on others
 			ent.skinNum = 0;
 			ent.model = cg.modelCfgDraw[state->modelIndex3];
 
@@ -907,7 +907,7 @@ void CG_AddPacketEntities (void)
 		}
 
 		if (state->modelIndex4) {
-			ent.skin = NULL;	// Never use a custom skin on others
+			ent.material = NULL;	// Never use a custom material on others
 			ent.skinNum = 0;
 			ent.model = cg.modelCfgDraw[state->modelIndex4];
 
@@ -924,7 +924,7 @@ void CG_AddPacketEntities (void)
 
 		// EF_POWERSCREEN shield
 		if (effects & EF_POWERSCREEN) {
-			ent.skin = NULL;	// Never use a custom skin on others
+			ent.material = NULL;	// Never use a custom material on others
 			ent.skinNum = 0;
 			ent.model = cgMedia.powerScreenModel;
 			ent.oldFrame = 0;

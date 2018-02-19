@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 typedef struct crosshairInfo_s {
 	size_t			number;
-	struct shader_s	*shader;
+	struct material_s	*mat;
 } crosshairInfo_t;
 
 typedef struct m_screenMenu_s {
@@ -388,7 +388,7 @@ static void ScreenMenu_Init (void)
 
 			// add to list
 			m_screenMenu.crosshairs[m_screenMenu.numCrosshairs].number = j;
-			m_screenMenu.crosshairs[m_screenMenu.numCrosshairs].shader = cgi.R_RegisterPic (crosshairList[i]);
+			m_screenMenu.crosshairs[m_screenMenu.numCrosshairs].mat = cgi.R_RegisterPic (crosshairList[i]);
 			m_screenMenu.crosshairNames[m_screenMenu.numCrosshairs] = CG_TagStrDup (crosshairList[i], CGTAG_MENU);
 			m_screenMenu.numCrosshairs++;
 		}
@@ -405,7 +405,7 @@ static void ScreenMenu_Init (void)
 	m_screenMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_screenMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_screenMenu.banner.generic.name		= NULL;
-	m_screenMenu.banner.shader				= uiMedia.banners.options;
+	m_screenMenu.banner.mat				= uiMedia.banners.options;
 
 	//
 	// console
@@ -501,7 +501,7 @@ static void ScreenMenu_Init (void)
 
 		m_screenMenu.ch_image.generic.type				= UITYPE_IMAGE;
 		m_screenMenu.ch_image.generic.flags				= UIF_NOSELECT|UIF_NOSELBAR;
-		m_screenMenu.ch_image.shader					= NULL;
+		m_screenMenu.ch_image.mat					= NULL;
 	}
 
 	m_screenMenu.ch_alpha_slider.generic.type		= UITYPE_SLIDER;
@@ -645,7 +645,7 @@ ScreenMenu_Draw
 */
 static void ScreenMenu_Draw (void)
 {
-	struct shader_s *chShader;
+	struct material_s *chMat;
 	int		width, height;
 	float	y;
 
@@ -697,11 +697,11 @@ static void ScreenMenu_Draw (void)
 	m_screenMenu.ch_header.generic.y			= y += UIFT_SIZEINC*2;
 
 	if (m_screenMenu.crosshairsFound && m_screenMenu.ch_number_list.curValue < (int) m_screenMenu.numCrosshairs) {
-		chShader = m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].shader;
-		cgi.R_GetImageSize (chShader, &width, &height);
+		chMat = m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].mat;
+		cgi.R_GetImageSize (chMat, &width, &height);
 	}
 	else {
-		chShader = cgMedia.whiteTexture;
+		chMat = cgMedia.whiteTexture;
 		width = 32;
 		height = 32;
 	}
@@ -713,7 +713,7 @@ static void ScreenMenu_Draw (void)
 		m_screenMenu.ch_image.generic.y				= y += UIFT_SIZEINC*2;
 		m_screenMenu.ch_image.width					= width;
 		m_screenMenu.ch_image.height				= height;
-		m_screenMenu.ch_image.shader				= chShader;
+		m_screenMenu.ch_image.mat					= chMat;
 	}
 	else
 		y += UIFT_SIZEINC;

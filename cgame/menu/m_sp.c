@@ -117,7 +117,7 @@ static void GameMenu_Init (void)
 	m_gameMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_gameMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_gameMenu.banner.generic.name		= NULL;
-	m_gameMenu.banner.shader			= uiMedia.banners.game;
+	m_gameMenu.banner.mat			= uiMedia.banners.game;
 
 	m_gameMenu.easy_action.generic.type		= UITYPE_ACTION;
 	m_gameMenu.easy_action.generic.flags	= UIF_LEFT_JUSTIFY|UIF_LARGE|UIF_SHADOW;

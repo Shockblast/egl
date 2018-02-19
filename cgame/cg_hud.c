@@ -111,7 +111,7 @@ static void HUD_DrawField (float x, float y, int altclr, int width, int value)
 			frame = *ptr -'0';
 
 		cgi.R_DrawPic (
-			cgMedia.hudNumShaders[altclr % 2][frame % 11], 0, x, y,
+			cgMedia.hudNumMats[altclr % 2][frame % 11], 0, x, y,
 			ICON_WIDTH * cg.hudScale[0],
 			ICON_HEIGHT * cg.hudScale[1],
 			0, 0, 1, 1, color);
@@ -128,7 +128,7 @@ static void HUD_DrawField (float x, float y, int altclr, int width, int value)
 CG_DrawHUDModel
 ================
 */
-static void CG_DrawHUDModel (int x, int y, int w, int h, struct refModel_s *model, struct shader_s *shader, float yawSpeed)
+static void CG_DrawHUDModel (int x, int y, int w, int h, struct refModel_s *model, struct material_s *mat, float yawSpeed)
 {
 	vec3_t	mins, maxs;
 	vec3_t	origin, angles;
@@ -142,7 +142,7 @@ static void CG_DrawHUDModel (int x, int y, int w, int h, struct refModel_s *mode
 	origin[2] = -0.5 * (mins[2] + maxs[2]);
 	Vec3Set (angles, 0, AngleModf (yawSpeed * (cg.refreshTime & 2047) * (360.0 / 2048.0)), 0);
 
-	CG_DrawModel (x, y, w, h, model, shader, origin, angles);
+	CG_DrawModel (x, y, w, h, model, mat, origin, angles);
 }
 
 /*
@@ -164,7 +164,7 @@ static void HUD_ExecuteLayoutString (char *layout)
 	int				value, width, index;
 	char			*token;
 	clientInfo_t	*ci;
-	struct shader_s	*shader;
+	struct material_s	*mat;
 	vec4_t			color;
 	vec2_t			charSize;
 	int				w, h;
@@ -202,9 +202,9 @@ static void HUD_ExecuteLayoutString (char *layout)
 					continue;	// Negative number = don't show
 
 				if (cg.frame.playerState.stats[STAT_FLASHES] & 4) {
-					cgi.R_GetImageSize (cgMedia.hudFieldShader, &w, &h);
+					cgi.R_GetImageSize (cgMedia.hudFieldMat, &w, &h);
 					cgi.R_DrawPic (
-						cgMedia.hudFieldShader, 0, x, y,
+						cgMedia.hudFieldMat, 0, x, y,
 						w * cg.hudScale[0],
 						h * cg.hudScale[1],
 						0, 0, 1, 1, color);
@@ -326,9 +326,9 @@ static void HUD_ExecuteLayoutString (char *layout)
 					altclr = 1;
 
 				if (cg.frame.playerState.stats[STAT_FLASHES] & 1) {
-					cgi.R_GetImageSize (cgMedia.hudFieldShader, &w, &h);
+					cgi.R_GetImageSize (cgMedia.hudFieldMat, &w, &h);
 					cgi.R_DrawPic (
-						cgMedia.hudFieldShader, 0, x, y,
+						cgMedia.hudFieldMat, 0, x, y,
 						w * cg.hudScale[0],
 						h * cg.hudScale[1],
 						0, 0, 1, 1, color);
@@ -377,14 +377,14 @@ static void HUD_ExecuteLayoutString (char *layout)
 					Com_Error (ERR_DROP, "Pic >= MAX_CS_IMAGES");
 
 				if (cg.imageCfgStrings[value])
-					shader = cg.imageCfgStrings[value];
+					mat = cg.imageCfgStrings[value];
 				else if (cg.configStrings[CS_IMAGES+value] && cg.configStrings[CS_IMAGES+value][0])
-					shader = CG_RegisterPic (cg.configStrings[CS_IMAGES+value]);
+					mat = CG_RegisterPic (cg.configStrings[CS_IMAGES+value]);
 				else
-					shader = cgMedia.noTexture;
+					mat = cgMedia.noTexture;
 
-				cgi.R_GetImageSize (shader, &w, &h);
-				cgi.R_DrawPic (shader, 0, x, y, w * cg.hudScale[0], h * cg.hudScale[1], 0, 0, 1, 1, color);
+				cgi.R_GetImageSize (mat, &w, &h);
+				cgi.R_DrawPic (mat, 0, x, y, w * cg.hudScale[0], h * cg.hudScale[1], 0, 0, 1, 1, color);
 				continue;
 			}
 
@@ -392,10 +392,10 @@ static void HUD_ExecuteLayoutString (char *layout)
 			if (!strcmp (token, "picn")) {
 				token = Com_Parse (&layout);
 
-				shader = CG_RegisterPic (token);
-				if (shader) {
-					cgi.R_GetImageSize (shader, &w, &h);
-					cgi.R_DrawPic (shader, 0, x, y, w * cg.hudScale[0], h * cg.hudScale[1], 0, 0, 1, 1, color);
+				mat = CG_RegisterPic (token);
+				if (mat) {
+					cgi.R_GetImageSize (mat, &w, &h);
+					cgi.R_DrawPic (mat, 0, x, y, w * cg.hudScale[0], h * cg.hudScale[1], 0, 0, 1, 1, color);
 				}
 				continue;
 			}
@@ -410,9 +410,9 @@ static void HUD_ExecuteLayoutString (char *layout)
 					continue;
 
 				if (cg.frame.playerState.stats[STAT_FLASHES] & 2) {
-					cgi.R_GetImageSize (cgMedia.hudFieldShader, &w, &h);
+					cgi.R_GetImageSize (cgMedia.hudFieldMat, &w, &h);
 					cgi.R_DrawPic (
-						cgMedia.hudFieldShader, 0, x, y,
+						cgMedia.hudFieldMat, 0, x, y,
 						w * cg.hudScale[0],
 						h * cg.hudScale[1],
 						0, 0, 1, 1, color);

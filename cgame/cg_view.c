@@ -41,8 +41,8 @@ static void V_TileRect (int x, int y, int w, int h)
 	if (w == 0 || h == 0)
 		return;	// Prevents div by zero (should never happen)
 
-	if (cgMedia.tileBackShader)
-		cgi.R_DrawPic (cgMedia.tileBackShader, 0,
+	if (cgMedia.tileBackMat)
+		cgi.R_DrawPic (cgMedia.tileBackMat, 0,
 		(float)x, (float)y, (float)w, (float)h,
 		x/64.0f, y/64.0f, (x+w)/64.0f, (y+h)/64.0f, Q_colorWhite);
 	else
@@ -198,8 +198,8 @@ static void V_TestParticles (void)
 		p->outPoly.colors = v_testParticleList[i].outColor;
 		p->outPoly.texCoords = v_testParticleList[i].outCoords;
 		p->outPoly.vertices = v_testParticleList[i].outVertices;
-		p->outPoly.shader = cgMedia.particleTable[i % PT_PICTOTAL];
-		p->outPoly.shaderTime = 0;
+		p->outPoly.mat = cgMedia.particleTable[i % PT_PICTOTAL];
+		p->outPoly.matTime = 0;
 
 		cgi.R_AddPoly (&p->outPoly);
 	}
@@ -230,7 +230,7 @@ static void V_TestEntities (void)
 		Matrix3_Identity (ent.axis);
 
 		ent.model = cg.baseClientInfo.model;
-		ent.skin = cg.baseClientInfo.skin;
+		ent.material = cg.baseClientInfo.material;
 		ent.skinNum = 0;
 
 		ent.flags = 0;

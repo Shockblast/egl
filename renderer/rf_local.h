@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 =============================================================================
 */
 
-meshBuffer_t *R_AddMeshToList (shader_t *shader, float shaderTime, refEntity_t *ent, struct mQ3BspFog_s *fog, meshType_t meshType, void *mesh);
+meshBuffer_t *R_AddMeshToList (material_t *mat, float matTime, refEntity_t *ent, struct mQ3BspFog_s *fog, meshType_t meshType, void *mesh);
 
 /*
 ===============================================================================

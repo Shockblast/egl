@@ -93,7 +93,7 @@ static void LoadGameMenu_Init (void)
 	m_loadGameMenu.banner.generic.type			= UITYPE_IMAGE;
 	m_loadGameMenu.banner.generic.flags			= UIF_NOSELECT|UIF_CENTERED;
 	m_loadGameMenu.banner.generic.name			= NULL;
-	m_loadGameMenu.banner.shader				= uiMedia.banners.loadGame;
+	m_loadGameMenu.banner.mat				= uiMedia.banners.loadGame;
 
 	UI_AddItem (&m_loadGameMenu.frameWork,		&m_loadGameMenu.banner);
 

@@ -83,8 +83,8 @@ enum {
 typedef struct clientInfo_s {
 	char				name[MAX_CFGSTRLEN];
 	char				cInfo[MAX_CFGSTRLEN];
-	struct shader_s		*skin;
-	struct shader_s		*icon;
+	struct material_s		*material;
+	struct material_s		*icon;
 	char				iconName[MAX_QPATH];
 	struct refModel_s	*model;
 	struct refModel_s	*weaponModels[MAX_CLIENTWEAPONMODELS];
@@ -175,7 +175,7 @@ typedef struct cgState_s {
 	// Config strings
 	//
 	char				configStrings[MAX_CFGSTRINGS][MAX_CFGSTRLEN];
-	struct shader_s		*imageCfgStrings[MAX_CS_IMAGES];
+	struct material_s		*imageCfgStrings[MAX_CS_IMAGES];
 	struct refModel_s	*modelCfgDraw[MAX_CS_MODELS];
 	struct cBspModel_s	*modelCfgClip[MAX_CS_MODELS];
 	struct sfx_s		*soundCfgStrings[MAX_CS_SOUNDS];
@@ -285,7 +285,7 @@ void	CG_PredictMovement (void);
 // cg_screen.c
 //
 
-struct shader_s	*CG_RegisterPic (char *name);
+struct material_s	*CG_RegisterPic (char *name);
 
 float	palRed (int index);
 float	palGreen (int index);
@@ -480,7 +480,7 @@ extern cVar_t	*gl_polyblend;
 
 void		CG_DrawFill (float x, float y, int w, int h, vec4_t color);
 
-void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct shader_s *shader, vec3_t origin, vec3_t angles);
+void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct material_s *mat, vec3_t origin, vec3_t angles);
 
 //
 // cg_main.c

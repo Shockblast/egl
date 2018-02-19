@@ -32,7 +32,7 @@ typedef struct skyState_s {
 	vec3_t			axis;
 
 	mesh_t			meshes[6];
-	shader_t		*shaders[6];
+	material_t		*materials[6];
 
 	vec2_t			coords[6][4];
 	vec3_t			verts[6][4];
@@ -229,7 +229,7 @@ void R_AddSkyToList (void)
 		return;
 
 	// FIXME
-	R_AddMeshToList (r_skyState.shaders[r_skyTexOrder[0]], 0, NULL, NULL, MBT_SKY, r_skyState.verts);
+	R_AddMeshToList (r_skyState.materials[r_skyTexOrder[0]], 0, NULL, NULL, MBT_SKY, r_skyState.verts);
 }
 
 
@@ -318,8 +318,8 @@ void R_DrawSky (meshBuffer_t *mb)
 		R_StoreSkyVerts (i, 2, r_currentList->skyMaxs[i][0], r_currentList->skyMaxs[i][1]);
 		R_StoreSkyVerts (i, 3, r_currentList->skyMaxs[i][0], r_currentList->skyMins[i][1]);
 
-		mb->shader = r_skyState.shaders[r_skyTexOrder[i]];
-		RB_PushMesh (&r_skyState.meshes[i], MF_NONBATCHED|MF_TRIFAN|mb->shader->features);
+		mb->mat = r_skyState.materials[r_skyTexOrder[i]];
+		RB_PushMesh (&r_skyState.meshes[i], MF_NONBATCHED|MF_TRIFAN|mb->mat->features);
 		RB_RenderMeshBuffer (mb, qFalse);
 	}
 
@@ -389,10 +389,10 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 
 	for (i=0 ; i<6 ; i++) {
 		Q_snprintfz (pathName, sizeof (pathName), "env/%s%s.tga", r_skyState.baseName, r_skyNameSuffix[i]);
-		r_skyState.shaders[i] = R_RegisterSky (pathName);
+		r_skyState.materials[i] = R_RegisterSky (pathName);
 
-		if (!r_skyState.shaders[i])
-			r_skyState.shaders[i] = r_noShaderSky;
+		if (!r_skyState.materials[i])
+			r_skyState.materials[i] = r_noMaterialSky;
 	}
 }
 

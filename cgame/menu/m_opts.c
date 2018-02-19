@@ -107,7 +107,7 @@ static void OptionsMenu_Init (void)
 	m_optionsMenu.banner.generic.type				= UITYPE_IMAGE;
 	m_optionsMenu.banner.generic.flags				= UIF_NOSELECT|UIF_CENTERED;
 	m_optionsMenu.banner.generic.name				= NULL;
-	m_optionsMenu.banner.shader						= uiMedia.banners.options;
+	m_optionsMenu.banner.mat						= uiMedia.banners.options;
 
 	m_optionsMenu.controls_menu.generic.type		= UITYPE_ACTION;
 	m_optionsMenu.controls_menu.generic.flags		= UIF_CENTERED|UIF_LARGE|UIF_SHADOW;

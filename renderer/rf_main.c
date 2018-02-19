@@ -58,7 +58,7 @@ static void R_AddPolysToList (void)
 		fog = R_FogForSphere (p->origin, p->radius);
 
 		// Add to the list
-		R_AddMeshToList (p->shader, p->shaderTime, NULL, fog, MBT_POLY, p);
+		R_AddMeshToList (p->mat, p->matTime, NULL, fog, MBT_POLY, p);
 	}
 }
 
@@ -492,7 +492,7 @@ void R_ClearScene (void)
 R_AddDecal
 =====================
 */
-void R_AddDecal (refDecal_t *decal, bvec4_t color, struct shader_s *material, float materialTime)
+void R_AddDecal (refDecal_t *decal, bvec4_t color, struct material_s *material, float materialTime)
 {
 	int			i;
 
@@ -506,10 +506,10 @@ void R_AddDecal (refDecal_t *decal, bvec4_t color, struct shader_s *material, fl
 	}
 
 	// Material
-	decal->poly.shader = material;
-	if (!decal->poly.shader)
-		decal->poly.shader = r_noShader;
-	decal->poly.shaderTime = materialTime;
+	decal->poly.mat = material;
+	if (!decal->poly.mat)
+		decal->poly.mat = r_noMaterial;
+	decal->poly.matTime = materialTime;
 
 	// FIXME: adjust bmodel decals here
 
@@ -549,8 +549,8 @@ void R_AddPoly (refPoly_t *poly)
 		return;
 
 	// Material
-	if (!poly->shader)
-		poly->shader = r_noShader;
+	if (!poly->mat)
+		poly->mat = r_noMaterial;
 
 	// Store
 	ri.scn.polyList[ri.scn.numPolys++] = poly;
@@ -740,9 +740,9 @@ void R_BeginRegistration (void)
 	ri.reg.modelsReleased = 0;
 	ri.reg.modelsSeaked = 0;
 	ri.reg.modelsTouched = 0;
-	ri.reg.shadersReleased = 0;
-	ri.reg.shadersSeaked = 0;
-	ri.reg.shadersTouched = 0;
+	ri.reg.matsReleased = 0;
+	ri.reg.matsSeaked = 0;
+	ri.reg.matsTouched = 0;
 
 	// Begin sub-system registration
 	ri.reg.inSequence = qTrue;
@@ -761,17 +761,17 @@ Called at the end of all registration by the client
 */
 void R_EndRegistration (void)
 {
-	R_EndFontRegistration (); // Register first so shaders are touched
-	R_EndModelRegistration (); // Register first so shaders are touched
-	R_EndShaderRegistration ();	// Register first so programs and images are touched
+	R_EndFontRegistration (); // Register first so materials are touched
+	R_EndModelRegistration (); // Register first so materials are touched
+	R_EndMaterialRegistration ();	// Register first so programs and images are touched
 	R_EndImageRegistration ();
 
 	ri.reg.inSequence = qFalse;
 
 	// Print registration info
 	Com_Printf (PRNT_CONSOLE, "Registration sequence completed...\n");
-	Com_Printf (PRNT_CONSOLE, "Fonts    rel/touch/seak: %i/%i/%i\n", ri.reg.fontsReleased, ri.reg.fontsTouched, ri.reg.fontsSeaked);
-	Com_Printf (PRNT_CONSOLE, "Models   rel/touch/seak: %i/%i/%i\n", ri.reg.modelsReleased, ri.reg.modelsTouched, ri.reg.modelsSeaked);
-	Com_Printf (PRNT_CONSOLE, "Shaders  rel/touch/seak: %i/%i/%i\n", ri.reg.shadersReleased, ri.reg.shadersTouched, ri.reg.shadersSeaked);
-	Com_Printf (PRNT_CONSOLE, "Images   rel/resamp/seak/touch: %i/%i/%i/%i\n", ri.reg.imagesReleased, ri.reg.imagesResampled, ri.reg.imagesSeaked, ri.reg.imagesTouched);
+	Com_Printf (PRNT_CONSOLE, "Fonts      rel/touch/seak: %i/%i/%i\n", ri.reg.fontsReleased, ri.reg.fontsTouched, ri.reg.fontsSeaked);
+	Com_Printf (PRNT_CONSOLE, "Models     rel/touch/seak: %i/%i/%i\n", ri.reg.modelsReleased, ri.reg.modelsTouched, ri.reg.modelsSeaked);
+	Com_Printf (PRNT_CONSOLE, "Materials  rel/touch/seak: %i/%i/%i\n", ri.reg.matsReleased, ri.reg.matsTouched, ri.reg.matsSeaked);
+	Com_Printf (PRNT_CONSOLE, "Images     rel/resamp/seak/touch: %i/%i/%i/%i\n", ri.reg.imagesReleased, ri.reg.imagesResampled, ri.reg.imagesSeaked, ri.reg.imagesTouched);
 }

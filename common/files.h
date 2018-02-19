@@ -698,7 +698,7 @@ typedef struct dQ3BspBrush_s {
 } dQ3BspBrush_t;
 
 typedef struct dQ3BspFog_s {
-	char			shader[MAX_QPATH];
+	char			mat[MAX_QPATH];
 	int				brushNum;
 	int				visibleSide;
 } dQ3BspFog_t;

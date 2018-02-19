@@ -182,8 +182,8 @@ typedef struct uiList_s {
 typedef struct uiImage_s {
 	uiCommon_t				generic;
 
-	struct shader_s			*shader;
-	struct shader_s			*hoverShader;
+	struct material_s			*mat;
+	struct material_s			*hoverMat;
 
 	int						width;
 	int						height;

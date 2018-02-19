@@ -329,7 +329,7 @@ static void PlayerConfigMenu_Init (void)
 	m_playerConfigMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_playerConfigMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_playerConfigMenu.banner.generic.name		= NULL;
-	m_playerConfigMenu.banner.shader			= uiMedia.banners.multiplayer;
+	m_playerConfigMenu.banner.mat			= uiMedia.banners.multiplayer;
 
 	m_playerConfigMenu.header.generic.type		= UITYPE_ACTION;
 	m_playerConfigMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;
@@ -452,7 +452,7 @@ void PlayerConfigMenu_Draw (void)
 	refEntity_t	entity[2];
 	refDef_t	refDef;
 	vec3_t		angles;
-	struct		shader_s *icon;
+	struct		material_s *icon;
 	float		y, xoffset;
 
 	// Initialize if necessary
@@ -530,11 +530,11 @@ void PlayerConfigMenu_Draw (void)
 	entity[0].model = cgi.R_RegisterModel (Q_VarArgs ("players/%s/tris.md2",
 		m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].directory));
 	if (entity[0].model) {
-		entity[0].skin = cgi.R_RegisterSkin (Q_VarArgs ("players/%s/%s.pcx",
+		entity[0].material = cgi.R_RegisterSkin (Q_VarArgs ("players/%s/%s.pcx",
 			m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].directory,
 			m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].skinDisplayNames[m_playerConfigMenu.skinList.curValue]));
 
-		if (entity[0].skin) {
+		if (entity[0].material) {
 			entity[0].origin[0] = entity[0].oldOrigin[0] = refDef.x;
 			entity[0].origin[1] = entity[0].oldOrigin[1] = 0;
 			entity[0].origin[2] = entity[0].oldOrigin[2] = 0;
@@ -587,7 +587,7 @@ void PlayerConfigMenu_Draw (void)
 
 	// Clear the scene and add the entities
 	cgi.R_ClearScene ();
-	if (entity[0].skin) {
+	if (entity[0].material) {
 		cgi.R_AddEntity (&entity[0]);
 		if (entity[1].model)
 			cgi.R_AddEntity (&entity[1]);

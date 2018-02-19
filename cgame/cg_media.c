@@ -49,12 +49,12 @@ void CG_InitBaseMedia (void)
 	cgMedia.whiteTexture			= cgi.R_RegisterPic ("***r_whiteTexture***");
 	cgMedia.blackTexture			= cgi.R_RegisterPic ("***r_blackTexture***");
 
-	cgMedia.tileBackShader			= cgi.R_RegisterPic ("pics/backtile.tga");
+	cgMedia.tileBackMat				= cgi.R_RegisterPic ("pics/backtile.tga");
 
 	cgMedia.alienInfraredVision		= cgi.R_RegisterPic ("alienInfraredVision");
 	cgMedia.infraredGoggles			= cgi.R_RegisterPic ("infraredGoggles");
 
-	cgMedia.consoleShader			= cgi.R_RegisterPic ("pics/conback.tga");
+	cgMedia.consoleMaterial			= cgi.R_RegisterPic ("pics/conback.tga");
 
 	cgMedia.loadSplash				= cgi.R_RegisterPic ("egl/ui/loadscreen/loadsplash.tga");
 	cgMedia.loadBarPos				= cgi.R_RegisterPic ("egl/ui/loadscreen/barpos.tga");
@@ -66,10 +66,10 @@ void CG_InitBaseMedia (void)
 	// Menu image media
 	uiMedia.bgBig					= cgi.R_RegisterPic ("egl/ui/bg_big.tga");
 
-	uiMedia.cursorShader			= cgi.R_RegisterPic ("egl/ui/cursor.tga");
-	uiMedia.cursorHoverShader		= cgi.R_RegisterPic ("egl/ui/cursorhover.tga");
+	uiMedia.cursorMat				= cgi.R_RegisterPic ("egl/ui/cursor.tga");
+	uiMedia.cursorHoverMat			= cgi.R_RegisterPic ("egl/ui/cursorhover.tga");
 
-	cgi.R_GetImageSize (uiMedia.cursorShader, &uiState.cursorW, &uiState.cursorH);
+	cgi.R_GetImageSize (uiMedia.cursorMat, &uiState.cursorW, &uiState.cursorH);
 
 	// Banners
 	uiMedia.banners.addressBook		= cgi.R_RegisterPic ("pics/m_banner_addressbook.tga");
@@ -256,16 +256,16 @@ static void CG_ModelMediaInit (void)
 
 /*
 ================
-CG_CrosshairShaderInit
+CG_CrosshairMaterialInit
 ================
 */
-void CG_CrosshairShaderInit (void)
+void CG_CrosshairMaterialInit (void)
 {
 	crosshair->modified = qFalse;
 	if (crosshair->intVal) {
 		crosshair->intVal = (crosshair->intVal < 0) ? 0 : crosshair->intVal;
 
-		cgMedia.crosshairShader = cgi.R_RegisterPic (Q_VarArgs ("pics/ch%d.tga", crosshair->intVal));
+		cgMedia.crosshairMat = cgi.R_RegisterPic (Q_VarArgs ("pics/ch%d.tga", crosshair->intVal));
 	}
 }
 
@@ -286,7 +286,7 @@ static void CG_PicMediaInit (void)
 	CG_LoadingString ("Loading image media...");
 	CG_LoadingFilename ("Crosshair");
 
-	CG_CrosshairShaderInit ();
+	CG_CrosshairMaterialInit ();
 
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("Pics");
@@ -299,14 +299,14 @@ static void CG_PicMediaInit (void)
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("HUD");
 
-	cgMedia.hudFieldShader		= cgi.R_RegisterPic ("pics/field_3.tga");
-	cgMedia.hudInventoryShader	= cgi.R_RegisterPic ("pics/inventory.tga");
-	cgMedia.hudNetShader		= cgi.R_RegisterPic ("pics/net.tga");
+	cgMedia.hudFieldMat		= cgi.R_RegisterPic ("pics/field_3.tga");
+	cgMedia.hudInventoryMat	= cgi.R_RegisterPic ("pics/inventory.tga");
+	cgMedia.hudNetMat		= cgi.R_RegisterPic ("pics/net.tga");
 	for (i=0 ; i<2 ; i++) {
 		for (j=0 ; j<11 ; j++)
-			cgMedia.hudNumShaders[i][j] = cgi.R_RegisterPic (Q_VarArgs ("pics/%s.tga", sb_nums[i][j]));
+			cgMedia.hudNumMats[i][j] = cgi.R_RegisterPic (Q_VarArgs ("pics/%s.tga", sb_nums[i][j]));
 	}
-	cgMedia.hudPausedShader		= cgi.R_RegisterPic ("pics/pause.tga");
+	cgMedia.hudPausedMat		= cgi.R_RegisterPic ("pics/pause.tga");
 
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("Disguise skins");

@@ -638,7 +638,7 @@ CL_ImageMediaInit
 void CL_ImageMediaInit (void)
 {
 	clMedia.cinMaterial			= R_RegisterPic ("***r_cinTexture***");
-	clMedia.consoleShader		= R_RegisterPic ("pics/conback.tga");
+	clMedia.consoleMaterial		= R_RegisterPic ("pics/conback.tga");
 	clMedia.whiteTexture		= R_RegisterPic ("***r_whiteTexture***");
 	clMedia.blackTexture		= R_RegisterPic ("***r_blackTexture***");
 }

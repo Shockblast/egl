@@ -68,7 +68,7 @@ static void SaveGameMenu_Init (void)
 	m_saveGameMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_saveGameMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_saveGameMenu.banner.generic.name		= NULL;
-	m_saveGameMenu.banner.shader			= uiMedia.banners.saveGame;
+	m_saveGameMenu.banner.mat			= uiMedia.banners.saveGame;
 
 	UI_AddItem (&m_saveGameMenu.frameWork,		&m_saveGameMenu.banner);
 

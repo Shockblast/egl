@@ -32,9 +32,9 @@ meshList_t	*r_currentList;
 #define R_MBCopy(in,out) \
 	(\
 		(out).sortKey = (in).sortKey, \
-		(out).shaderTime = (in).shaderTime, \
+		(out).matTime = (in).matTime, \
 		(out).entity = (in).entity, \
-		(out).shader = (in).shader, \
+		(out).mat = (in).mat, \
 		(out).fog = (in).fog, \
 		(out).mesh = (in).mesh \
 	)
@@ -44,7 +44,7 @@ meshList_t	*r_currentList;
 R_AddMeshToList
 =============
 */
-meshBuffer_t *R_AddMeshToList (shader_t *shader, float shaderTime, refEntity_t *ent, struct mQ3BspFog_s *fog, meshType_t meshType, void *mesh)
+meshBuffer_t *R_AddMeshToList (material_t *mat, float matTime, refEntity_t *ent, struct mQ3BspFog_s *fog, meshType_t meshType, void *mesh)
 {
 	mBspSurface_t	*surf;
 	meshBuffer_t	*mb;
@@ -52,9 +52,9 @@ meshBuffer_t *R_AddMeshToList (shader_t *shader, float shaderTime, refEntity_t *
 	assert (meshType >= 0 && meshType < MBT_MAX);
 
 	// Check if it qualifies to be added to the list
-	if (!shader)
+	if (!mat)
 		return NULL;
-	else if (!shader->numPasses)
+	else if (!mat->numPasses)
 		return NULL;
 	if (!mesh)
 		return NULL;
@@ -62,36 +62,36 @@ meshBuffer_t *R_AddMeshToList (shader_t *shader, float shaderTime, refEntity_t *
 		ent = ri.scn.defaultEntity;
 
 	// Choose the buffer to append to
-	switch (shader->sortKey) {
-	case SHADER_SORT_SKY:
-	case SHADER_SORT_OPAQUE:
-		if (r_currentList->numMeshes[shader->sortKey] >= MAX_MESH_BUFFER)
+	switch (mat->sortKey) {
+	case MAT_SORT_SKY:
+	case MAT_SORT_OPAQUE:
+		if (r_currentList->numMeshes[mat->sortKey] >= MAX_MESH_BUFFER)
 			return NULL;
-		mb = &r_currentList->meshBuffer[shader->sortKey][r_currentList->numMeshes[shader->sortKey]++];
+		mb = &r_currentList->meshBuffer[mat->sortKey][r_currentList->numMeshes[mat->sortKey]++];
 		break;
 
-	case SHADER_SORT_POSTPROCESS:
+	case MAT_SORT_POSTPROCESS:
 		if (r_currentList->numPostProcessMeshes >= MAX_POSTPROC_BUFFER)
 			return NULL;
 		mb = &r_currentList->meshBufferPostProcess[r_currentList->numPostProcessMeshes];
 		break;
 
-	case SHADER_SORT_PORTAL:
+	case MAT_SORT_PORTAL:
 		if (ri.scn.mirrorView || ri.scn.portalView)
 			return NULL;
 		// Fall through
 
 	default:
-		if (r_currentList->numAdditiveMeshes[shader->sortKey - MAX_MESH_KEYS] >= MAX_ADDITIVE_BUFFER)
+		if (r_currentList->numAdditiveMeshes[mat->sortKey - MAX_MESH_KEYS] >= MAX_ADDITIVE_BUFFER)
 			return NULL;
-		mb = &r_currentList->meshBufferAdditive[shader->sortKey - MAX_MESH_KEYS][r_currentList->numAdditiveMeshes[shader->sortKey - MAX_MESH_KEYS]++];
+		mb = &r_currentList->meshBufferAdditive[mat->sortKey - MAX_MESH_KEYS][r_currentList->numAdditiveMeshes[mat->sortKey - MAX_MESH_KEYS]++];
 		break;
 	}
 
 	// Fill it in
 	mb->entity = ent;
-	mb->shader = shader;
-	mb->shaderTime = shaderTime;
+	mb->mat = mat;
+	mb->matTime = matTime;
 	mb->fog = fog;
 	mb->mesh = mesh;
 
@@ -288,7 +288,7 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 	meshType_t		nextMeshType;
 
 	// Check if it's a sky surface
-	if (mb->shader->flags & SHADER_SKY) {
+	if (mb->mat->flags & MAT_SKY) {
 		if (!r_currentList->skyDrawn) {
 			R_DrawSky (mb);
 			r_currentList->skyDrawn = qTrue;
@@ -298,7 +298,7 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 
 	if (!shadowPass) {
 		// Check if it's a portal surface
-		if (mb->shader->sortKey == SHADER_SORT_PORTAL && !triangleOutlines) {
+		if (mb->mat->sortKey == MAT_SORT_PORTAL && !triangleOutlines) {
 		}
 	}
 	else {
@@ -334,12 +334,12 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 			nextSurf = NULL;
 
 		// Set features
-		features = mb->shader->features;
+		features = mb->mat->features;
 		if (gl_shownormals->intVal)
 			features |= MF_NORMALS;
-		if (mb->shader->flags & SHADER_AUTOSPRITE)
+		if (mb->mat->flags & MAT_AUTOSPRITE)
 			features |= MF_NOCULL;
-		if (!(mb->shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+		if (!(mb->mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 			features |= MF_NONBATCHED;
 
 		// Push the mesh
@@ -349,13 +349,13 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 		RB_PushMesh (surf->mesh, features);
 
 		if (features & MF_NONBATCHED
-		|| mb->shader->flags & SHADER_DEFORMV_BULGE
+		|| mb->mat->flags & MAT_DEFORMV_BULGE
 		|| !nextMB
-		|| nextMB->shader->flags & SHADER_DEFORMV_BULGE
+		|| nextMB->mat->flags & MAT_DEFORMV_BULGE
 		|| nextMB->entity != mb->entity
 		|| nextMB->sortKey != mb->sortKey
-		|| nextMB->shader != mb->shader
-		|| nextMB->shaderTime != mb->shaderTime
+		|| nextMB->mat != mb->mat
+		|| nextMB->matTime != mb->matTime
 		|| !nextSurf
 		|| nextSurf->q2_lmTexNumActive != surf->q2_lmTexNumActive
 		|| RB_BackendOverflow (nextSurf->mesh->numVerts, nextSurf->mesh->numIndexes)) {
@@ -379,25 +379,25 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 		surf = (mBspSurface_t *)mb->mesh;
 		nextSurf = (nextMeshType == MBT_Q3BSP) ? (mBspSurface_t *)nextMB->mesh : NULL;
 
-		features = mb->shader->features;
+		features = mb->mat->features;
 		if (gl_shownormals->intVal)
 			features |= MF_NORMALS;
-		if (mb->shader->flags & SHADER_AUTOSPRITE)
+		if (mb->mat->flags & MAT_AUTOSPRITE)
 			features |= MF_NOCULL;
-		if (!(mb->shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+		if (!(mb->mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 			features |= MF_NONBATCHED;
 		RB_PushMesh (surf->mesh, features);
 
 		if (features & MF_NONBATCHED
-		|| mb->shader->flags & SHADER_DEFORMV_BULGE
+		|| mb->mat->flags & MAT_DEFORMV_BULGE
 		|| !nextMB
 		|| nextMB->entity != mb->entity
 		|| nextMB->sortKey != mb->sortKey
-		|| nextMB->shader != mb->shader
-		|| nextMB->shaderTime != mb->shaderTime
+		|| nextMB->mat != mb->mat
+		|| nextMB->matTime != mb->matTime
 		|| nextSurf->dLightBits != surf->dLightBits
 		|| nextSurf->lmTexNum != surf->lmTexNum
-		|| nextMB->shader->flags & SHADER_DEFORMV_BULGE
+		|| nextMB->mat->flags & MAT_DEFORMV_BULGE
 		|| RB_BackendOverflow (nextSurf->mesh->numVerts, nextSurf->mesh->numIndexes)) {
 			if (mb->entity->model != ri.scn.worldModel)
 				RB_RotateForEntity (mb->entity);
@@ -419,24 +419,24 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 		surf = (mBspSurface_t *)mb->mesh;
 		nextSurf = nextMB ? (mBspSurface_t *)nextMB->mesh : NULL;
 
-		features = mb->shader->features;
+		features = mb->mat->features;
 		if (gl_shownormals->intVal)
 			features |= MF_NORMALS;
-		if (mb->shader->flags & SHADER_AUTOSPRITE)
+		if (mb->mat->flags & MAT_AUTOSPRITE)
 			features |= MF_NOCULL;
-		if (!(mb->shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+		if (!(mb->mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 			features |= MF_NONBATCHED;
 		R_PushFlare (mb);
 
 		if (features & MF_NONBATCHED
-		|| mb->shader->flags & SHADER_DEFORMV_BULGE
+		|| mb->mat->flags & MAT_DEFORMV_BULGE
 		|| !nextMB
 		|| nextMB->sortKey != mb->sortKey
-		|| nextMB->shader != mb->shader
-		|| nextMB->shaderTime != mb->shaderTime
+		|| nextMB->mat != mb->mat
+		|| nextMB->matTime != mb->matTime
 		|| nextSurf->dLightBits != surf->dLightBits
 		|| nextSurf->lmTexNum != surf->lmTexNum
-		|| nextMB->shader->flags & SHADER_DEFORMV_BULGE
+		|| nextMB->mat->flags & MAT_DEFORMV_BULGE
 		|| R_FlareOverflow ()) {
 			ri.pc.meshBatchFlush++;
 			RB_RenderMeshBuffer (mb, shadowPass);
@@ -455,18 +455,18 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 		if (shadowPass)
 			break;
 
-		features = mb->shader->features;
+		features = mb->mat->features;
 		if (gl_shownormals->intVal)
 			features |= MF_NORMALS;
-		if (!(mb->shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+		if (!(mb->mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 			features |= MF_NONBATCHED;
 		R_PushDecal (mb, features);
 
 		if (features & MF_NONBATCHED
 		|| !nextMB
 		|| nextMB->sortKey != mb->sortKey
-		|| nextMB->shader != mb->shader
-		|| nextMB->shaderTime != mb->shaderTime
+		|| nextMB->mat != mb->mat
+		|| nextMB->matTime != mb->matTime
 		|| R_DecalOverflow (nextMB)) {
 			ri.pc.meshBatchFlush++;
 			RB_RenderMeshBuffer (mb, shadowPass);
@@ -477,8 +477,8 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 		if (shadowPass)
 			break;
 
-		features = MF_TRIFAN|mb->shader->features;
-		if (!(mb->shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+		features = MF_TRIFAN|mb->mat->features;
+		if (!(mb->mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 			features |= MF_NONBATCHED;
 
 		R_PushPoly (mb, features);
@@ -486,8 +486,8 @@ static inline void R_BatchMeshBuffer (meshBuffer_t *mb, meshBuffer_t *nextMB, qB
 		if (features & MF_NONBATCHED
 		|| !nextMB
 		|| nextMB->sortKey != mb->sortKey
-		|| nextMB->shader != mb->shader
-		|| nextMB->shaderTime != mb->shaderTime
+		|| nextMB->mat != mb->mat
+		|| nextMB->matTime != mb->matTime
 		|| R_PolyOverflow (nextMB)) {
 			ri.pc.meshBatchFlush++;
 			RB_RenderMeshBuffer (mb, shadowPass);

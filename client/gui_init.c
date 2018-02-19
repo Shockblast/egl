@@ -1612,7 +1612,7 @@ static guiParseKey_t	cl_sliderDefKeyList[] = {
 	{ "high",					NULL						},
 	{ "step",					NULL						},
 	{ "vertical",				NULL						},
-	{ "thumbshader",			NULL						},
+	{ "thumbmaterial",			NULL						},
 	{ "cvar",					NULL						},
 	{ NULL,						NULL						}
 };
@@ -2345,8 +2345,8 @@ static void GUI_r_TouchGUI (gui_t *gui)
 
 	// Load generic media
 	if (gui->flags & WFL_MATERIAL) {
-		gui->matShader = R_RegisterPic (gui->matName);
-		if (!gui->matShader)
+		gui->matPtr = R_RegisterPic (gui->matName);
+		if (!gui->matPtr)
 			GUI_CantFindMedia (gui, "Material", gui->matName);
 	}
 

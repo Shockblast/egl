@@ -403,7 +403,7 @@ static void ControlsMenu_Init (void)
 	m_controlsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_controlsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_controlsMenu.banner.generic.name		= NULL;
-	m_controlsMenu.banner.shader			= uiMedia.banners.options;
+	m_controlsMenu.banner.mat			= uiMedia.banners.options;
 
 	//
 	// Menu selection

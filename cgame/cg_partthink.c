@@ -250,19 +250,19 @@ void pExploAnimThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t c
 	cgi.R_AddLight (org, 375 * ((color[3] / p->color[3]) + (frand () * 0.05f)), 1, 0.8f, 0.6f);
 
 	if (color[3] > (p->color[3] * 0.95))
-		p->shader = cgMedia.particleTable[PT_EXPLO1];
+		p->mat = cgMedia.particleTable[PT_EXPLO1];
 	else if (color[3] > (p->color[3] * 0.9))
-		p->shader = cgMedia.particleTable[PT_EXPLO2];
+		p->mat = cgMedia.particleTable[PT_EXPLO2];
 	else if (color[3] > (p->color[3] * 0.8))
-		p->shader = cgMedia.particleTable[PT_EXPLO3];
+		p->mat = cgMedia.particleTable[PT_EXPLO3];
 	else if (color[3] > (p->color[3] * 0.65))
-		p->shader = cgMedia.particleTable[PT_EXPLO4];
+		p->mat = cgMedia.particleTable[PT_EXPLO4];
 	else if (color[3] > (p->color[3] * 0.3))
-		p->shader = cgMedia.particleTable[PT_EXPLO5];
+		p->mat = cgMedia.particleTable[PT_EXPLO5];
 	else if (color[3] > (p->color[3] * 0.15))
-		p->shader = cgMedia.particleTable[PT_EXPLO6];
+		p->mat = cgMedia.particleTable[PT_EXPLO6];
 	else
-		p->shader = cgMedia.particleTable[PT_EXPLO7];
+		p->mat = cgMedia.particleTable[PT_EXPLO7];
 
 	p->thinkNext = qTrue;
 }

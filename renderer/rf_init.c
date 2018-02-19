@@ -314,10 +314,10 @@ R_MediaInit
 */
 void R_MediaInit (void)
 {
-	// Chars image/shaders
+	// Chars image/materials
 	R_CheckFont ();
 
-	// World Caustic shaders
+	// World Caustic materials
 	ri.media.worldLavaCaustics = R_RegisterTexture ("egl/lavacaustics", -1);
 	ri.media.worldSlimeCaustics = R_RegisterTexture ("egl/slimecaustics", -1);
 	ri.media.worldWaterCaustics = R_RegisterTexture ("egl/watercaustics", -1);
@@ -1337,7 +1337,7 @@ rInit_t R_Init (void)
 	ri.lightSysPool = Mem_CreatePool ("Refresh: Light system");
 	ri.modelSysPool = Mem_CreatePool ("Refresh: Model system");
 	ri.programSysPool = Mem_CreatePool ("Refresh: Program system");
-	ri.shaderSysPool = Mem_CreatePool ("Refresh: Shader system");
+	ri.matSysPool = Mem_CreatePool ("Refresh: Material system");
 
 	// Initialize our QGL dynamic bindings
 	if (!QGL_Init (gl_driver->string)) {
@@ -1479,7 +1479,7 @@ rInit_t R_Init (void)
 	// Sub-system init
 	R_ImageInit ();
 	R_ProgramInit ();
-	R_ShaderInit ();
+	R_MaterialInit ();
 	R_FontInit ();
 	R_MediaInit ();
 	R_ModelInit ();
@@ -1519,7 +1519,7 @@ void R_Shutdown (qBool full)
 
 	// Shutdown subsystems
 	R_FontShutdown ();
-	R_ShaderShutdown ();
+	R_MaterialShutdown ();
 	R_ProgramShutdown ();
 	R_ImageShutdown ();
 	R_ModelShutdown ();

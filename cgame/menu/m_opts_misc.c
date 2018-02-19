@@ -147,7 +147,7 @@ static void MiscMenu_Init (void)
 	m_miscMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_miscMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_miscMenu.banner.generic.name		= NULL;
-	m_miscMenu.banner.shader			= uiMedia.banners.options;
+	m_miscMenu.banner.mat			= uiMedia.banners.options;
 
 	m_miscMenu.header.generic.type		= UITYPE_ACTION;
 	m_miscMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

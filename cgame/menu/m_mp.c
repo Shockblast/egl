@@ -80,7 +80,7 @@ static void MultiplayerMenu_Init (void)
 	m_multiPlayerMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_multiPlayerMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_multiPlayerMenu.banner.generic.name		= NULL;
-	m_multiPlayerMenu.banner.shader				= uiMedia.banners.multiplayer;
+	m_multiPlayerMenu.banner.mat				= uiMedia.banners.multiplayer;
 
 	m_multiPlayerMenu.joinservers_menu.generic.type		= UITYPE_ACTION;
 	m_multiPlayerMenu.joinservers_menu.generic.flags	= UIF_CENTERED|UIF_LARGE|UIF_SHADOW;

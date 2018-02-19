@@ -204,7 +204,7 @@ typedef struct frame_s {
 typedef struct refEntity_s {
 	struct refModel_s		*model;			// Opaque type outside refresh
 
-	struct shader_s			*skin;			// NULL for inline skin
+	struct material_s			*material;			// NULL for inline material
 	int						skinNum;
 
 	mat3x3_t				axis;
@@ -217,7 +217,7 @@ typedef struct refEntity_s {
 	float					backLerp;		// 0.0 = current, 1.0 = old
 
 	bvec4_t					color;
-	float					shaderTime;
+	float					matTime;
 
 	int						flags;
 	float					scale;
@@ -264,8 +264,8 @@ typedef struct refPoly_s {
 	vec2_t					*texCoords;
 	bvec4_t					*colors;
 
-	struct shader_s			*shader;
-	float					shaderTime;
+	struct material_s			*mat;
+	float					matTime;
 } refPoly_t;
 
 typedef struct refDecal_s {

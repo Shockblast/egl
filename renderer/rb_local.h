@@ -76,7 +76,7 @@ extern rb_glState_t	rb_glState;
 // rb_math.c
 //
 
-float		*RB_TableForFunc (shTableFunc_t func);
+float		*RB_TableForFunc (matTableFunc_t func);
 
 void		Matrix4_Copy2D (const mat4x4_t m1, mat4x4_t m2);
 void		Matrix4_Multiply2D (const mat4x4_t m1, const mat4x4_t m2, mat4x4_t out);

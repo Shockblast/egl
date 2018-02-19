@@ -135,9 +135,6 @@
     <ClInclude Include="..\..\..\common\protocol.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\renderer\r_glstate.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\renderer\r_local.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
@@ -172,9 +169,6 @@
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\renderer\rf_public.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\renderer\rf_shader.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\server\sv_local.h">
@@ -215,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\openal\alut.h">
       <Filter>Header Files\include\openal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\renderer\rf_material.h">
+      <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -362,9 +359,6 @@
     <ClCompile Include="..\..\..\common\parse.c">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\renderer\r_glstate.c">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\renderer\r_math.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
@@ -404,9 +398,6 @@
     <ClCompile Include="..\..\..\renderer\rf_decal.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\renderer\rf_entity.c">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\renderer\rf_font.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
@@ -429,12 +420,6 @@
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\renderer\rf_program.c">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\renderer\rf_shader.c">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\renderer\rf_skeletal.c">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\renderer\rf_sky.c">
@@ -481,6 +466,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\minizip\zip.c">
       <Filter>Source Files\include\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\renderer\rf_material.c">
+      <Filter>Source Files\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

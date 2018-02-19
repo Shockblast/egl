@@ -175,7 +175,7 @@ static void GloomMenu_Init (void)
 	m_gloomOptionsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_gloomOptionsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_gloomOptionsMenu.banner.generic.name		= NULL;
-	m_gloomOptionsMenu.banner.shader			= uiMedia.banners.options;
+	m_gloomOptionsMenu.banner.mat			= uiMedia.banners.options;
 
 	m_gloomOptionsMenu.header.generic.type		= UITYPE_ACTION;
 	m_gloomOptionsMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

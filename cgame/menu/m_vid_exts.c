@@ -163,7 +163,7 @@ static void GLExtsMenu_Init (void)
 	m_extensionsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_extensionsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_extensionsMenu.banner.generic.name		= NULL;
-	m_extensionsMenu.banner.shader				= uiMedia.banners.video;
+	m_extensionsMenu.banner.mat				= uiMedia.banners.video;
 
 	m_extensionsMenu.header.generic.type		= UITYPE_ACTION;
 	m_extensionsMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

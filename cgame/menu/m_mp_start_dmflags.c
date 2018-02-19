@@ -223,7 +223,7 @@ static void DMFlagsMenu_Init (void)
 	m_dMFlagsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_dMFlagsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_dMFlagsMenu.banner.generic.name		= NULL;
-	m_dMFlagsMenu.banner.shader				= uiMedia.banners.startServer;
+	m_dMFlagsMenu.banner.mat				= uiMedia.banners.startServer;
 
 	m_dMFlagsMenu.header.generic.type		= UITYPE_ACTION;
 	m_dMFlagsMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;
