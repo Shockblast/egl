@@ -180,11 +180,7 @@ static void R_MarkQ2Leaves (void)
 			viewCluster2 = leaf->cluster;
 	}
 
-	if (ri.def.areaChanged)
-		ri.def.areaChanged = qFalse;
-	else if (ri.scn.oldViewCluster == ri.scn.viewCluster
-	&& oldViewCluster2 == viewCluster2
-	&& !r_noVis->intVal && ri.scn.viewCluster != -1)
+	if (ri.scn.oldViewCluster == ri.scn.viewCluster && oldViewCluster2 == viewCluster2 && (ri.def.rdFlags & RDF_OLDAREABITS) && !r_noVis->intVal && ri.scn.viewCluster != -1)
 		return;
 
 	// Development aid to let you run around and see exactly where the pvs ends
@@ -624,11 +620,7 @@ static void R_MarkQ3Leaves (void)
 		ri.scn.viewCluster = leaf->cluster;
 	}
 
-	if (ri.def.areaChanged)
-		ri.def.areaChanged = qFalse;
-	else if (!r_noVis->intVal && !r_q3_visChanged
-	&& ri.scn.viewCluster == ri.scn.oldViewCluster
-	&& ri.scn.viewCluster != -1)
+	if (ri.scn.viewCluster == ri.scn.oldViewCluster && (ri.def.rdFlags & RDF_OLDAREABITS) && !r_noVis->intVal && ri.scn.viewCluster != -1)
 		return;
 
 	// Development aid to let you run around and see exactly where the pvs ends

@@ -113,16 +113,18 @@ typedef struct cgDownloadInfo_s {
 typedef struct cgState_s {
 	byte				currGameMod;
 
-	// Time
-	int					netTime;
-	float				netFrameTime;
+	// Times
+	// Note: there's a net and refresh time because they run asynchronously
+	int					netTime;			// Net time
+	float				netFrameTime;		// Network frame delta (scaled by timescale)
 
-	int					refreshTime;
-	float				refreshFrameTime;
+	int					refreshTime;		// Refresh time
+	float				refreshFrameTime;	// Refresh frame delta (scaled by timescale)
 
-	int					realTime;
+	int					realTime;			// System time
 
 	// View settings
+	qBool				oldAreaBits;
 	refDef_t			refDef;
 	vec4_t				viewBlend;
 

@@ -570,10 +570,13 @@ void V_RenderView (int realTime, float netFrameTime, float refreshFrameTime, flo
 
 		cg.refDef.time			= cg.refreshTime * 0.001f;
 
-		cg.refDef.areaChanged	= cg.frame.areaChanged;
 		cg.refDef.areaBits		= cg.frame.areaBits;
-
 		cg.refDef.rdFlags		= cg.frame.playerState.rdFlags;
+
+		if (cg.oldAreaBits)
+			cg.refDef.rdFlags |= RDF_OLDAREABITS;
+		else
+			cg.oldAreaBits = qTrue;
 	}
 
 	// Render the frame

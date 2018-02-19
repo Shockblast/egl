@@ -352,6 +352,12 @@ void CG_EndFrameSequence (int numEntities)
 		return;
 	}
 
+	// Check if areaBits changed
+	if (memcmp(cg.oldFrame.areaBits, cg.frame.areaBits, sizeof(cg.frame.areaBits)) == 0)
+		cg.oldAreaBits = qTrue;
+	else
+		cg.oldAreaBits = qFalse;
+
 	// Build a list of collision solids
 	CG_BuildSolidList ();
 

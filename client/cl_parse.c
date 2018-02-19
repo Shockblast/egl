@@ -503,7 +503,7 @@ static void CL_ParseFrame (int extraBits)
 {
 	int		cmd, len;
 	uint32	serverFrame;
-	int		extraFlags, i;
+	int		extraFlags;
 	frame_t	*oldFrame;
 
 	memset (&cl.frame, 0, sizeof (cl.frame));
@@ -585,20 +585,6 @@ static void CL_ParseFrame (int extraBits)
 	// Read areaBits
 	len = MSG_ReadByte (&cls.netMessage);
 	MSG_ReadData (&cls.netMessage, &cl.frame.areaBits, len);
-
-	// Check for change
-	if (oldFrame) {
-		cl.frame.areaChanged = qFalse;
-		for (i=0 ; i<MAX_AREA_BITS ; i++) {
-			if (oldFrame->areaBits[i] != cl.frame.areaBits[i]) {
-				cl.frame.areaChanged = qTrue;
-				break;
-			}
-		}
-	}
-	else {
-		cl.frame.areaChanged = qTrue;
-	}
 
 	// Read playerinfo
 	if (cls.serverProtocol != ENHANCED_PROTOCOL_VERSION) {

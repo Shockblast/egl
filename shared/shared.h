@@ -1829,6 +1829,8 @@ enum {
 	RDF_NOWORLDMODEL	= 1 << 1,		// used for player configuration screen
 	RDF_IRGOGGLES		= 1 << 2,
 	RDF_UVGOGGLES		= 1 << 3,
+
+	RDF_OLDAREABITS		= 1 << 4,
 };
 
 // playerState_t is the information needed in addition to pMoveState_t to

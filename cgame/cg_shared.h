@@ -193,7 +193,6 @@ typedef struct frame_s {
 	int						serverFrame;
 	int						serverTime;		// server time the message is valid for (in msec)
 	int						deltaFrame;
-	qBool					areaChanged;
 	byte					areaBits[MAX_AREA_BITS];		// portalarea visibility bits
 	playerStateNew_t		playerState;
 	int						numEntities;
@@ -376,7 +375,6 @@ typedef struct refDef_s {
 
 	int						rdFlags;			// RDF_NOWORLDMODEL, etc
 
-	qBool					areaChanged;
 	byte					*areaBits;			// if not NULL, only areas with set bits will be drawn
 } refDef_t;
 
