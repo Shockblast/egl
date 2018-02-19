@@ -113,7 +113,7 @@ CG_MapMediaInit
 static void CG_MapMediaInit (void)
 {
 	float		rotate, pctInc;
-	vec3_t		axis;
+	vec3_t		axis = { 1, 0, 0 };
 	int			i, j;
 
 	if (!cg.configStrings[CS_MODELS+1][0])
@@ -211,7 +211,7 @@ static void CG_MapMediaInit (void)
 	CG_LoadingString ("Loading sky env...");
 	rotate = (float)atof (cg.configStrings[CS_SKYROTATE]);
 	if (sscanf (cg.configStrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]) != 3)
-		Com_Error(ERR_FATAL, "Couldn't decode sky axis\n");
+		Com_DevPrintf (PRNT_WARNING, "Couldn't decode sky axis\n");
 	cgi.R_SetSky (cg.configStrings[CS_SKY], rotate, axis);
 }
 

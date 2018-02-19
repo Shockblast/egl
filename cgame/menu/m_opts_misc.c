@@ -40,8 +40,6 @@ typedef struct m_miscMenu_s {
 
 	uiList_t		shadows_list;			// effects menu kthx
 	uiList_t		screenshot_list;
-	uiSlider_t		jpgquality_slider;
-	uiAction_t		jpgquality_amount;
 
 	uiList_t		flashblend_list;		// effects menu kthx
 
@@ -59,16 +57,8 @@ static void ScreenshotFunc (void *unused)
 {
 	if (m_miscMenu.screenshot_list.curValue == 1)
 		cgi.Cvar_Set ("gl_screenshot", "png", qFalse);
-	else if (m_miscMenu.screenshot_list.curValue == 2)
-		cgi.Cvar_Set ("gl_screenshot", "jpg", qFalse);
 	else
 		cgi.Cvar_Set ("gl_screenshot", "tga", qFalse);
-}
-
-static void JPGQualityFunc (void *unused)
-{
-	cgi.Cvar_SetValue ("gl_jpgquality", m_miscMenu.jpgquality_slider.curValue * 5, qFalse);
-	m_miscMenu.jpgquality_amount.generic.name = cgi.Cvar_GetStringValue ("gl_jpgquality");
 }
 
 static void FlashBlendFunc (void *unused)
@@ -89,14 +79,8 @@ static void MiscMenu_SetValues (void)
 
 	if (!Q_stricmp (cgi.Cvar_GetStringValue ("gl_screenshot"), "png"))
 		m_miscMenu.screenshot_list.curValue	= 1;
-	else if (!Q_stricmp (cgi.Cvar_GetStringValue ("gl_screenshot"), "jpg"))
-		m_miscMenu.screenshot_list.curValue	= 2;
 	else
 		m_miscMenu.screenshot_list.curValue	= 0;
-
-	cgi.Cvar_SetValue ("gl_jpgquality",			clamp (cgi.Cvar_GetIntegerValue ("gl_jpgquality"), 0, 100), qFalse);
-	m_miscMenu.jpgquality_slider.curValue		= cgi.Cvar_GetIntegerValue ("gl_jpgquality") / 5;
-	m_miscMenu.jpgquality_amount.generic.name	= cgi.Cvar_GetStringValue ("gl_jpgquality");
 
 	cgi.Cvar_SetValue ("gl_flashblend",		clamp (cgi.Cvar_GetIntegerValue ("gl_flashblend"), 0, 1), qFalse);
 	m_miscMenu.flashblend_list.curValue	= cgi.Cvar_GetIntegerValue ("gl_flashblend");
@@ -131,7 +115,6 @@ static void MiscMenu_Init (void)
 	static char *screenshot_names[] = {
 		"tga",
 		"png",
-		"jpg",
 		0
 	};
 
@@ -165,15 +148,6 @@ static void MiscMenu_Init (void)
 	m_miscMenu.screenshot_list.itemNames			= screenshot_names;
 	m_miscMenu.screenshot_list.generic.statusBar	= "Selects screenshot output format";
 
-	m_miscMenu.jpgquality_slider.generic.type		= UITYPE_SLIDER;
-	m_miscMenu.jpgquality_slider.generic.name		= "JPG screenshot quality";
-	m_miscMenu.jpgquality_slider.generic.callBack	= JPGQualityFunc;
-	m_miscMenu.jpgquality_slider.minValue			= 0;
-	m_miscMenu.jpgquality_slider.maxValue			= 20;
-	m_miscMenu.jpgquality_slider.generic.statusBar	= "JPG Screenshot Quality";
-	m_miscMenu.jpgquality_amount.generic.type		= UITYPE_ACTION;
-	m_miscMenu.jpgquality_amount.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELECT;
-
 	m_miscMenu.flashblend_list.generic.type			= UITYPE_SPINCONTROL;
 	m_miscMenu.flashblend_list.generic.name			= "Flashblend";
 	m_miscMenu.flashblend_list.generic.callBack		= FlashBlendFunc;
@@ -193,8 +167,6 @@ static void MiscMenu_Init (void)
 
 	UI_AddItem (&m_miscMenu.frameWork,			&m_miscMenu.shadows_list);
 	UI_AddItem (&m_miscMenu.frameWork,			&m_miscMenu.screenshot_list);
-	UI_AddItem (&m_miscMenu.frameWork,			&m_miscMenu.jpgquality_slider);
-	UI_AddItem (&m_miscMenu.frameWork,			&m_miscMenu.jpgquality_amount);
 
 	UI_AddItem (&m_miscMenu.frameWork,			&m_miscMenu.flashblend_list);
 
@@ -243,10 +215,6 @@ static void MiscMenu_Draw (void)
 	m_miscMenu.shadows_list.generic.y			= y += UIFT_SIZEINC + UIFT_SIZEINCMED;
 	m_miscMenu.screenshot_list.generic.x		= 0;
 	m_miscMenu.screenshot_list.generic.y		= y += UIFT_SIZEINC;
-	m_miscMenu.jpgquality_slider.generic.x		= 0;
-	m_miscMenu.jpgquality_slider.generic.y		= y += UIFT_SIZEINC;
-	m_miscMenu.jpgquality_amount.generic.x		= (UIFT_SIZE * (SLIDER_RANGE + 5));
-	m_miscMenu.jpgquality_amount.generic.y		= y;
 	m_miscMenu.flashblend_list.generic.x		= 0;
 	m_miscMenu.flashblend_list.generic.y		= y += UIFT_SIZEINC + UIFT_SIZEINCMED;
 	m_miscMenu.back_action.generic.x			= 0;

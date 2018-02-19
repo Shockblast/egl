@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // The lightmap texture data needs to be kept in
 // main memory so texsubimage can update properly
-static float	r_q2_blockLights[34*34*3];
+static float	r_q2_blockLights[256*256*3];
 
 static vec3_t	r_q2_pointColor;
 static vec3_t	r_q2_lightSpot;

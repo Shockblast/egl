@@ -129,7 +129,6 @@ cVar_t	*vid_height;
 
 cVar_t	*intensity;
 
-cVar_t	*gl_jpgquality;
 cVar_t	*gl_nobind;
 cVar_t	*gl_picmip;
 cVar_t	*gl_screenshot;
@@ -1241,9 +1240,8 @@ static void R_Register (void)
 	vid_width			= Cvar_Register ("vid_width",			"0",						CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	vid_height			= Cvar_Register ("vid_height",			"0",						CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 
-	intensity			= Cvar_Register ("intensity",			"2",						CVAR_ARCHIVE);
+	intensity			= Cvar_Register ("intensity",			"1",						CVAR_ARCHIVE);
 
-	gl_jpgquality		= Cvar_Register ("gl_jpgquality",		"85",						CVAR_ARCHIVE);
 	gl_nobind			= Cvar_Register ("gl_nobind",			"0",						CVAR_CHEAT);
 	gl_picmip			= Cvar_Register ("gl_picmip",			"0",						CVAR_LATCH_VIDEO);
 	gl_screenshot		= Cvar_Register ("gl_screenshot",		"tga",						CVAR_ARCHIVE);

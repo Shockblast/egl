@@ -319,8 +319,8 @@ static void V_CalcThirdPersonView (void)
 
 	// Trig stuff
 	angle = M_PI * (cg_thirdPersonAngle->floatVal / 180.0f);
-	upDist = cg_thirdPersonDist->floatVal * sin (angle);
-	backDist = cg_thirdPersonDist->floatVal * cos (angle);
+	upDist = (cg_thirdPersonDist->floatVal + 1.0f) * sin (angle);
+	backDist = (cg_thirdPersonDist->floatVal + 1.0f) * cos (angle);
 
 	// Move up
 	Vec3MA (cg.refDef.viewOrigin, -backDist, cg.refDef.viewAxis[0], end);

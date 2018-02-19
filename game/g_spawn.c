@@ -383,7 +383,7 @@ static void ED_ParseField (char *key, char *value, edict_t *ent)
 				break;
 			case F_VECTOR:
 				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3)
-					Com_Error (ERR_FATAL, "Couldn't decode vector");
+					Com_DevPrintf (PRNT_WARNING, "Couldn't decode vector");
 				((float *)(b+f->ofs))[0] = vec[0];
 				((float *)(b+f->ofs))[1] = vec[1];
 				((float *)(b+f->ofs))[2] = vec[2];
