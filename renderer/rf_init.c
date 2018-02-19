@@ -30,7 +30,6 @@ cVar_t	*gl_bitdepth;
 cVar_t	*gl_clear;
 cVar_t	*gl_cull;
 cVar_t	*gl_drawbuffer;
-cVar_t	*gl_driver;
 cVar_t	*gl_dynamic;
 cVar_t	*gl_errorcheck;
 
@@ -1145,7 +1144,6 @@ static void R_Register (void)
 	gl_clear			= Cvar_Register ("gl_clear",			"0",			0);
 	gl_cull				= Cvar_Register ("gl_cull",				"1",			0);
 	gl_drawbuffer		= Cvar_Register ("gl_drawbuffer",		"GL_BACK",		0);
-	gl_driver			= Cvar_Register ("gl_driver",			GL_DRIVERNAME,	CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	gl_dynamic			= Cvar_Register ("gl_dynamic",			"1",			0);
 	gl_errorcheck		= Cvar_Register ("gl_errorcheck",		"1",			CVAR_ARCHIVE);
 
@@ -1340,8 +1338,8 @@ rInit_t R_Init (void)
 	ri.matSysPool = Mem_CreatePool ("Refresh: Material system");
 
 	// Initialize our QGL dynamic bindings
-	if (!QGL_Init (gl_driver->string)) {
-		Com_Printf (PRNT_ERROR, "...could not load \"%s\"\n", gl_driver->string);
+	if (!QGL_Init (GL_DRIVERNAME)) {
+		Com_Printf (PRNT_ERROR, "...could not load \"%s\"\n", GL_DRIVERNAME);
 		QGL_Shutdown ();
 		return R_INIT_QGL_FAIL;
 	}

@@ -807,7 +807,6 @@ extern cVar_t	*gl_bitdepth;
 extern cVar_t	*gl_clear;
 extern cVar_t	*gl_cull;
 extern cVar_t	*gl_drawbuffer;
-extern cVar_t	*gl_driver;
 extern cVar_t	*gl_dynamic;
 extern cVar_t	*gl_errorcheck;
 

@@ -33,7 +33,6 @@ typedef struct glwState_s {
 
 	qBool		classRegistered;
 
-	qBool		miniDriver;
 	qBool		bppChangeAllowed;
 
 	HDC			hDC;			// handle to device context
