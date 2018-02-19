@@ -134,7 +134,7 @@ qBool		R_CullSphere (const vec3_t origin, const float radius, int clipFlags);
 // rf_decal.c
 //
 
-qBool		R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle, float size);
+qBool		R_CreateDecal (refDecal_t *d, struct material_s *material, vec3_t origin, vec3_t direction, float angle, float size);
 qBool		R_FreeDecal (refDecal_t *d);
 
 //
@@ -186,7 +186,7 @@ void		R_EndFrame (void);
 
 void		R_ClearScene (void);
 
-void		R_AddDecal (refDecal_t *decal, bvec4_t color, struct material_s *material, float materialTime);
+void		R_AddDecal (refDecal_t *decal, bvec4_t color, float materialTime);
 void		R_AddEntity (refEntity_t *ent);
 void		R_AddPoly (refPoly_t *poly);
 void		R_AddLight (vec3_t org, float intensity, float r, float g, float b);

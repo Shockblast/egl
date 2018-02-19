@@ -715,7 +715,7 @@ static uint32 R_GetClippedFragments (vec3_t origin, float radius, vec3_t axis[3]
 R_CreateDecal
 ===============
 */
-qBool R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle, float size)
+qBool R_CreateDecal (refDecal_t *d, struct material_s *material, vec3_t origin, vec3_t direction, float angle, float size)
 {
 	vec3_t			*clipNormals, *clipVerts;
 	refFragment_t	*fr, *clipFragments;
@@ -773,16 +773,18 @@ qBool R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle
 		if (fr->surf) {
 			for (k=i+1 ; k<numFragments ; k++) {
 				if (clipFragments[k].surf == fr->surf)
-					clipFragments[k].surf = NULL;
+					fr->surf = NULL;
 			}
 
-			totalSurfaces++;
+			if (fr->surf)
+				totalSurfaces++;
 		}
 	}
 	assert (totalIndexes && totalVerts);
 
 	// Store values
 	Vec3Copy (origin, d->origin);
+	d->poly.mat = material;
 	d->numIndexes = totalIndexes;
 	d->poly.numVerts = totalVerts;
 	d->numSurfaces = totalSurfaces;

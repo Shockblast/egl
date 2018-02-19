@@ -492,11 +492,11 @@ void R_ClearScene (void)
 R_AddDecal
 =====================
 */
-void R_AddDecal (refDecal_t *decal, bvec4_t color, struct material_s *material, float materialTime)
+void R_AddDecal (refDecal_t *decal, bvec4_t color, float materialTime)
 {
 	int			i;
 
-	if (!decal || ri.scn.numDecals >= MAX_REF_DECALS)
+	if (!decal || ri.scn.numDecals+1 >= MAX_REF_DECALS)
 		return;
 
 	// Adjust color
@@ -505,10 +505,6 @@ void R_AddDecal (refDecal_t *decal, bvec4_t color, struct material_s *material, 
 			*(int *)decal->poly.colors[i] = *(int *)color;
 	}
 
-	// Material
-	decal->poly.mat = material;
-	if (!decal->poly.mat)
-		decal->poly.mat = r_noMaterial;
 	decal->poly.matTime = materialTime;
 
 	// FIXME: adjust bmodel decals here
@@ -545,7 +541,7 @@ R_AddPoly
 */
 void R_AddPoly (refPoly_t *poly)
 {
-	if (ri.scn.numPolys >= MAX_REF_POLYS)
+	if (ri.scn.numPolys+1 >= MAX_REF_POLYS)
 		return;
 
 	// Material
@@ -566,7 +562,7 @@ void R_AddLight (vec3_t origin, float intensity, float r, float g, float b)
 {
 	refDLight_t	*dl;
 
-	if (ri.scn.numDLights >= MAX_REF_DLIGHTS)
+	if (ri.scn.numDLights+1 >= MAX_REF_DLIGHTS)
 		return;
 
 	if (!intensity)

@@ -138,7 +138,7 @@ cgDecal_t *CG_SpawnDecal (float org0,				float org1,					float org2,
 
 	// Create the decal
 	d = CG_AllocDecal ();
-	if (!cgi.R_CreateDecal (&d->refDecal, origin, dir, angle, size)) {
+	if (!cgi.R_CreateDecal (&d->refDecal, cgMedia.decalTable[type%DT_PICTOTAL], origin, dir, angle, size)) {
 		CG_FreeDecal (d);
 		return NULL;
 	}
@@ -152,7 +152,6 @@ cgDecal_t *CG_SpawnDecal (float org0,				float org1,					float org2,
 
 	d->size = size;
 
-	d->mat = cgMedia.decalTable[type%DT_PICTOTAL];
 	d->flags = flags;
 
 	d->think = think;
@@ -303,7 +302,7 @@ void CG_AddDecals (void)
 		outColor[2] = color[2];
 		outColor[3] = color[3] * 255;
 
-		cgi.R_AddDecal (&d->refDecal, outColor, d->mat, 0);
+		cgi.R_AddDecal (&d->refDecal, outColor, 0);
 
 nextDecal:
 		// Kill if instant
