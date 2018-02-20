@@ -144,7 +144,7 @@ V_TestParticles
 static cgParticle_t v_testParticleList[PT_PICTOTAL];
 static void V_TestParticles (void)
 {
-	int				i;
+	int				i, type;
 	float			d, r, u;
 	vec3_t			origin;
 	float			scale;
@@ -160,6 +160,8 @@ static void V_TestParticles (void)
 		r = 3*((i&7)-3.5f);
 		u = 3*(((i>>3)&7)-3.5f);
 
+		type = (cg.realTime / 1000) % PT_PICTOTAL ;//i;
+
 		// Center
 		origin[0] = cg.refDef.viewOrigin[0] + cg.refDef.viewAxis[0][0]*d - cg.refDef.viewAxis[1][0]*r + cg.refDef.viewAxis[2][0]*u;
 		origin[1] = cg.refDef.viewOrigin[1] + cg.refDef.viewAxis[0][1]*d - cg.refDef.viewAxis[1][1]*r + cg.refDef.viewAxis[2][1]*u;
@@ -167,28 +169,28 @@ static void V_TestParticles (void)
 
 		// Top left
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[0], 0, 0);
+		Vec2Set (v_testParticleList[i].outCoords[0], cgMedia.particleCoords[type][0], cgMedia.particleCoords[type][1]);
 		Vec3Set (v_testParticleList[i].outVertices[0],	origin[0] + cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 														origin[1] + cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 														origin[2] + cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 		// Bottom left
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[1], 0, 1);
+		Vec2Set (v_testParticleList[i].outCoords[1], cgMedia.particleCoords[type][0], cgMedia.particleCoords[type][3]);
 		Vec3Set (v_testParticleList[i].outVertices[1],	origin[0] - cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 														origin[1] - cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 														origin[2] - cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 		// Bottom right
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[2], 1, 1);
+		Vec2Set (v_testParticleList[i].outCoords[2], cgMedia.particleCoords[type][2], cgMedia.particleCoords[type][3]);
 		Vec3Set (v_testParticleList[i].outVertices[2],	origin[0] - cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 														origin[1] - cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 														origin[2] - cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);
 
 		// Top right
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[3], 1, 0);
+		Vec2Set (v_testParticleList[i].outCoords[3], cgMedia.particleCoords[type][2], cgMedia.particleCoords[type][1]);
 		Vec3Set (v_testParticleList[i].outVertices[3],	origin[0] + cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 														origin[1] + cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 														origin[2] + cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);

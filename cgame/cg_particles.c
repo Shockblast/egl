@@ -129,6 +129,7 @@ void	CG_SpawnParticle (float org0,					float org1,					float org2,
 
 	p = CG_AllocParticle ();
 	p->time = (float)cg.realTime;
+	p->type = type;
 
 	Vec3Set (p->org, org0, org1, org2);
 	Vec3Copy (p->org, p->oldOrigin);
@@ -392,50 +393,50 @@ void CG_AddParticles (void)
 				float s = (float)sin (DEG2RAD (orient)) * scale;
 
 				// Top left
-				Vec2Set (p->outCoords[0], 0, 0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + a_upVec[0]*s - a_rtVec[0]*c,
 											org[1] + a_upVec[1]*s - a_rtVec[1]*c,
 											org[2] + a_upVec[2]*s - a_rtVec[2]*c);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0, 1);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - a_upVec[0]*c - a_rtVec[0]*s,
 											org[1] - a_upVec[1]*c - a_rtVec[1]*s,
 											org[2] - a_upVec[2]*c - a_rtVec[2]*s);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1, 1);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - a_upVec[0]*s + a_rtVec[0]*c,
 											org[1] - a_upVec[1]*s + a_rtVec[1]*c,
 											org[2] - a_upVec[2]*s + a_rtVec[2]*c);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1, 0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + a_upVec[0]*c + a_rtVec[0]*s,
 											org[1] + a_upVec[1]*c + a_rtVec[1]*s,
 											org[2] + a_upVec[2]*c + a_rtVec[2]*s);
 			}
 			else {
 				// Top left
-				Vec2Set (p->outCoords[0], 0, 0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + a_upVec[0]*scale - a_rtVec[0]*scale,
 											org[1] + a_upVec[1]*scale - a_rtVec[1]*scale,
 											org[2] + a_upVec[2]*scale - a_rtVec[2]*scale);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0, 1);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - a_upVec[0]*scale - a_rtVec[0]*scale,
 											org[1] - a_upVec[1]*scale - a_rtVec[1]*scale,
 											org[2] - a_upVec[2]*scale - a_rtVec[2]*scale);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1, 1);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - a_upVec[0]*scale + a_rtVec[0]*scale,
 											org[1] - a_upVec[1]*scale + a_rtVec[1]*scale,
 											org[2] - a_upVec[2]*scale + a_rtVec[2]*scale);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1, 0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + a_upVec[0]*scale + a_rtVec[0]*scale,
 											org[1] + a_upVec[1]*scale + a_rtVec[1]*scale,
 											org[2] + a_upVec[2]*scale + a_rtVec[2]*scale);
@@ -518,25 +519,25 @@ void CG_AddParticles (void)
 			Vec3Scale (a_upVec, 0.75f * Vec3Length (p->angle), a_upVec);
 
 			// Top left
-			Vec2Set (p->outCoords[0], 0, 0);
+			Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 			Vec3Set (p->outVertices[0], org[0] + a_upVec[0]*scale - a_rtVec[0]*scale,
 										org[1] + a_upVec[1]*scale - a_rtVec[1]*scale,
 										org[2] + a_upVec[2]*scale - a_rtVec[2]*scale);
 
 			// Bottom left
-			Vec2Set (p->outCoords[1], 0, 1);
+			Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 			Vec3Set (p->outVertices[1], org[0] - a_upVec[0]*scale - a_rtVec[0]*scale,
 										org[1] - a_upVec[1]*scale - a_rtVec[1]*scale,
 										org[2] - a_upVec[2]*scale - a_rtVec[2]*scale);
 
 			// Bottom right
-			Vec2Set (p->outCoords[2], 1, 1);
+			Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 			Vec3Set (p->outVertices[2], org[0] - a_upVec[0]*scale + a_rtVec[0]*scale,
 										org[1] - a_upVec[1]*scale + a_rtVec[1]*scale,
 										org[2] - a_upVec[2]*scale + a_rtVec[2]*scale);
 
 			// Top right
-			Vec2Set (p->outCoords[3], 1, 0);
+			Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 			Vec3Set (p->outVertices[3], org[0] + a_upVec[0]*scale + a_rtVec[0]*scale,
 										org[1] + a_upVec[1]*scale + a_rtVec[1]*scale,
 										org[2] + a_upVec[2]*scale + a_rtVec[2]*scale);
@@ -561,50 +562,50 @@ void CG_AddParticles (void)
 				float s = (float)sin (DEG2RAD (orient)) * scale;
 
 				// Top left
-				Vec2Set (p->outCoords[0], 0.0, 0.0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + cg.refDef.viewAxis[1][0]*c + cg.refDef.viewAxis[2][0]*s,
 											org[1] + cg.refDef.viewAxis[1][1]*c + cg.refDef.viewAxis[2][1]*s,
 											org[2] + cg.refDef.viewAxis[1][2]*c + cg.refDef.viewAxis[2][2]*s);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0.0, 1.0);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - cg.refDef.viewAxis[1][0]*s + cg.refDef.viewAxis[2][0]*c,
 											org[1] - cg.refDef.viewAxis[1][1]*s + cg.refDef.viewAxis[2][1]*c,
 											org[2] - cg.refDef.viewAxis[1][2]*s + cg.refDef.viewAxis[2][2]*c);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1.0, 1.0);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - cg.refDef.viewAxis[1][0]*c - cg.refDef.viewAxis[2][0]*s,
 											org[1] - cg.refDef.viewAxis[1][1]*c - cg.refDef.viewAxis[2][1]*s,
 											org[2] - cg.refDef.viewAxis[1][2]*c - cg.refDef.viewAxis[2][2]*s);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1.0, 0.0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + cg.refDef.viewAxis[1][0]*s - cg.refDef.viewAxis[2][0]*c,
 											org[1] + cg.refDef.viewAxis[1][1]*s - cg.refDef.viewAxis[2][1]*c,
 											org[2] + cg.refDef.viewAxis[1][2]*s - cg.refDef.viewAxis[2][2]*c);
 			}
 			else {
 				// Top left
-				Vec2Set (p->outCoords[0], 0, 0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 											org[1] + cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 											org[2] + cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0, 1);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 											org[1] - cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 											org[2] - cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1, 1);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 											org[1] - cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 											org[2] - cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1, 0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 											org[1] + cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 											org[2] + cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);

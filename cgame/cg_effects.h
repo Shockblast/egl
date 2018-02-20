@@ -356,6 +356,7 @@ typedef struct cgParticle_s {
 	struct cgParticle_s	*prev;
 	struct cgParticle_s	*next;
 
+	int					type;
 	float				time;
 
 	vec3_t				org;
