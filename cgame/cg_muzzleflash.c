@@ -46,7 +46,7 @@ static void CG_BrassHack (cgEntity_t *pl, leType_t type, int count)
 						(forward[2] * ((frand () * 2.5f) + 0.5f)) + (crand () * 45.0f) + 90,
 						frand () * 360,				frand () * 360,				frand () * 360,
 						crand () * 1000,			crand () * 1000,			crand () * 1000,
-						25 + (crand () * 5),
+						220 + (crand () * 50),
 						0,
 						0,
 						type);
