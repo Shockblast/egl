@@ -30,23 +30,15 @@ static int			cg_numDecals;
 /*
 =============================================================================
 
-	DECAL IMAGING
-
-=============================================================================
-*/
-
-int dRandBloodMark (void)	{ return DT_BLOOD01 + (rand()&15); }
-int dRandGrnBloodMark (void){ return DT_BLOOD01_GRN + (rand()&15); }
-int dRandExploMark (void)	{ return DT_EXPLOMARK + (rand()%3); }
-int dRandSlashMark (void)	{ return DT_SLASH + (rand()%3); }
-
-/*
-=============================================================================
-
 	DECAL MANAGEMENT
 
 =============================================================================
 */
+
+int dRandBloodMark (void) { return DT_BLOOD01 + (rand()&15); }
+int dRandGrnBloodMark (void) { return DT_BLOOD01_GRN + (rand()&15); }
+int dRandExploMark (void) { return DT_EXPLOMARK + (rand()%3); }
+int dRandSlashMark (void) { return DT_SLASH + (rand()%3); }
 
 /*
 ===============
@@ -138,7 +130,7 @@ cgDecal_t *CG_SpawnDecal (float org0,				float org1,					float org2,
 
 	// Create the decal
 	d = CG_AllocDecal ();
-	if (!cgi.R_CreateDecal (&d->refDecal, cgMedia.decalTable[type%DT_PICTOTAL], origin, dir, angle, size)) {
+	if (!cgi.R_CreateDecal (&d->refDecal, cgMedia.decalTable[type%DT_PICTOTAL], cgMedia.decalCoords[type%DT_PICTOTAL], origin, dir, angle, size)) {
 		CG_FreeDecal (d);
 		return NULL;
 	}
@@ -255,7 +247,7 @@ void CG_AddDecals (void)
 
 		// Small decal lod
 		if (cg_decalLOD->intVal && d->size < 12) {
-			Vec3Subtract (cg.refDef.viewOrigin, d->refDecal.origin, temp);
+			Vec3Subtract (cg.refDef.viewOrigin, d->refDecal.poly.origin, temp);
 			if (DotProduct(temp, temp)/15000 > 100*d->size)
 				goto nextDecal;
 		}

@@ -339,7 +339,7 @@ static void Mat_SkipBlock (material_t *mat, parse_t *ps, char *fileName, char *t
 
 // ==========================================================================
 
-static qBool ShdPass_AnimFrequency (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_AnimFrequency (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	if (!Mat_ParseInt (ps, &pass->animFPS)) {
 		Mat_PrintPos (PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
@@ -351,7 +351,7 @@ static qBool ShdPass_AnimFrequency (material_t *mat, matPass_t *pass, parse_t *p
 	return qTrue;
 }
 
-static qBool ShdPass_AnimMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_AnimMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -381,7 +381,7 @@ static qBool ShdPass_AnimMap (material_t *mat, matPass_t *pass, parse_t *ps, cha
 			break;
 		}
 
-		if (pass->animNumNames+1 >= MAX_MATERIAL_ANIM_FRAMES) {
+		if (pass->animNumNames+1 > MAX_MATERIAL_ANIM_FRAMES) {
 			Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
 			Mat_Printf (PRNT_WARNING, "WARNING: too many animation frames, ignoring\n");
 			PS_SkipLine (ps);
@@ -400,12 +400,12 @@ static qBool ShdPass_AnimMap (material_t *mat, matPass_t *pass, parse_t *ps, cha
 	return qTrue;
 }
 
-static qBool ShdPass_MapExt (material_t *mat, matPass_t *pass, parse_t *ps, texFlags_t addTexFlags, char *fileName)
+static qBool MatPass_MapExt (material_t *mat, matPass_t *pass, parse_t *ps, texFlags_t addTexFlags, qBool allowColorTokens, char *fileName)
 {
 	char	*str;
 
 	// Check for too many frames
-	if (pass->animNumNames+1 >= MAX_MATERIAL_ANIM_FRAMES) {
+	if (pass->animNumNames+1 > MAX_MATERIAL_ANIM_FRAMES) {
 		Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
 		Mat_Printf (PRNT_WARNING, "WARNING: too many animation frames, ignoring\n");
 		PS_SkipLine (ps);
@@ -425,21 +425,29 @@ static qBool ShdPass_MapExt (material_t *mat, matPass_t *pass, parse_t *ps, texF
 	}
 	else {
 		pass->tcGen = TC_GEN_BASE;
-		if (!strcmp (str, "$rgb")) {
-			pass->animTexFlags[pass->animNumNames] |= IF_NOALPHA;
-			if (!Mat_ParseString (ps, &str)) {
-				Mat_PrintPos (PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
-				Mat_Printf (PRNT_ERROR, "ERROR: missing/invalid map parameters\n");
-				return qFalse;
+		texFlags_t tokenFlags = 0;
+
+		if (allowColorTokens) {
+			if (!strcmp(str, "$rgb")) {
+				tokenFlags |= IF_NOALPHA;
+			}
+			else if (!strcmp(str, "$alpha")) {
+				tokenFlags |= IF_NORGB;
 			}
 		}
-		else if (!strcmp (str, "$alpha")) {
-			pass->animTexFlags[pass->animNumNames] |= IF_NORGB;
-			if (!Mat_ParseString (ps, &str)) {
-				Mat_PrintPos (PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
-				Mat_Printf (PRNT_ERROR, "ERROR: missing/invalid map parameters\n");
+
+		if (!strcmp(str, "$greyscale") || !strcmp(str, "$grayscale")) {
+			tokenFlags |= IF_GREYSCALE;
+		}
+
+		if (tokenFlags != 0) {
+			if (!Mat_ParseString(ps, &str)) {
+				Mat_PrintPos(PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
+				Mat_Printf(PRNT_ERROR, "ERROR: missing/invalid map parameters\n");
 				return qFalse;
 			}
+
+			pass->animTexFlags[pass->animNumNames] |= tokenFlags;
 		}
 	}
 
@@ -449,86 +457,40 @@ static qBool ShdPass_MapExt (material_t *mat, matPass_t *pass, parse_t *ps, texF
 		str[MAX_QPATH-1] = '\0';
 	}
 
-	pass->animTexFlags[pass->animNumNames] |= addTexFlags;
 	pass->animNames[pass->animNumNames++] = Mem_PoolStrDup (str, ri.matSysPool, 0);
 	return qTrue;
 }
 
-static qBool ShdPass_Map (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_Map (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
-	return ShdPass_MapExt (mat, pass, ps, 0, fileName);
+	return MatPass_MapExt (mat, pass, ps, 0, qTrue, fileName);
 }
 
-static qBool ShdPass_AlphaMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_AlphaMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	return MatPass_MapExt(mat, pass, ps, IF_NORGB, qFalse, fileName);
+}
+
+static qBool MatPass_ClampMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	return MatPass_MapExt (mat, pass, ps, IF_CLAMP_ALL, qTrue, fileName);
+}
+
+static qBool MatPass_GreyMap(material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	return MatPass_MapExt(mat, pass, ps, IF_GREYSCALE, qTrue, fileName);
+}
+
+static qBool MatPass_RGBMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	return MatPass_MapExt(mat, pass, ps, IF_NOALPHA, qFalse, fileName);
+}
+
+static qBool MatPass_CubeMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
-	if (pass->animNumNames+1 >= MAX_MATERIAL_ANIM_FRAMES) {
-		Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
-		Mat_Printf (PRNT_WARNING, "WARNING: too many animation frames, ignoring\n");
-		PS_SkipLine (ps);
-		return qTrue;
-	}
-
-	pass->tcGen = TC_GEN_BASE;
-	pass->animTexFlags[pass->animNumNames] |= IF_NORGB;
-
-	if (!Mat_ParseString (ps, &str)) {
-		Mat_PrintPos (PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
-		Mat_Printf (PRNT_ERROR, "ERROR: alphaMap with no parameters\n");
-		return qFalse;
-	}
-
-	if (strlen(str)+1 >= MAX_QPATH) {
-		Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
-		Mat_Printf (PRNT_WARNING, "WARNING: animMap frame name '%s' too long, and will be truncated!\n", str);
-		str[MAX_QPATH-1] = '\0';
-	}
-
-	pass->animNames[pass->animNumNames++] = Mem_PoolStrDup (str, ri.matSysPool, 0);
-	return qTrue;
-}
-
-static qBool ShdPass_ClampMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
-{
-	return ShdPass_MapExt (mat, pass, ps, IF_CLAMP, fileName);
-}
-
-static qBool ShdPass_RGBMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
-{
-	char	*str;
-
-	if (pass->animNumNames+1 >= MAX_MATERIAL_ANIM_FRAMES) {
-		Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
-		Mat_Printf (PRNT_WARNING, "WARNING: too many animation frames, ignoring\n");
-		PS_SkipLine (ps);
-		return qTrue;
-	}
-
-	pass->tcGen = TC_GEN_BASE;
-	pass->animTexFlags[pass->animNumNames] |= IF_NOALPHA;
-
-	if (!Mat_ParseString (ps, &str)) {
-		Mat_PrintPos (PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
-		Mat_Printf (PRNT_ERROR, "ERROR: rgbMap with no parameters\n");
-		return qFalse;
-	}
-
-	if (strlen(str)+1 >= MAX_QPATH) {
-		Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
-		Mat_Printf (PRNT_WARNING, "WARNING: animMap frame name '%s' too long, and will be truncated!\n", str);
-		str[MAX_QPATH-1] = '\0';
-	}
-
-	pass->animNames[pass->animNumNames++] = Mem_PoolStrDup (str, ri.matSysPool, 0);
-	return qTrue;
-}
-
-static qBool ShdPass_CubeMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
-{
-	char	*str;
-
-	if (pass->animNumNames+1 >= MAX_MATERIAL_ANIM_FRAMES) {
+	if (pass->animNumNames+1 > MAX_MATERIAL_ANIM_FRAMES) {
 		Mat_PrintPos (PRNT_WARNING, mat, r_numCurrPasses, ps, fileName);
 		Mat_Printf (PRNT_WARNING, "WARNING: too many animation frames, ignoring\n");
 		PS_SkipLine (ps);
@@ -543,7 +505,7 @@ static qBool ShdPass_CubeMap (material_t *mat, matPass_t *pass, parse_t *ps, cha
 
 	if (ri.config.extTexCubeMap) {
 		pass->flags |= MAT_PASS_CUBEMAP;
-		pass->animTexFlags[pass->animNumNames] |= IT_CUBEMAP|IF_CLAMP;
+		pass->animTexFlags[pass->animNumNames] |= IT_CUBEMAP|IF_CLAMP_ALL;
 
 		pass->tcGen = TC_GEN_REFLECTION;
 	}
@@ -561,7 +523,7 @@ static qBool ShdPass_CubeMap (material_t *mat, matPass_t *pass, parse_t *ps, cha
 	return qTrue;
 }
 
-static qBool ShdPass_FragmentMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_FragmentMap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	int		index;
 	char	*str;
@@ -605,14 +567,14 @@ static qBool ShdPass_FragmentMap (material_t *mat, matPass_t *pass, parse_t *ps,
 		}
 
 		if (!strcmp (str, "clamp"))
-			pass->animTexFlags[index] |= IF_CLAMP;
+			pass->animTexFlags[index] |= IF_CLAMP_ALL;
 		else if (!strcmp (str, "cubemap")) {
 			if (!ri.config.extTexCubeMap) {
 				Mat_PrintPos (PRNT_ERROR, mat, r_numCurrPasses, ps, fileName);
 				Mat_Printf (PRNT_ERROR, "ERROR: cubeMap used and extension not available!\n");
 				return qFalse;
 			}
-			pass->animTexFlags[index] |= IT_CUBEMAP|IF_CLAMP;
+			pass->animTexFlags[index] |= IT_CUBEMAP|IF_CLAMP_ALL;
 		}
 		else if (!strcmp (str, "nocompress"))
 			pass->animTexFlags[index] |= IF_NOCOMPRESS;
@@ -641,7 +603,7 @@ static qBool ShdPass_FragmentMap (material_t *mat, matPass_t *pass, parse_t *ps,
 	return qTrue;
 }
 
-static qBool ShdPass_FragmentProgram (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_FragmentProgram (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -663,7 +625,7 @@ static qBool ShdPass_FragmentProgram (material_t *mat, matPass_t *pass, parse_t 
 	return qTrue;
 }
 
-static qBool ShdPass_VertexProgram (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_VertexProgram (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -685,7 +647,7 @@ static qBool ShdPass_VertexProgram (material_t *mat, matPass_t *pass, parse_t *p
 	return qTrue;
 }
 
-static qBool ShdPass_Program (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_Program (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -708,7 +670,7 @@ static qBool ShdPass_Program (material_t *mat, matPass_t *pass, parse_t *ps, cha
 	return qTrue;
 }
 
-static qBool ShdPass_RGBGen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_RGBGen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -796,7 +758,7 @@ static qBool ShdPass_RGBGen (material_t *mat, matPass_t *pass, parse_t *ps, char
 	return qFalse;
 }
 
-static qBool ShdPass_AlphaGen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_AlphaGen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 	float	f, g;
@@ -892,7 +854,7 @@ static qBool ShdPass_AlphaGen (material_t *mat, matPass_t *pass, parse_t *ps, ch
 	return qFalse;
 }
 
-static qBool ShdPass_AlphaFunc (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_AlphaFunc (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -920,7 +882,7 @@ static qBool ShdPass_AlphaFunc (material_t *mat, matPass_t *pass, parse_t *ps, c
 	return qFalse;
 }
 
-static qBool ShdPass_BlendFunc (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_BlendFunc (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -1004,7 +966,7 @@ static qBool ShdPass_BlendFunc (material_t *mat, matPass_t *pass, parse_t *ps, c
 	return qTrue;
 }
 
-static qBool ShdPass_DepthFunc (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_DepthFunc (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -1032,7 +994,7 @@ static qBool ShdPass_DepthFunc (material_t *mat, matPass_t *pass, parse_t *ps, c
 	return qFalse;
 }
 
-static qBool ShdPass_TcGen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_TcGen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -1075,7 +1037,7 @@ static qBool ShdPass_TcGen (material_t *mat, matPass_t *pass, parse_t *ps, char 
 	return qFalse;
 }
 
-static qBool ShdPass_TcMod (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_TcMod (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	tcMod_t	*tcMod;
 	char	*str;
@@ -1157,7 +1119,7 @@ static qBool ShdPass_TcMod (material_t *mat, matPass_t *pass, parse_t *ps, char 
 	return qTrue;
 }
 
-static qBool ShdPass_MaskColor (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_MaskColor (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->maskRed = qTrue;
 	pass->maskGreen = qTrue;
@@ -1165,43 +1127,43 @@ static qBool ShdPass_MaskColor (material_t *mat, matPass_t *pass, parse_t *ps, c
 	return qTrue;
 }
 
-static qBool ShdPass_MaskRed (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_MaskRed (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->maskRed = qTrue;
 	return qTrue;
 }
 
-static qBool ShdPass_MaskGreen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_MaskGreen (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->maskGreen = qTrue;
 	return qTrue;
 }
 
-static qBool ShdPass_MaskBlue (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_MaskBlue (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->maskBlue = qTrue;
 	return qTrue;
 }
 
-static qBool ShdPass_MaskAlpha (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_MaskAlpha (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->maskAlpha = qTrue;
 	return qTrue;
 }
 
-static qBool ShdPass_NoGamma (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_NoGamma (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->passTexFlags |= IF_NOGAMMA;
 	return qTrue;
 }
 
-static qBool ShdPass_NoIntens (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_NoIntens (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->passTexFlags |= IF_NOINTENS;
 	return qTrue;
 }
 
-static qBool ShdPass_NoMipmap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_NoMipmap (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	char	*str;
 
@@ -1226,50 +1188,68 @@ static qBool ShdPass_NoMipmap (material_t *mat, matPass_t *pass, parse_t *ps, ch
 	return qTrue;
 }
 
-static qBool ShdPass_NoPicmip (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_NoPicmip (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->passTexFlags |= IF_NOPICMIP;
 	return qTrue;
 }
 
-static qBool ShdPass_NoCompress (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_NoCompress (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->passTexFlags |= IF_NOCOMPRESS;
 	return qTrue;
 }
 
-static qBool ShdPass_TcClamp (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_TcClamp (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
-	pass->passTexFlags |= IF_CLAMP;
+	pass->passTexFlags |= IF_CLAMP_ALL;
 	return qTrue;
 }
 
-static qBool ShdPass_SizeBase (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_TcClampS (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	pass->passTexFlags |= IF_CLAMP_S;
+	return qTrue;
+}
+
+static qBool MatPass_TcClampT (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	pass->passTexFlags |= IF_CLAMP_T;
+	return qTrue;
+}
+
+static qBool MatPass_SizeBase (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	mat->sizeBase = r_numCurrPasses;
 	return qTrue;
 }
 
-static qBool ShdPass_Detail (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_Detail (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->flags |= MAT_PASS_DETAIL;
 	return qTrue;
 }
 
-static qBool ShdPass_NotDetail (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_NotDetail (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->flags |= MAT_PASS_NOTDETAIL;
 	return qTrue;
 }
 
-static qBool ShdPass_DepthWrite (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatPass_DepthWrite (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	pass->flags |= MAT_PASS_DEPTHWRITE;
 	mat->flags |= MAT_DEPTHWRITE;
 	return qTrue;
 }
 
-static qBool ShdPass_Emissive (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+static qBool MatBase_Flare (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
+{
+	mat->flags |= MAT_FLARE;
+	return qTrue;
+}
+
+static qBool MatPass_Emissive (material_t *mat, matPass_t *pass, parse_t *ps, char *fileName)
 {
 	return qTrue;
 }
@@ -1277,50 +1257,55 @@ static qBool ShdPass_Emissive (material_t *mat, matPass_t *pass, parse_t *ps, ch
 // ==========================================================================
 
 static matKey_t r_materialPassKeys[] = {
-	{ "animfrequency",		&ShdPass_AnimFrequency		},
-	{ "animmap",			&ShdPass_AnimMap			},
-	{ "cubemap",			&ShdPass_CubeMap			},
-	{ "map",				&ShdPass_Map				},
-	{ "alphamap",			&ShdPass_AlphaMap			},
-	{ "clampmap",			&ShdPass_ClampMap			},
-	{ "rgbmap",				&ShdPass_RGBMap				},
+	{ "animfrequency",		&MatPass_AnimFrequency		},
+	{ "animmap",			&MatPass_AnimMap			},
+	{ "cubemap",			&MatPass_CubeMap			},
+	{ "map",				&MatPass_Map				},
+	{ "alphamap",			&MatPass_AlphaMap			},
+	{ "clampmap",			&MatPass_ClampMap			},
+	{ "greymap",			&MatPass_GreyMap			},
+	{ "rgbmap",				&MatPass_RGBMap				},
 
-	{ "fragmentmap",		&ShdPass_FragmentMap		},
-	{ "fragmentprogram",	&ShdPass_FragmentProgram	},
-	{ "vertexprogram",		&ShdPass_VertexProgram		},
-	{ "program",			&ShdPass_Program			},
+	{ "fragmentmap",		&MatPass_FragmentMap		},
+	{ "fragmentprogram",	&MatPass_FragmentProgram	},
+	{ "vertexprogram",		&MatPass_VertexProgram		},
+	{ "program",			&MatPass_Program			},
 
-	{ "rgbgen",				&ShdPass_RGBGen				},
-	{ "alphagen",			&ShdPass_AlphaGen			},
+	{ "rgbgen",				&MatPass_RGBGen				},
+	{ "alphagen",			&MatPass_AlphaGen			},
 
-	{ "alphafunc",			&ShdPass_AlphaFunc			},
-	{ "blendfunc",			&ShdPass_BlendFunc			},
-	{ "depthfunc",			&ShdPass_DepthFunc			},
+	{ "alphafunc",			&MatPass_AlphaFunc			},
+	{ "blendfunc",			&MatPass_BlendFunc			},
+	{ "depthfunc",			&MatPass_DepthFunc			},
+	
+	{ "tcclamp",			&MatPass_TcClamp			},
+	{ "tcclamps",			&MatPass_TcClampS			},
+	{ "tcclampx",			&MatPass_TcClampS			},
+	{ "tcclampt",			&MatPass_TcClampT			},
+	{ "tcclampy",			&MatPass_TcClampT			},
+	{ "tcgen",				&MatPass_TcGen				},
+	{ "tcmod",				&MatPass_TcMod				},
 
-	{ "tcclamp",			&ShdPass_TcClamp			},
-	{ "tcgen",				&ShdPass_TcGen				},
-	{ "tcmod",				&ShdPass_TcMod				},
+	{ "maskcolor",			&MatPass_MaskColor			},
+	{ "maskred",			&MatPass_MaskRed			},
+	{ "maskgreen",			&MatPass_MaskGreen			},
+	{ "maskblue",			&MatPass_MaskBlue			},
+	{ "maskalpha",			&MatPass_MaskAlpha			},
 
-	{ "maskcolor",			&ShdPass_MaskColor			},
-	{ "maskred",			&ShdPass_MaskRed			},
-	{ "maskgreen",			&ShdPass_MaskGreen			},
-	{ "maskblue",			&ShdPass_MaskBlue			},
-	{ "maskalpha",			&ShdPass_MaskAlpha			},
+	{ "nogamma",			&MatPass_NoGamma			},
+	{ "nointens",			&MatPass_NoIntens			},
+	{ "nomipmap",			&MatPass_NoMipmap			},
+	{ "nopicmip",			&MatPass_NoPicmip			},
+	{ "nocompress",			&MatPass_NoCompress			},
 
-	{ "nogamma",			&ShdPass_NoGamma			},
-	{ "nointens",			&ShdPass_NoIntens			},
-	{ "nomipmap",			&ShdPass_NoMipmap			},
-	{ "nopicmip",			&ShdPass_NoPicmip			},
-	{ "nocompress",			&ShdPass_NoCompress			},
+	{ "sizebase",			&MatPass_SizeBase			},
 
-	{ "sizebase",			&ShdPass_SizeBase			},
+	{ "detail",				&MatPass_Detail				},
+	{ "nodetail",			&MatPass_NotDetail			},
+	{ "notdetail",			&MatPass_NotDetail			},
 
-	{ "detail",				&ShdPass_Detail				},
-	{ "nodetail",			&ShdPass_NotDetail			},
-	{ "notdetail",			&ShdPass_NotDetail			},
-
-	{ "depthwrite",			&ShdPass_DepthWrite			},
-	{ "emissive",			&ShdPass_Emissive			},
+	{ "depthwrite",			&MatPass_DepthWrite			},
+	{ "emissive",			&MatPass_Emissive			},
 
 	{ NULL,					NULL						}
 };
@@ -1729,6 +1714,7 @@ static matKey_t r_materialBaseKeys[] = {
 	{ "subdivide",				&MatBase_Subdivide		},
 	{ "depthrange",				&MatBase_DepthRange		},
 	{ "depthwrite",				&MatBase_DepthWrite		},
+	{ "flare",					&MatBase_Flare			},
 	{ "fogparms",				&MatBase_FogParms		},
 	{ "polygonoffset",			&MatBase_PolygonOffset	},
 	{ "portal",					&MatBase_Portal			},
@@ -2653,7 +2639,7 @@ static material_t *R_RegisterMaterial (char *name, qBool forceDefault, matRegTyp
 		if (forceDefault)
 			texFlags = 0;
 		else
-			texFlags = IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_CLAMP;
+			texFlags = IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_CLAMP_ALL;
 		break;
 
 	default:

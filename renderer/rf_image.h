@@ -46,18 +46,23 @@ enum { // texFlags_t
 	IT_3D				= 1 << 0,		// 3d texture
 	IT_CUBEMAP			= 1 << 1,		// it's a cubemap env base image
 	IT_LIGHTMAP			= 1 << 2,		// lightmap texture
-
-	IF_CLAMP			= 1 << 3,		// texcoords edge clamped
-	IF_NOCOMPRESS		= 1 << 4,		// no texture compression
-	IF_NOGAMMA			= 1 << 5,		// not affected by vid_gama
-	IF_NOINTENS			= 1 << 6,		// not affected by intensity
-	IF_NOMIPMAP_LINEAR	= 1 << 7,		// not mipmapped, linear filtering
-	IF_NOMIPMAP_NEAREST	= 1 << 8,		// not mipmapped, nearest filtering
-	IF_NOPICMIP			= 1 << 9,		// not affected by gl_picmip
-	IF_NOFLUSH			= 1 << 10,		// do not flush at the end of registration (internal only)
-	IF_NOALPHA			= 1 << 11,		// force alpha to 255
-	IF_NORGB			= 1 << 12,		// force rgb to 255 255 255
+	
+	IF_CLAMP_S			= 1 << 6,		// texcoords edge clamped
+	IF_CLAMP_T			= 1 << 7,		// texcoords edge clamped
+	IF_CLAMP_R			= 1 << 8,		// texcoords edge clamped (3D)
+	IF_NOCOMPRESS		= 1 << 9,		// no texture compression
+	IF_NOGAMMA			= 1 << 10,		// not affected by vid_gama
+	IF_NOINTENS			= 1 << 11,		// not affected by intensity
+	IF_NOMIPMAP_LINEAR	= 1 << 12,		// not mipmapped, linear filtering
+	IF_NOMIPMAP_NEAREST	= 1 << 13,		// not mipmapped, nearest filtering
+	IF_NOPICMIP			= 1 << 14,		// not affected by gl_picmip
+	IF_NOFLUSH			= 1 << 15,		// do not flush at the end of registration (internal only)
+	IF_NOALPHA			= 1 << 16,		// force alpha to 255
+	IF_NORGB			= 1 << 17,		// force rgb to 255 255 255
+	IF_GREYSCALE		= 1 << 18		// uploaded as greyscale
 };
+#define IF_CLAMP_ALL		(IF_CLAMP_S|IF_CLAMP_T|IF_CLAMP_R)
+#define IF_NOMIPMAP_MASK	(IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)
 
 typedef struct image_s {
 	char					name[MAX_QPATH];				// game path, including extension

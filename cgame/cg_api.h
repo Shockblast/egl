@@ -201,12 +201,12 @@ typedef struct cgImport_s {
 	size_t		(*R_DrawStringLen) (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color);
 
 	void		(*R_DrawPic) (struct material_s *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
-	void		(*R_DrawRectangle) (struct material_s *mat, float matTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
+	void		(*R_DrawFill) (float x, float y, int w, int h, vec4_t color);
 
 	void		(*R_GetRefConfig) (refConfig_t *outConfig);
 	void		(*R_GetImageSize) (struct material_s *mat, int *width, int *height);
 
-	qBool		(*R_CreateDecal) (refDecal_t *d, struct material_s *material, vec3_t origin, vec3_t direction, float angle, float size);
+	qBool		(*R_CreateDecal) (refDecal_t *d, struct material_s *material, vec3_t origin, vec4_t subUVs, vec3_t direction, float angle, float size);
 	qBool		(*R_FreeDecal) (refDecal_t *d);
 
 	void		(*R_RegisterMap) (char *mapName);

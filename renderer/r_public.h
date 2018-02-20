@@ -121,8 +121,7 @@ typedef struct cinematic_s {
 //
 
 void		R_DrawPic (struct material_s *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
-void		R_DrawRectangle (struct material_s *mat, float matTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
-
+void		R_DrawFill(float x, float y, int w, int h, vec4_t color);
 //
 // rf_cull.c
 //
@@ -134,7 +133,7 @@ qBool		R_CullSphere (const vec3_t origin, const float radius, int clipFlags);
 // rf_decal.c
 //
 
-qBool		R_CreateDecal (refDecal_t *d, struct material_s *material, vec3_t origin, vec3_t direction, float angle, float size);
+qBool		R_CreateDecal (refDecal_t *d, struct material_s *material, vec4_t subUVs, vec3_t origin, vec3_t direction, float angle, float size);
 qBool		R_FreeDecal (refDecal_t *d);
 
 //

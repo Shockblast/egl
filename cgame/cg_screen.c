@@ -152,7 +152,7 @@ void CG_DrawDebugGraph (void)
 
 	// Draw the graph
 	Vec4Set (color, Q_colorDkGrey[0], Q_colorDkGrey[1], Q_colorDkGrey[2], scr_graphalpha->floatVal);
-	CG_DrawFill (0, cg.refConfig.vidHeight-scr_graphheight->floatVal, cg.refConfig.vidWidth, scr_graphheight->floatVal, color);
+	cgi.R_DrawFill (0, cg.refConfig.vidHeight-scr_graphheight->floatVal, cg.refConfig.vidWidth, scr_graphheight->floatVal, color);
 
 	for (a=0 ; a<cg.refConfig.vidWidth ; a++) {
 		i = (scr_graphCurrent-1-a+1024) & GRAPHMASK;
@@ -164,7 +164,7 @@ void CG_DrawDebugGraph (void)
 
 		h = (int)v % scr_graphheight->intVal;
 		Vec3Set (color, palRedf (scr_graphValues[i].color), palGreenf (scr_graphValues[i].color), palBluef (scr_graphValues[i].color));
-		CG_DrawFill (cg.refConfig.vidWidth-1-a, cg.refConfig.vidHeight-h, 1, h, color);
+		cgi.R_DrawFill (cg.refConfig.vidWidth-1-a, cg.refConfig.vidHeight-h, 1, h, color);
 	}
 }
 
@@ -659,7 +659,7 @@ void SCR_Draw (void)
 {
 	// Draw view blend
 	if (gl_polyblend->intVal && cg.viewBlend[3] > 0.01f)
-		CG_DrawFill (0, 0, cg.refDef.width, cg.refDef.height, cg.viewBlend);
+		cgi.R_DrawFill (0, 0, cg.refDef.width, cg.refDef.height, cg.viewBlend);
 
 	// Gloom IR goggles
 	SCR_DrawGoggles ();

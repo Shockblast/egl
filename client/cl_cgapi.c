@@ -750,7 +750,7 @@ void CL_CGameAPI_Init (void)
 	cgi.R_DrawStringLen				= R_DrawStringLen;
 
 	cgi.R_DrawPic					= R_DrawPic;
-	cgi.R_DrawRectangle				= R_DrawRectangle;
+	cgi.R_DrawFill					= R_DrawFill;
 
 	cgi.R_GetRefConfig				= R_GetRefConfig;
 	cgi.R_GetImageSize				= R_GetImageSize;

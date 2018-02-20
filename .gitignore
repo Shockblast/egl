@@ -10,6 +10,8 @@
 /win32/vs17/Debug
 /win32/vs17/egl/x64
 /win32/vs17/egl/Win32
+/win32/vs17/eglded/x64
+/win32/vs17/eglded/Win32
 /win32/vs17/eglcgame/Win32
 /win32/vs17/eglcgame/x64
 /win32/vs17/game/Win32

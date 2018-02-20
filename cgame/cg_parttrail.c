@@ -508,7 +508,7 @@ void CG_GibTrail (vec3_t start, vec3_t end, int flags)
 					0,								0,								0,
 					1.0f,							-0.5f / (0.4f + (frand () * 0.3f)),
 					7.5f + (crand () * 2),			9 + (crand () * 2),
-					pRandBloodMark (),				partFlags,
+					pRandBloodTrail (),				partFlags,
 					pBloodThink,					qTrue,
 					PART_STYLE_QUAD,
 					frand () * 360);
@@ -562,7 +562,7 @@ void CG_GibTrail (vec3_t start, vec3_t end, int flags)
 					0,								0 + (frand () * 90),			0,
 					0.8f + (frand () * 0.2f),		-1.0f / (0.5f + (frand () * 0.3f)),
 					4 + (crand () * 2),				6 + (crand () * 2),
-					pRandGrnBloodMark (),			partFlags,
+					pRandGrnBloodTrail (),			partFlags,
 					pBloodThink,					qTrue,
 					PART_STYLE_QUAD,
 					frand () * 360);

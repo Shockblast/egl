@@ -35,14 +35,14 @@ static int				cg_numParticles;
 =============================================================================
 */
 
-int pRandBloodDrip (void)	{ return PT_BLDDRIP01 + (rand()&1); }
-int pRandGrnBloodDrip (void){ return PT_BLDDRIP01_GRN + (rand()&1); }
-int pRandBloodMark (void)	{ return PT_BLOOD + (rand()%6); }
-int pRandGrnBloodMark (void){ return PT_GRNBLOOD + (rand()%6); }
-int pRandSmoke (void)		{ return PT_SMOKE + (rand()&1); }
-int pRandGlowSmoke (void)	{ return PT_SMOKEGLOW + (rand()&1); }
-int pRandEmbers (void)		{ return PT_EMBERS1 + (rand()%3); }
-int pRandFire (void)		{ return PT_FIRE1 + (rand()&3); }
+int pRandBloodDrip (void)		{ return PT_BLDDRIP01 + (rand()&1); }
+int pRandGrnBloodDrip (void)	{ return PT_BLDDRIP01_GRN + (rand()&1); }
+int pRandBloodTrail (void)		{ return PT_BLOODTRAIL + (rand()%7); }
+int pRandGrnBloodTrail (void)	{ return PT_GRNBLOODTRAIL + (rand()%7); }
+int pRandSmoke (void)			{ return PT_SMOKE + (rand()&1); }
+int pRandGlowSmoke (void)		{ return PT_SMOKEGLOW + (rand()&1); }
+int pRandEmbers (void)			{ return PT_EMBERS1 + (rand()%3); }
+int pRandFire (void)			{ return PT_FIRE1 + (rand()&3); }
 
 /*
 =============================================================================

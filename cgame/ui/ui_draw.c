@@ -42,7 +42,7 @@ void UI_DrawTextBox (float x, float y, float scale, int width, int lines)
 	float	cx, cy;
 
 	// fill in behind it
-	CG_DrawFill (x, y, (width + 2)*scale*8, (lines + 2)*scale*8, Q_colorBlack);
+	cgi.R_DrawFill (x, y, (width + 2)*scale*8, (lines + 2)*scale*8, Q_colorBlack);
 
 	// draw left side
 	cx = x;
@@ -127,7 +127,7 @@ static void UI_DrawStatusBar (char *string)
 	if (string) {
 		int col = (cg.refConfig.vidWidth*0.5) - (((Q_ColorCharCount (string, (int)strlen (string))) * 0.5) * UIFT_SIZE);
 
-		CG_DrawFill (0, cg.refConfig.vidHeight - UIFT_SIZE - 2, cg.refConfig.vidWidth, UIFT_SIZE + 2, Q_colorDkGrey);
+		cgi.R_DrawFill (0, cg.refConfig.vidHeight - UIFT_SIZE - 2, cg.refConfig.vidWidth, UIFT_SIZE + 2, Q_colorDkGrey);
 		cgi.R_DrawString (NULL, col, cg.refConfig.vidHeight - UIFT_SIZE - 1, UIFT_SCALE, UIFT_SCALE, FS_SHADOW, string, Q_colorWhite);
 	}
 }
@@ -344,7 +344,7 @@ static void Selection_Draw (uiCommon_t *i)
 		Vec4Set (bgColor, Q_colorDkGrey[0], Q_colorDkGrey[1], Q_colorDkGrey[2], 0.33f);
 
 		if (i->flags & UIF_FORCESELBAR || ((uiState.cursorItem && uiState.cursorItem == i) || (uiState.selectedItem && uiState.selectedItem == i)))
-			CG_DrawFill (i->topLeft[0], i->topLeft[1], i->botRight[0] - i->topLeft[0], i->botRight[1] - i->topLeft[1], bgColor);
+			cgi.R_DrawFill (i->topLeft[0], i->topLeft[1], i->botRight[0] - i->topLeft[0], i->botRight[1] - i->topLeft[1], bgColor);
 	}
 }
 
@@ -453,7 +453,7 @@ void UI_Refresh (qBool fullScreen)
 	}
 	else {
 		Vec4Set (fillColor, Q_colorBlack[0], Q_colorBlack[1], Q_colorBlack[2], 0.8f);
-		CG_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, fillColor);
+		cgi.R_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, fillColor);
 	}
 
 	// Draw the menu

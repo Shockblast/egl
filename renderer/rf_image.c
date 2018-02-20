@@ -188,7 +188,7 @@ void GL_TextureMode (qBool verbose, qBool verboseOnly)
 	for (i=0, image=r_imageList ; i<r_numImages ; i++, image++) {
 		if (!image->touchFrame)
 			continue;	// Free r_imageList slot
-		if (image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))
+		if (image->flags & IF_NOMIPMAP_MASK)
 			continue;
 
 		RB_BindTexture (image);
@@ -218,7 +218,7 @@ void GL_ResetAnisotropy (void)
 	for (i=0, image=r_imageList ; i<r_numImages ; i++, image++) {
 		if (!image->touchFrame)
 			continue;	// Free r_imageList slot
-		if (image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))
+		if (image->flags & IF_NOMIPMAP_MASK)
 			continue;	// Skip non-mipmapped imagery
 
 		RB_BindTexture (image);
@@ -902,30 +902,38 @@ static void R_ColorMipLevel (byte *image, int size, int level)
 R_ImageFormat
 ===============
 */
-static inline int R_ImageFormat (char *name, int flags, int *samples)
+static inline int R_ImageFormat (char *name, texFlags_t flags, int *samples)
 {
 	GLint		format;
 
 	if (flags & IF_NOALPHA && *samples == 4)
 		*samples = 3;
 
-	switch (*samples) {
-	case 3:
+	if (flags & IF_GREYSCALE) {
 		if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
-			format = ri.rgbFormat;
+			format = ri.greyFormat;
 		else
-			format = ri.rgbFormatCompressed;
-		break;
+			format = ri.greyFormatCompressed;
+	}
+	else {
+		switch (*samples) {
+		case 3:
+			if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
+				format = ri.rgbFormat;
+			else
+				format = ri.rgbFormatCompressed;
+			break;
 
-	default:
-		Com_Printf (PRNT_WARNING, "WARNING: Invalid image sample count '%d' on '%s', assuming '4'\n", samples, name);
-		*samples = 4;
-	case 4:
-		if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
-			format = ri.rgbaFormat;
-		else
-			format = ri.rgbaFormatCompressed;
-		break;
+		default:
+			Com_Printf (PRNT_WARNING, "WARNING: Invalid image sample count '%d' on '%s', assuming '4'\n", samples, name);
+			*samples = 4;
+		case 4:
+			if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
+				format = ri.rgbaFormat;
+			else
+				format = ri.rgbaFormatCompressed;
+			break;
+		}
 	}
 
 	return format;
@@ -1085,7 +1093,7 @@ static void R_ResampleImage (uint32 *in, int inWidth, int inHeight, uint32 *out,
 R_UploadCMImage
 ===============
 */
-static void R_UploadCMImage (char *name, byte **data, int width, int height, int flags, int samples, int *upWidth, int *upHeight, int *upFormat)
+static void R_UploadCMImage (char *name, byte **data, int width, int height, texFlags_t flags, int samples, int *upWidth, int *upHeight, int *upFormat)
 {
 	GLsizei		scaledWidth, scaledHeight;
 	uint32		*scaledData;
@@ -1105,7 +1113,7 @@ static void R_UploadCMImage (char *name, byte **data, int width, int height, int
 	}
 
 	// Mipmap
-	mipMap = (flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)) ? qFalse : qTrue;
+	mipMap = (flags & IF_NOMIPMAP_MASK) ? qFalse : qTrue;
 
 	// Let people sample down the world textures for speed
 	if (mipMap && !(flags & IF_NOPICMIP)) {
@@ -1247,7 +1255,7 @@ static void R_UploadCMImage (char *name, byte **data, int width, int height, int
 R_Upload2DImage
 ===============
 */
-static void R_Upload2DImage (char *name, byte *data, int width, int height, int flags, int samples, int *upWidth, int *upHeight, int *upFormat)
+static void R_Upload2DImage (char *name, byte *data, int width, int height, texFlags_t flags, int samples, int *upWidth, int *upHeight, int *upFormat)
 {
 	GLsizei		scaledWidth, scaledHeight;
 	uint32		*scaledData;
@@ -1267,7 +1275,7 @@ static void R_Upload2DImage (char *name, byte *data, int width, int height, int 
 	}
 
 	// Mipmap
-	mipMap = (flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)) ? qFalse : qTrue;
+	mipMap = (flags & IF_NOMIPMAP_MASK) ? qFalse : qTrue;
 
 	// Let people sample down the world textures for speed
 	if (mipMap && !(flags & IF_NOPICMIP)) {
@@ -1321,17 +1329,24 @@ static void R_Upload2DImage (char *name, byte *data, int width, int height, int 
 	}
 
 	// Texture edge clamping
-	if (!(flags & IF_CLAMP)) {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	}
-	else if (ri.config.extTexEdgeClamp) {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	if (flags & IF_CLAMP_S) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	}
 	else {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	}
+
+	if (flags & IF_CLAMP_T) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
+	else {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
 	// Allocate a buffer
@@ -1413,7 +1428,7 @@ FIXME:
 - r_roundImagesDown, r_colorMipLevels
 ===============
 */
-static void R_Upload3DImage (char *name, byte **data, int width, int height, int depth, int flags, int samples, int *upWidth, int *upHeight, int *upDepth, int *upFormat)
+static void R_Upload3DImage (char *name, byte **data, int width, int height, int depth, texFlags_t flags, int samples, int *upWidth, int *upHeight, int *upDepth, int *upFormat)
 {
 	GLsizei		scaledWidth, scaledHeight, scaledDepth;
 	GLint		format;
@@ -1426,7 +1441,7 @@ static void R_Upload3DImage (char *name, byte **data, int width, int height, int
 	for (scaledDepth=1 ; scaledDepth<depth ; scaledDepth<<=1) ;
 
 	// Mipmap
-	mipMap = (flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)) ? qFalse : qTrue;
+	mipMap = (flags & IF_NOMIPMAP_MASK) ? qFalse : qTrue;
 
 	// Mipmapping not supported
 	if (mipMap && !ri.config.extSGISGenMipmap)
@@ -1478,20 +1493,35 @@ static void R_Upload3DImage (char *name, byte **data, int width, int height, int
 	}
 
 	// Texture edge clamping
-	if (!(flags & IF_CLAMP)) {
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	}
-	else if (ri.config.extTexEdgeClamp) {
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	// Texture edge clamping
+	if (flags & IF_CLAMP_S) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	}
 	else {
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	}
+
+	if (flags & IF_CLAMP_T) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
+	else {
+		qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	if (flags & IF_CLAMP_R) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+	}
+	else {
+		qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	}
 
 	// Scan and replace channels if desired
@@ -1604,7 +1634,7 @@ static void R_FloodFillSkin (byte *skin, int skinWidth, int skinHeight)
 		skin[x + skinWidth * y] = fdc;
 	}
 }
-static void R_PalToRGBA (char *name, byte *data, int width, int height, int flags, image_t *image, qBool isPCX)
+static void R_PalToRGBA (char *name, byte *data, int width, int height, texFlags_t flags, image_t *image, qBool isPCX)
 {
 	uint32	*trans;
 	int		i, s, pxl;
@@ -1692,7 +1722,7 @@ static const char *R_BareImageName (const char *name)
 R_FindImage
 ================
 */
-static image_t *R_FindImage (const char *bareName, int flags)
+static image_t *R_FindImage (const char *bareName, texFlags_t flags)
 {
 	image_t	*image;
 	uint32	hash;
@@ -1776,7 +1806,7 @@ image_t *R_LoadImage (char *name, const char *bareName, byte **pic, int width, i
 	image->depth = depth;
 
 	// Texture scaling, hacky special case!
-	if (!upload8 && !(flags & (IF_NOMIPMAP_NEAREST|IF_NOMIPMAP_LINEAR))) {
+	if (!upload8 && !(flags & IF_NOMIPMAP_MASK)) {
 		char		newName[MAX_QPATH];
 		walTex_t	*mt;
 		int			fileLen;
@@ -1852,7 +1882,7 @@ static inline image_t *R_RegisterCubeMap (char *name, texFlags_t flags)
 	const char	*bareName;
 
 	// Make sure we have this
-	flags |= (IT_CUBEMAP|IF_CLAMP);
+	flags |= (IT_CUBEMAP|IF_CLAMP_ALL);
 
 	// Generate the bare name
 	bareName = R_BareImageName (name);
@@ -2136,7 +2166,7 @@ qBool R_UpdateTexture (char *name, byte *data, int width, int height)
 	}
 
 	// Can't be mipmapped
-	if (!(image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))) {
+	if (!(image->flags & IF_NOMIPMAP_MASK)) {
 		Com_DevPrintf (PRNT_WARNING, "R_UpdateTexture: %s: can not update mipmapped images!\n", name);
 		return qFalse;
 	}
@@ -2268,7 +2298,9 @@ static void R_ImageList_f (void)
 		Com_Printf (0, "%s", (image->flags & IF_NOGAMMA)	? "-" : "G");
 		Com_Printf (0, "%s", (image->flags & IF_NOINTENS)	? "-" : "I");
 		Com_Printf (0, "%s", (image->flags & IF_NOFLUSH)	? "F" : "-");
-		Com_Printf (0, "%s", (image->flags & IF_CLAMP)		? "C" : "-");
+		Com_Printf (0, "%s", (image->flags & IF_CLAMP_S)	? "Cs" : "--");
+		Com_Printf (0, "%s", (image->flags & IF_CLAMP_T)	? "Ct" : "--");
+		Com_Printf (0, "%s", (image->flags & IF_CLAMP_R)	? "Cr" : "--");
 
 		// Width/height name
 		Com_Printf (0, " %5i  %5i %s\n", image->upWidth, image->upHeight, image->name);
@@ -2276,7 +2308,7 @@ static void R_ImageList_f (void)
 		// Increment counters
 		totalImages++;
 		texels += image->upWidth * image->upHeight;
-		if (!(image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))) {
+		if (!(image->flags & IF_NOMIPMAP_MASK)) {
 			tempWidth=image->upWidth, tempHeight=image->upHeight;
 			while (tempWidth > 1 || tempHeight > 1) {
 				tempWidth >>= 1;
@@ -2519,7 +2551,7 @@ static void R_InitSpecialTextures (void)
 	memset (data, 0, 256 * 256 * 4);
 	memset (&ri.cinTexture, 0, sizeof (ri.cinTexture));
 	ri.cinTexture = R_Load2DImage ("***r_cinTexture***", &data, 256, 256,
-		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_CLAMP|IF_NOINTENS|IF_NOGAMMA|IF_NOCOMPRESS, 3);
+		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_CLAMP_ALL|IF_NOINTENS|IF_NOGAMMA|IF_NOCOMPRESS, 3);
 
 	/*
 	** ri.dLightTexture
@@ -2562,10 +2594,10 @@ static void R_InitSpecialTextures (void)
 	memset (&ri.dLightTexture, 0, sizeof (ri.dLightTexture));
 	if (ri.config.extTex3D)
 		ri.dLightTexture = R_Load3DImage ("***r_dLightTexture***", &data, size, size, size,
-			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP|IT_3D, 4);
+			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP_ALL|IT_3D, 4);
 	else
 		ri.dLightTexture = R_Load2DImage ("***r_dLightTexture***", &data, size, size,
-			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP, 4);
+			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP_ALL, 4);
 
 	/*
 	** ri.fogTexture
@@ -2586,7 +2618,7 @@ static void R_InitSpecialTextures (void)
 	}
 	memset (&ri.fogTexture, 0, sizeof (ri.fogTexture));
 	ri.fogTexture = R_Load2DImage ("***r_fogTexture***", &data, FOGTEX_WIDTH, FOGTEX_HEIGHT,
-		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP, 4);
+		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP_ALL, 4);
 
 	Mem_FreeTag (ri.imageSysPool, IMGTAG_BATCH);
 }

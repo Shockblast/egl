@@ -131,7 +131,7 @@ void Inv_DrawInventory (void)
 
 		Q_snprintfz (string, sizeof (string), "%6s %3i %s", bind, cg.inventory[item], cg.configStrings[CS_ITEMS+item]);
 		if (item == selected) {
-			CG_DrawFill (x, y, 26*charSize[0], charSize[1], selBarColor);
+			cgi.R_DrawFill (x, y, 26*charSize[0], charSize[1], selBarColor);
 
 			// Draw blinky cursors by the selected item
 			if ((cg.frame.serverFrame>>2) & 1) {

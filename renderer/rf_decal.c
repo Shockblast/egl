@@ -715,7 +715,7 @@ static uint32 R_GetClippedFragments (vec3_t origin, float radius, vec3_t axis[3]
 R_CreateDecal
 ===============
 */
-qBool R_CreateDecal (refDecal_t *d, struct material_s *material, vec3_t origin, vec3_t direction, float angle, float size)
+qBool R_CreateDecal (refDecal_t *d, struct material_s *material, vec4_t subUVs, vec3_t origin, vec3_t direction, float angle, float size)
 {
 	vec3_t			*clipNormals, *clipVerts;
 	refFragment_t	*fr, *clipFragments;
@@ -856,6 +856,10 @@ qBool R_CreateDecal (refDecal_t *d, struct material_s *material, vec3_t origin, 
 			Vec3Subtract (outVerts, origin, temp);
 			outCoords[0] = DotProduct (temp, axis[1]) + 0.5f;
 			outCoords[1] = DotProduct (temp, axis[2]) + 0.5f;
+
+			// Sub coords
+			outCoords[0] = subUVs[0] + (outCoords[0] * (subUVs[2]-subUVs[0]));
+			outCoords[1] = subUVs[1] + (outCoords[1] * (subUVs[3]-subUVs[1]));
 
 			outVerts += 3;
 			outNormals += 3;

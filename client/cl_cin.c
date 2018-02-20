@@ -678,7 +678,7 @@ void CIN_DrawCinematic (void)
 	byte		*source;
 
 	// Fill the background with black
-	CL_DrawFill (0, 0, cls.refConfig.vidWidth, cls.refConfig.vidHeight, Q_colorBlack);
+	R_DrawFill (0, 0, cls.refConfig.vidWidth, cls.refConfig.vidHeight, Q_colorBlack);
 
 	// No cinematic image to render!
 	if (!cl.cin.frames[0])

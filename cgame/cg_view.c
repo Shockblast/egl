@@ -46,7 +46,7 @@ static void V_TileRect (int x, int y, int w, int h)
 		(float)x, (float)y, (float)w, (float)h,
 		x/64.0f, y/64.0f, (x+w)/64.0f, (y+h)/64.0f, Q_colorWhite);
 	else
-		CG_DrawFill ((float)x, (float)y, (float)w, (float)h, Q_colorBlack);
+		cgi.R_DrawFill ((float)x, (float)y, (float)w, (float)h, Q_colorBlack);
 }
 static void V_TileClear (void)
 {

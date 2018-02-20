@@ -1393,7 +1393,7 @@ static int R_Q3BSP_PackLightmaps (int num, int w, int h, int size, const byte *d
 		R_Q3BSP_BuildLightmap (w, h, data, r_q3_lmBuffer, w * 4);
 
 		image = R_Load2DImage (Q_VarArgs ("*lm%i", r_q3_lmNumUploaded), (byte **)(&r_q3_lmBuffer),
-			w, h, IF_CLAMP|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOGAMMA|IF_NOINTENS|IF_NOCOMPRESS|IT_LIGHTMAP, Q3LIGHTMAP_BYTES);
+			w, h, IF_CLAMP_ALL|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOGAMMA|IF_NOINTENS|IF_NOCOMPRESS|IT_LIGHTMAP, Q3LIGHTMAP_BYTES);
 
 		r_lmTextures[r_q3_lmNumUploaded] = image;
 		rects[0].texNum = r_q3_lmNumUploaded;
@@ -1464,7 +1464,7 @@ static int R_Q3BSP_PackLightmaps (int num, int w, int h, int size, const byte *d
 	}
 
 	image = R_Load2DImage (Q_VarArgs ("*lm%i", r_q3_lmNumUploaded), (byte **)(&r_q3_lmBuffer),
-		rectX * w, rectY * h, IF_CLAMP|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOGAMMA|IF_NOINTENS|IF_NOCOMPRESS|IT_LIGHTMAP, Q3LIGHTMAP_BYTES);
+		rectX * w, rectY * h, IF_CLAMP_ALL|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOGAMMA|IF_NOINTENS|IF_NOCOMPRESS|IT_LIGHTMAP, Q3LIGHTMAP_BYTES);
 
 	r_lmTextures[r_q3_lmNumUploaded] = image;
 	for (i=0 ; i<num ; i++)

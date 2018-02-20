@@ -478,8 +478,6 @@ extern cVar_t	*gl_polyblend;
 // cg_draw.c
 //
 
-void		CG_DrawFill (float x, float y, int w, int h, vec4_t color);
-
 void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct material_s *mat, vec3_t origin, vec3_t angles);
 
 //

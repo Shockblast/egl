@@ -755,9 +755,11 @@ typedef struct refInfo_s {
 
 	int					rgbFormat;
 	int					rgbaFormat;
+	int					greyFormat;
 
 	int					rgbFormatCompressed;
 	int					rgbaFormatCompressed;
+	int					greyFormatCompressed;
 
 	float				pow2MapOvrbr;
 

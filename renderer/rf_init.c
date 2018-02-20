@@ -588,6 +588,7 @@ static void GL_InitExtensions (void)
 
 				ri.rgbFormatCompressed = GL_COMPRESSED_RGB_ARB;
 				ri.rgbaFormatCompressed = GL_COMPRESSED_RGBA_ARB;
+				ri.greyFormatCompressed = GL_COMPRESSED_LUMINANCE_ARB;
 				break;
 
 			case 2:
@@ -603,6 +604,7 @@ static void GL_InitExtensions (void)
 				ri.config.extTexCompression = qTrue;
 
 				ri.rgbFormatCompressed = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+				ri.greyFormatCompressed = GL_LUMINANCE4; // Not supported, just use 4bit per sample luminance
 				switch (r_ext_textureCompression->intVal) {
 				case 2:
 					ri.rgbaFormatCompressed = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -633,6 +635,7 @@ static void GL_InitExtensions (void)
 
 				ri.rgbFormatCompressed = GL_RGB_S3TC;
 				ri.rgbaFormatCompressed = GL_RGBA_S3TC;
+				ri.greyFormatCompressed = GL_LUMINANCE4; // Not supported, just use 4bit per sample luminance
 				break;
 
 			default:

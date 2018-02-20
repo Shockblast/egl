@@ -25,17 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /*
 ================
-CG_DrawFill
-================
-*/
-void CG_DrawFill (float x, float y, int w, int h, vec4_t color)
-{
-	cgi.R_DrawPic (cgMedia.whiteTexture, 0, x, y, w, h, 0, 0, 1, 1, color);
-}
-
-
-/*
-================
 CG_DrawModel
 ================
 */

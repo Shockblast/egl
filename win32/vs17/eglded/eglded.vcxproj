@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{2CCCC9EC-C944-4AAC-8396-E355666828C5}</ProjectGuid>
+    <RootNamespace>eglded</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(SolutionDir)..\lib\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)..\..\include\zlibpng\;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>$(SolutionDir)..\lib\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)..\..\include\zlibpng\;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(SolutionDir)..\lib\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\include\zlibpng\;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)x64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(SolutionDir)..\lib\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\include\zlibpng\;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)x64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <PreprocessorDefinitions>DEDICATED_ONLY;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link />
+    <Link />
+    <Link>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <PreprocessorDefinitions>DEDICATED_ONLY;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link />
+    <Link />
+    <Link>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <PreprocessorDefinitions>DEDICATED_ONLY;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <PreprocessorDefinitions>DEDICATED_ONLY;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;libpng_$(Platform)$(Configuration).lib;zlib_$(Platform)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>COPY "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)$(TargetFileName)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\common\alias.h" />
+    <ClInclude Include="..\..\..\common\cmd.h" />
+    <ClInclude Include="..\..\..\common\cm_common.h" />
+    <ClInclude Include="..\..\..\common\cm_public.h" />
+    <ClInclude Include="..\..\..\common\cm_q2_local.h" />
+    <ClInclude Include="..\..\..\common\cm_q3_local.h" />
+    <ClInclude Include="..\..\..\common\common.h" />
+    <ClInclude Include="..\..\..\common\cvar.h" />
+    <ClInclude Include="..\..\..\common\files.h" />
+    <ClInclude Include="..\..\..\common\memory.h" />
+    <ClInclude Include="..\..\..\common\parse.h" />
+    <ClInclude Include="..\..\..\common\protocol.h" />
+    <ClInclude Include="..\..\..\include\minizip\crypt.h" />
+    <ClInclude Include="..\..\..\include\minizip\ioapi.h" />
+    <ClInclude Include="..\..\..\include\minizip\unzip.h" />
+    <ClInclude Include="..\..\..\include\minizip\zip.h" />
+    <ClInclude Include="..\..\..\include\openal\al.h" />
+    <ClInclude Include="..\..\..\include\openal\alc.h" />
+    <ClInclude Include="..\..\..\include\openal\alut.h" />
+    <ClInclude Include="..\..\..\include\zlibpng\ioapi.h" />
+    <ClInclude Include="..\..\..\include\zlibpng\png.h" />
+    <ClInclude Include="..\..\..\include\zlibpng\pngconf.h" />
+    <ClInclude Include="..\..\..\include\zlibpng\zconf.h" />
+    <ClInclude Include="..\..\..\include\zlibpng\zlib.h" />
+    <ClInclude Include="..\..\..\server\sv_local.h" />
+    <ClInclude Include="..\..\resource.h" />
+    <ClInclude Include="..\..\wglext.h" />
+    <ClInclude Include="..\..\win_local.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\common\alias.c" />
+    <ClCompile Include="..\..\..\common\cbuf.c" />
+    <ClCompile Include="..\..\..\common\cmd.c" />
+    <ClCompile Include="..\..\..\common\cm_common.c" />
+    <ClCompile Include="..\..\..\common\cm_q2_main.c" />
+    <ClCompile Include="..\..\..\common\cm_q2_trace.c" />
+    <ClCompile Include="..\..\..\common\cm_q3_main.c" />
+    <ClCompile Include="..\..\..\common\cm_q3_patch.c" />
+    <ClCompile Include="..\..\..\common\cm_q3_trace.c" />
+    <ClCompile Include="..\..\..\common\common.c" />
+    <ClCompile Include="..\..\..\common\crc.c" />
+    <ClCompile Include="..\..\..\common\cvar.c" />
+    <ClCompile Include="..\..\..\common\files.c" />
+    <ClCompile Include="..\..\..\common\md4.c" />
+    <ClCompile Include="..\..\..\common\memory.c" />
+    <ClCompile Include="..\..\..\common\net_chan.c" />
+    <ClCompile Include="..\..\..\common\net_msg.c" />
+    <ClCompile Include="..\..\..\common\parse.c" />
+    <ClCompile Include="..\..\..\include\minizip\ioapi.c" />
+    <ClCompile Include="..\..\..\include\minizip\unzip.c" />
+    <ClCompile Include="..\..\..\include\minizip\zip.c" />
+    <ClCompile Include="..\..\..\server\sv_ccmds.c" />
+    <ClCompile Include="..\..\..\server\sv_ents.c" />
+    <ClCompile Include="..\..\..\server\sv_gameapi.c" />
+    <ClCompile Include="..\..\..\server\sv_init.c" />
+    <ClCompile Include="..\..\..\server\sv_main.c" />
+    <ClCompile Include="..\..\..\server\sv_pmove.c" />
+    <ClCompile Include="..\..\..\server\sv_send.c" />
+    <ClCompile Include="..\..\..\server\sv_user.c" />
+    <ClCompile Include="..\..\..\server\sv_world.c" />
+    <ClCompile Include="..\..\win_console.c" />
+    <ClCompile Include="..\..\win_main.c" />
+    <ClCompile Include="..\..\win_sock.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\EGL.APS" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\EGL.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\shared\shared.vcxproj">
+      <Project>{c25bc6a0-9748-4920-af92-36309d94fa11}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

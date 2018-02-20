@@ -67,6 +67,9 @@ void	CG_WeldingSparkFlash (vec3_t pos);
 =============================================================================
 */
 
+#define THINK_DELAY_DEFAULT		16.5f // 60 FPS
+#define THINK_DELAY_EXPENSIVE	33.0f // 30 FPS
+
 enum {
 	// ----------- PARTICLES ----------
 	PT_BFG_DOT,
@@ -99,19 +102,23 @@ enum {
 	PT_EMBERS2,
 	PT_EMBERS3,
 
-	PT_BLOOD,
-	PT_BLOOD2,
-	PT_BLOOD3,
-	PT_BLOOD4,
-	PT_BLOOD5,
-	PT_BLOOD6,
+	PT_BLOODTRAIL,
+	PT_BLOODTRAIL2,
+	PT_BLOODTRAIL3,
+	PT_BLOODTRAIL4,
+	PT_BLOODTRAIL5,
+	PT_BLOODTRAIL6,
+	PT_BLOODTRAIL7,
+	PT_BLOODTRAIL8,
 
-	PT_GRNBLOOD,
-	PT_GRNBLOOD2,
-	PT_GRNBLOOD3,
-	PT_GRNBLOOD4,
-	PT_GRNBLOOD5,
-	PT_GRNBLOOD6,
+	PT_GRNBLOODTRAIL,
+	PT_GRNBLOODTRAIL2,
+	PT_GRNBLOODTRAIL3,
+	PT_GRNBLOODTRAIL4,
+	PT_GRNBLOODTRAIL5,
+	PT_GRNBLOODTRAIL6,
+	PT_GRNBLOODTRAIL7,
+	PT_GRNBLOODTRAIL8,
 
 	PT_BLDDRIP01,
 	PT_BLDDRIP02,
@@ -119,6 +126,8 @@ enum {
 	PT_BLDDRIP02_GRN,
 	PT_BLDSPURT,
 	PT_BLDSPURT2,
+	PT_BLDSPURT_GREEN,
+	PT_BLDSPURT_GREEN2,
 
 	PT_BEAM,
 
@@ -272,7 +281,6 @@ typedef struct cgDecal_s {
 
 	float				lifeTime;
 
-	struct				material_s *mat;
 	uint32				flags;
 
 	void				(*think)(struct cgDecal_s *d, vec4_t color, int *type, uint32 *flags);
@@ -409,8 +417,8 @@ void	CG_SpawnParticle (float org0,					float org1,					float org2,
 // random texturing
 int		pRandBloodDrip (void);
 int		pRandGrnBloodDrip (void);
-int		pRandBloodMark (void);
-int		pRandGrnBloodMark (void);
+int		pRandBloodTrail (void);
+int		pRandGrnBloodTrail (void);
 int		pRandSmoke (void);
 int		pRandGlowSmoke (void);
 int		pRandEmbers (void);

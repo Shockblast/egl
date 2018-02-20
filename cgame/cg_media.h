@@ -198,7 +198,10 @@ typedef struct cgMedia_s {
 
 	// particle/decal media
 	struct material_s		*decalTable[DT_PICTOTAL];
+	vec4_t					decalCoords[DT_PICTOTAL];
+
 	struct material_s		*particleTable[PT_PICTOTAL];
+	vec4_t					particleCoords[PT_PICTOTAL];
 } cgMedia_t;
 
 extern cgMedia_t	cgMedia;

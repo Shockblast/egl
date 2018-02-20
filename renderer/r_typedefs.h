@@ -37,7 +37,7 @@ typedef uint16			meshFeatures_t;
 // Image subsystem
 //
 typedef char			texUnit_t;
-typedef uint16			texFlags_t;
+typedef uint32			texFlags_t;
 
 //
 // Material subsystem

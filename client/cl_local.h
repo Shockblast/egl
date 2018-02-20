@@ -454,8 +454,6 @@ void		CL_ParseServerMessage (void);
 // cl_screen.c
 //
 
-void		CL_DrawFill (float x, float y, int w, int h, vec4_t color);
-
 void		SCR_BeginLoadingPlaque (void);
 void		SCR_EndLoadingPlaque (void);
 
