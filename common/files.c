@@ -1226,6 +1226,23 @@ static void FS_AddGameDirectory (char *dir, char *gamePath)
 	}
 
 	FS_FreeFileList (packFiles, numPacks);
+
+	// Load *.pk3 files
+	numPacks = Sys_FindFiles (dir, "*/*.pk3", packFiles, FS_MAX_PAKS, 0, qFalse, qTrue, qFalse);
+
+	for (i=0 ; i<numPacks ; i++) {
+		pkz = FS_LoadPKZ (packFiles[i], qTrue);
+		if (!pkz)
+			continue;
+		search = Mem_PoolAlloc (sizeof (fsPath_t), com_fileSysPool, 0);
+		Q_strncpyz (search->pathName, dir, sizeof (search->pathName));
+		Q_strncpyz (search->gamePath, gamePath, sizeof (search->gamePath));
+		search->package = pkz;
+		search->next = fs_searchPaths;
+		fs_searchPaths = search;
+	}
+
+	FS_FreeFileList (packFiles, numPacks);
 }
 
 /*

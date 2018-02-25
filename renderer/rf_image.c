@@ -27,8 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "rf_local.h"
 
 #ifdef _WIN32
+# include "../include/jpeg/jpeglib.h"
 # include "../include/zlibpng/png.h"
 #else
+# include <jpeglib.h>
 # include <png.h>
 #endif
 
@@ -224,6 +226,170 @@ void GL_ResetAnisotropy (void)
 		RB_BindTexture (image);
 		qglTexParameteri (image->target, GL_TEXTURE_MAX_ANISOTROPY_EXT, set);
 	}
+}
+
+/*
+==============================================================================
+ 
+	JPG
+ 
+==============================================================================
+*/
+
+static void jpg_noop(j_decompress_ptr cinfo)
+{
+}
+
+static void jpeg_d_error_exit (j_common_ptr cinfo)
+{
+	char msg[1024];
+
+	(cinfo->err->format_message)(cinfo, msg);
+	Com_Error (ERR_FATAL, "R_LoadJPG: JPEG Lib Error: '%s'", msg);
+}
+
+static boolean jpg_fill_input_buffer (j_decompress_ptr cinfo)
+{
+    Com_DevPrintf (PRNT_WARNING, "R_LoadJPG: Premeture end of jpeg file\n");
+
+    return 1;
+}
+
+static void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
+{
+    cinfo->src->next_input_byte += (size_t) num_bytes;
+    cinfo->src->bytes_in_buffer -= (size_t) num_bytes;
+}
+
+/*
+=============
+R_LoadJPG
+
+ala Vic
+=============
+*/
+static void R_LoadJPG (char *name, byte **pic, int *width, int *height)
+{
+    int		fileLen, components;
+    byte	*img, *scan, *buffer, *dummy;
+    struct	jpeg_error_mgr			jerr;
+    struct	jpeg_decompress_struct	cinfo;
+	uint32	i;
+
+	if (pic)
+		*pic = NULL;
+
+	// Load the file
+	fileLen = FS_LoadFile (name, (void **)&buffer, NULL);
+	if (!buffer || fileLen <= 0)
+		return;
+
+	// Parse the file
+	cinfo.err = jpeg_std_error (&jerr);
+	jerr.error_exit = jpeg_d_error_exit;
+
+	jpeg_create_decompress (&cinfo);
+
+	jpeg_mem_src (&cinfo, buffer, fileLen);
+	jpeg_read_header (&cinfo, TRUE);
+
+	jpeg_start_decompress (&cinfo);
+
+	components = cinfo.output_components;
+    if (components != 3 && components != 1) {
+		Com_DevPrintf (PRNT_WARNING, "R_LoadJPG: Bad jpeg components '%s' (%d)\n", name, components);
+		jpeg_destroy_decompress (&cinfo);
+		FS_FreeFile (buffer);
+		return;
+	}
+
+	if (cinfo.output_width <= 0 || cinfo.output_height <= 0) {
+		Com_DevPrintf (PRNT_WARNING, "R_LoadJPG: Bad jpeg dimensions on '%s' (%d x %d)\n", name, cinfo.output_width, cinfo.output_height);
+		jpeg_destroy_decompress (&cinfo);
+		FS_FreeFile (buffer);
+		return;
+	}
+
+	if (width)
+		*width = cinfo.output_width;
+	if (height)
+		*height = cinfo.output_height;
+
+	img = Mem_PoolAlloc (cinfo.output_width * cinfo.output_height * 4, ri.imageSysPool, r_imageAllocTag);
+	dummy = Mem_PoolAlloc (cinfo.output_width * components, ri.imageSysPool, r_imageAllocTag);
+
+	if (pic)
+		*pic = img;
+
+	while (cinfo.output_scanline < cinfo.output_height) {
+		scan = dummy;
+		if (!jpeg_read_scanlines (&cinfo, &scan, 1)) {
+			Com_Printf (PRNT_WARNING, "Bad jpeg file %s\n", name);
+			jpeg_destroy_decompress (&cinfo);
+			Mem_Free (dummy);
+			FS_FreeFile (buffer);
+			return;
+		}
+
+		if (components == 1) {
+			for (i=0 ; i<cinfo.output_width ; i++, img+=4)
+				img[0] = img[1] = img[2] = *scan++;
+		}
+		else {
+			for (i=0 ; i<cinfo.output_width ; i++, img+=4, scan += 3)
+				img[0] = scan[0], img[1] = scan[1], img[2] = scan[2];
+		}
+	}
+
+    jpeg_finish_decompress (&cinfo);
+    jpeg_destroy_decompress (&cinfo);
+
+    Mem_Free (dummy);
+	FS_FreeFile (buffer);
+}
+
+
+/*
+================== 
+R_WriteJPG
+================== 
+*/
+
+static void R_WriteJPG (FILE *f, byte *buffer, int width, int height, int quality)
+{
+	int			offset, w3;
+	struct		jpeg_compress_struct	cinfo;
+	struct		jpeg_error_mgr			jerr;
+	byte		*s;
+
+	// Initialise the jpeg compression object
+	cinfo.err = jpeg_std_error (&jerr);
+	jpeg_create_compress (&cinfo);
+	jpeg_stdio_dest (&cinfo, f);
+
+	// Setup jpeg parameters
+	cinfo.image_width = width;
+	cinfo.image_height = height;
+	cinfo.in_color_space = JCS_RGB;
+	cinfo.input_components = 3;
+	cinfo.progressive_mode = TRUE;
+
+	jpeg_set_defaults (&cinfo);
+	jpeg_set_quality (&cinfo, quality, TRUE);
+	jpeg_start_compress (&cinfo, qTrue);	// start compression
+	jpeg_write_marker (&cinfo, JPEG_COM, (byte *) "EGL v" EGL_VERSTR, (uint32) strlen ("EGL v" EGL_VERSTR));
+
+	// Feed scanline data
+	w3 = cinfo.image_width * 3;
+	offset = w3 * cinfo.image_height - w3;
+	while (cinfo.next_scanline < cinfo.image_height) {
+		s = &buffer[offset - (cinfo.next_scanline * w3)];
+		jpeg_write_scanlines (&cinfo, &s, 1);
+	}
+
+	// Finish compression
+	jpeg_finish_compress (&cinfo);
+	jpeg_destroy_compress (&cinfo);
 }
 
 /*
@@ -1908,8 +2074,16 @@ static inline image_t *R_RegisterCubeMap (char *name, texFlags_t flags)
 			loadName[len-3] = 't'; loadName[len-2] = 'g'; loadName[len-1] = 'a';
 			R_LoadTGA (loadName, &pic[i], &width, &height, &samples);
 			if (!pic[i]) {
-				Com_Printf (PRNT_WARNING, "R_RegisterCubeMap: Unable to find all of the sides, aborting!\n");
-				break;
+				// JPG
+				samples = 3;
+				loadName[len-3] = 'j'; loadName[len-2] = 'p'; loadName[len-1] = 'g';
+				R_LoadJPG (loadName, &pic[i], &width, &height);
+
+				// Not found
+				if (!pic[i]) {
+					Com_Printf (PRNT_WARNING, "R_RegisterCubeMap: Unable to find all of the sides, aborting!\n");
+					break;
+				}
 			}
 		}
 
@@ -2010,25 +2184,31 @@ image_t	*R_RegisterImage (char *name, texFlags_t flags)
 		loadName[len-3] = 't'; loadName[len-2] = 'g'; loadName[len-1] = 'a';
 		R_LoadTGA (loadName, &pic, &width, &height, &samples);
 		if (!pic) {
-			// WAL
-			if (!(strcmp (name+len-4, ".wal"))) {
-				loadName[len-3] = 'w'; loadName[len-2] = 'a'; loadName[len-1] = 'l';
-				R_LoadWal (loadName, &pic, &width, &height);
+			// JPG
+			samples = 3;
+			loadName[len-3] = 'j'; loadName[len-2] = 'p'; loadName[len-1] = 'g';
+			R_LoadJPG (loadName, &pic, &width, &height);
+			if (!pic) {
+				// WAL
+				if (!(strcmp (name+len-4, ".wal"))) {
+					loadName[len-3] = 'w'; loadName[len-2] = 'a'; loadName[len-1] = 'l';
+					R_LoadWal (loadName, &pic, &width, &height);
+					if (pic) {
+						image = R_LoadImage (loadName, bareName, &pic, width, height, 1, flags, samples, qTrue, qFalse);
+						return image;
+					}
+					return NULL;
+				}
+
+				// PCX
+				loadName[len-3] = 'p'; loadName[len-2] = 'c'; loadName[len-1] = 'x';
+				R_LoadPCX (loadName, &pic, NULL, &width, &height);
 				if (pic) {
-					image = R_LoadImage (loadName, bareName, &pic, width, height, 1, flags, samples, qTrue, qFalse);
+					image = R_LoadImage (loadName, bareName, &pic, width, height, 1, flags, samples, qTrue, qTrue);
 					return image;
 				}
 				return NULL;
 			}
-
-			// PCX
-			loadName[len-3] = 'p'; loadName[len-2] = 'c'; loadName[len-1] = 'x';
-			R_LoadPCX (loadName, &pic, NULL, &width, &height);
-			if (pic) {
-				image = R_LoadImage (loadName, bareName, &pic, width, height, 1, flags, samples, qTrue, qTrue);
-				return image;
-			}
-			return NULL;
 		}
 	}
 
@@ -2339,12 +2519,13 @@ R_ScreenShot_f
 */
 enum {
 	SSHOTTYPE_PNG,
+	SSHOTTYPE_JPG,
 	SSHOTTYPE_TGA,
 };
 static void R_ScreenShot_f (void)
 {
 	char	checkName[MAX_OSPATH];
-	int		type, shotNum, quality;
+	int		type, shotNum;
 	char	*ext;
 	byte	*buffer;
 	FILE	*f;
@@ -2357,6 +2538,8 @@ static void R_ScreenShot_f (void)
 
 	if (!Q_stricmp (ext, "png"))
 		type = SSHOTTYPE_PNG;
+	else if (!Q_stricmp (ext, "jpg"))
+		type = SSHOTTYPE_JPG;
 	else
 		type = SSHOTTYPE_TGA;
 
@@ -2364,14 +2547,17 @@ static void R_ScreenShot_f (void)
 	switch (type) {
 	case SSHOTTYPE_TGA:
 		Com_Printf (0, "Taking TGA screenshot...\n");
-		quality = 100;
 		ext = "tga";
 		break;
 
 	case SSHOTTYPE_PNG:
 		Com_Printf (0, "Taking PNG screenshot...\n");
-		quality = 100;
 		ext = "png";
+		break;
+
+	case SSHOTTYPE_JPG:
+		Com_Printf (0, "Taking JPG screenshot...\n");
+		ext = "jpg";
 		break;
 	}
 
@@ -2442,6 +2628,10 @@ static void R_ScreenShot_f (void)
 
 	case SSHOTTYPE_PNG:
 		R_WritePNG (f, buffer, ri.config.vidWidth, ri.config.vidHeight);
+		break;
+
+	case SSHOTTYPE_JPG:
+		R_WriteJPG (f, buffer, ri.config.vidWidth, ri.config.vidHeight, 100);
 		break;
 	}
 

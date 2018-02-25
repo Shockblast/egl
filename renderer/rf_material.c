@@ -457,6 +457,7 @@ static qBool MatPass_MapExt (material_t *mat, matPass_t *pass, parse_t *ps, texF
 		str[MAX_QPATH-1] = '\0';
 	}
 
+	pass->animTexFlags[pass->animNumNames] |= addTexFlags;
 	pass->animNames[pass->animNumNames++] = Mem_PoolStrDup (str, ri.matSysPool, 0);
 	return qTrue;
 }
@@ -3183,7 +3184,29 @@ void R_MaterialInit (void)
 	// Load scripts
 	r_numMaterialErrors = 0;
 	r_numMaterialWarnings = 0;
+
 	numFiles = FS_FindFiles ("scripts", "*scripts/*.shd", "shd", fileList, MAX_MATERIALS, qTrue, qFalse);
+	for (i=0 ; i<numFiles ; i++) {
+		// Fix the path
+		Com_NormalizePath (fixedName, sizeof (fixedName), fileList[i]);
+
+		// Check the path
+		name = strstr (fixedName, "/scripts/");
+		if (!name)
+			continue;	// This shouldn't happen...
+		name++;	// Skip the initial '/'
+
+		// Base dir material?
+		if (strstr (fileList[i], BASE_MODDIRNAME "/"))
+			pathType = MAT_PATHTYPE_BASEDIR;
+		else
+			pathType = MAT_PATHTYPE_MODDIR;
+
+		R_ParseMaterialFile (name, pathType);
+	}
+	FS_FreeFileList (fileList, numFiles);
+
+	numFiles = FS_FindFiles ("scripts", "*scripts/*.shader", "shader", fileList, MAX_MATERIALS, qTrue, qFalse);
 	for (i=0 ; i<numFiles ; i++) {
 		// Fix the path
 		Com_NormalizePath (fixedName, sizeof (fixedName), fileList[i]);
