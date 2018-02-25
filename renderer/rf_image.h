@@ -91,7 +91,6 @@ typedef struct image_s {
 #define FOGTEX_WIDTH		256
 #define FOGTEX_HEIGHT		32
 
-#define Q2LIGHTMAP_WIDTH	256				// lightmaps are square
 #define R_MAX_LIGHTMAPS		128				// maximum local lightmap textures
 extern image_t		*r_lmTextures[R_MAX_LIGHTMAPS];
 

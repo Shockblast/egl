@@ -34,10 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 =============================================================================
 */
 
-// The lightmap texture data needs to be kept in
-// main memory so texsubimage can update properly
-static float	r_q2_blockLights[34*34*3];
-
 static vec3_t	r_q2_pointColor;
 static vec3_t	r_q2_lightSpot;
 
@@ -88,6 +84,7 @@ loc0:
 	R_Q2BSP_r_MarkWorldLights (node->children[0], lt, bit);
 	R_Q2BSP_r_MarkWorldLights (node->children[1], lt, bit);
 }
+
 void R_Q2BSP_MarkWorldLights (void)
 {
 	refDLight_t	*lt;
@@ -146,6 +143,7 @@ loc0:
 	R_Q2BSP_r_MarkBModelLights (node->children[0], lt, bit);
 	R_Q2BSP_r_MarkBModelLights (node->children[1], lt, bit);
 }
+
 void R_Q2BSP_MarkBModelLights (refEntity_t *ent, vec3_t mins, vec3_t maxs)
 {
 	refDLight_t		*lt;
@@ -263,6 +261,7 @@ static int Q2BSP_RecursiveLightPoint (mBspNode_t *node, vec3_t start, vec3_t end
 	// Go down back side
 	return Q2BSP_RecursiveLightPoint (node->children[!side], mid, end);
 }
+
 static qBool R_Q2BSP_RecursiveLightPoint (vec3_t point, vec3_t end)
 {
 	int	r;
@@ -559,6 +558,12 @@ static void R_Q2BSP_SetLightLevel (void)
 static byte		*r_q2_lmBuffer;
 static int		r_q2_lmNumUploaded;
 static int		*r_q2_lmAllocated;
+
+// The lightmap texture data needs to be kept in
+// main memory so texsubimage can update properly
+static byte		*r_q2_lightScratch;
+static size_t	r_q2_lmLargestSize = 0;
+
 int				r_q2_lmSize;
 
 /*
@@ -593,7 +598,7 @@ static void R_Q2BSP_AddDynamicLights (mBspSurface_t *surf)
 		sl = DotProduct (impact, surf->q2_texInfo->vecs[0]) + surf->q2_texInfo->vecs[0][3] - surf->q2_textureMins[0];
 		st = DotProduct (impact, surf->q2_texInfo->vecs[1]) + surf->q2_texInfo->vecs[1][3] - surf->q2_textureMins[1];
 
-		bl = r_q2_blockLights;
+		bl = surf->q2_blockLights;
 		for (t=0, ftacc=0 ; t<surf->q2_lmHeight ; t++) {
 			td = (int) (st - ftacc);
 			if (td < 0)
@@ -658,20 +663,18 @@ static void R_Q2BSP_BuildLightMap (mBspSurface_t *surf, byte *dest, int stride)
 		Com_Error (ERR_DROP, "LM_BuildLightMap called for non-lit surface");
 
 	size = surf->q2_lmWidth*surf->q2_lmHeight;
-	if (size > sizeof (r_q2_blockLights) >> 4)
-		Com_Error (ERR_DROP, "Bad r_q2_blockLights size");
 
 	// Set to full bright if no light data
 	if (!surf->q2_lmSamples || r_fullbright->intVal) {
 		for (i=0 ; i<size*3 ; i++)
-			r_q2_blockLights[i] = 255.0f;
+			surf->q2_blockLights[i] = 255.0f;
 	}
 	else {
 		lightMap = surf->q2_lmSamples;
 
 		// Add all the lightmaps
 		if (surf->q2_numStyles == 1) {
-			bl = r_q2_blockLights;
+			bl = surf->q2_blockLights;
 
 			// Optimal case
 			Vec3Scale (ri.scn.lightStyles[surf->q2_styles[0]].rgb, gl_modulate->floatVal, scale);
@@ -699,7 +702,7 @@ static void R_Q2BSP_BuildLightMap (mBspSurface_t *surf, byte *dest, int stride)
 		}
 		else {
 			map = 0;
-			bl = r_q2_blockLights;
+			bl = surf->q2_blockLights;
 			Vec3Scale (ri.scn.lightStyles[surf->q2_styles[map]].rgb, gl_modulate->floatVal, scale);
 			if (scale[0] == 1.0f && scale[1] == 1.0f && scale[2] == 1.0f) {
 				for (i=0 ; i<size ; i++, bl+=3) {
@@ -720,7 +723,7 @@ static void R_Q2BSP_BuildLightMap (mBspSurface_t *surf, byte *dest, int stride)
 			lightMap += size*3;
 
 			for (map=1 ; map<surf->q2_numStyles ; map++) {
-				bl = r_q2_blockLights;
+				bl = surf->q2_blockLights;
 
 				Vec3Scale (ri.scn.lightStyles[surf->q2_styles[map]].rgb, gl_modulate->floatVal, scale);
 				if (scale[0] == 1.0f && scale[1] == 1.0f && scale[2] == 1.0f) {
@@ -750,7 +753,7 @@ static void R_Q2BSP_BuildLightMap (mBspSurface_t *surf, byte *dest, int stride)
 
 	// Put into texture format
 	stride -= (surf->q2_lmWidth << 2);
-	bl = r_q2_blockLights;
+	bl = surf->q2_blockLights;
 
 	for (i=0 ; i<surf->q2_lmHeight ; i++) {
 		for (j=0 ; j<surf->q2_lmWidth ; j++) {
@@ -815,7 +818,6 @@ R_Q2BSP_UpdateLightmap
 */
 void R_Q2BSP_UpdateLightmap (mBspSurface_t *surf)
 {
-	static uint32	temp[Q2LIGHTMAP_WIDTH*Q2LIGHTMAP_WIDTH];
 	int				map;
 
 	// Don't attempt a surface more than once a frame
@@ -847,7 +849,7 @@ void R_Q2BSP_UpdateLightmap (mBspSurface_t *surf)
 
 dynamic:
 	// Update texture
-	R_Q2BSP_BuildLightMap (surf, (void *)temp, surf->q2_lmWidth*4);
+	R_Q2BSP_BuildLightMap (surf, r_q2_lightScratch, surf->q2_lmWidth*4);
 	if ((surf->q2_styles[map] >= 32 || surf->q2_styles[map] == 0) && surf->dLightFrame != ri.frameCount) {
 		R_Q2BSP_SetLMCacheState (surf);
 
@@ -864,7 +866,7 @@ dynamic:
 					surf->q2_lmWidth, surf->q2_lmHeight,
 					GL_RGBA,
 					GL_UNSIGNED_BYTE,
-					temp);
+					r_q2_lightScratch);
 }
 
 
@@ -936,8 +938,13 @@ void R_Q2BSP_BeginBuildingLightmaps (void)
 	// Should be no lightmaps at this point
 	r_q2_lmNumUploaded = 0;
 
+	if (r_q2_lmLargestSize)
+		Mem_Free (r_q2_lightScratch);
+
+	r_q2_lmLargestSize = 0;
+
 	// Find the maximum size
-	for (size=1 ; size<Q2LIGHTMAP_WIDTH && size<ri.config.maxTexSize ; size<<=1);
+	for (size=1 ; size<r_lmMaxBlockSize->intVal && size<ri.config.maxTexSize ; size<<=1);
 	r_q2_lmSize = size;
 
 	// Allocate buffers and clear values
@@ -955,7 +962,6 @@ void R_Q2BSP_BeginBuildingLightmaps (void)
 	R_Q2BSP_UploadLMBlock ();
 }
 
-
 /*
 ========================
 R_Q2BSP_CreateSurfaceLightmap
@@ -963,7 +969,11 @@ R_Q2BSP_CreateSurfaceLightmap
 */
 void R_Q2BSP_CreateSurfaceLightmap (mBspSurface_t *surf)
 {
-	byte	*base;
+	byte			*base;
+	const size_t	surf_size = surf->q2_lmWidth * surf->q2_lmHeight;
+
+	r_q2_lmLargestSize = max(r_q2_lmLargestSize, surf_size * 4);
+	surf->q2_blockLights = Mem_PoolAlloc(surf_size * 3 * sizeof(float), ri.modelSysPool, ri.scn.worldModel->memTag);
 
 	if (!R_Q2BSP_AllocLMBlock (surf->q2_lmWidth, surf->q2_lmHeight, &surf->q2_lmCoords[0], &surf->q2_lmCoords[1])) {
 		R_Q2BSP_UploadLMBlock ();
@@ -991,6 +1001,9 @@ R_Q2BSP_EndBuildingLightmaps
 */
 void R_Q2BSP_EndBuildingLightmaps (void)
 {
+	// create scratches
+	r_q2_lightScratch = Mem_PoolAlloc(r_q2_lmLargestSize, ri.lightSysPool, 0);
+
 	// Upload the final block
 	R_Q2BSP_UploadLMBlock ();
 

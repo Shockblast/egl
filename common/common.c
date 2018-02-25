@@ -275,6 +275,9 @@ void Com_DevPrintf (comPrint_t flags, char *fmt, ...)
 	Com_ConPrint (flags, msg);
 }
 
+#ifdef _WIN32
+ #include <Windows.h>
+#endif
 
 /*
 =============
@@ -329,6 +332,10 @@ NO_RETURN void Com_Error (comError_t code, char *fmt, ...)
 
 	default:
 	case ERR_FATAL:
+#ifdef _WIN32
+		DebugBreak();
+#endif
+
 		SV_ServerShutdown (Q_VarArgs ("Server fatal crashed: %s\n", msg), qFalse, qTrue);
 #ifndef DEDICATED_ONLY
 		if (!dedicated->intVal)

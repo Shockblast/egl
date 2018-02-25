@@ -247,6 +247,7 @@ typedef struct mBspSurface_s {
 	int						q2_numStyles;
 	byte					q2_styles[Q2BSP_MAX_LIGHTMAPS];
 	float					q2_cachedLight[Q2BSP_MAX_LIGHTMAPS];	// values currently used in lightmap
+	float					*q2_blockLights;
 
 	// Quake3 BSP specific
 	uint32					q3_nodeFrame;		// used so we don't have to recurse EVERY frame
