@@ -464,7 +464,7 @@ static qBool R_CullQ3FlareSurface (mBspSurface_t *surf, refEntity_t *ent, int cl
 	ri.pc.cullRadius[CULL_FAIL]++;
 
 	// Radius cull
-	if (clipFlags && R_CullSphere (origin, 1, clipFlags))
+	if (clipFlags && R_CullSphere (origin, r_flareSize->floatVal, clipFlags))
 		return qTrue;
 
 	// Visible

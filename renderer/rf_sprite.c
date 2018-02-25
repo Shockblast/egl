@@ -176,8 +176,8 @@ R_PushFlare
 void R_PushFlare (meshBuffer_t *mb)
 {
 	vec4_t			color;
-	vec3_t			origin, point, v;
-	float			radius = r_flareSize->floatVal, flarescale, depth;
+	vec3_t			origin, point;
+	float			radius = r_flareSize->floatVal, flarescale;
 	float			up = radius, down = -radius, left = -radius, right = radius;
 	mBspSurface_t	*surf = (mBspSurface_t *)mb->mesh;
 	meshFeatures_t	features;
@@ -189,16 +189,9 @@ void R_PushFlare (meshBuffer_t *mb)
 	else {
 		Vec3Copy (surf->q3_origin, origin);
 	}
-	R_TransformToScreen_Vec3 (origin, v);
 
-	if (v[0] < ri.def.x || v[0] > ri.def.x + ri.def.width)
-		return;
-	if (v[1] < ri.def.y || v[1] > ri.def.y + ri.def.height)
-		return;
-
-	qglReadPixels ((int)(v[0]), (int)(v[1]), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	if (depth + 1e-4 < v[2])
-		return;		// Occluded
+	if (R_PointOccluded(origin))
+		return; // Occluded
 
 	Vec3Copy (origin, origin);
 

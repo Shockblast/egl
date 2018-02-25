@@ -128,6 +128,7 @@ void		R_DrawFill(float x, float y, int w, int h, vec4_t color);
 
 qBool		R_CullBox (vec3_t mins, vec3_t maxs, int clipFlags);
 qBool		R_CullSphere (const vec3_t origin, const float radius, int clipFlags);
+qBool		R_PointOccluded (const vec3_t origin);
 
 //
 // rf_decal.c
