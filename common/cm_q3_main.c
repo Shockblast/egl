@@ -841,7 +841,7 @@ static void CM_Q3BSP_LoadLeafs (dQ3BspLump_t *l)
 		if (out->area >= cm_q3_numAreas)
 			cm_q3_numAreas = out->area + 1;
 
-		if (!out->contents)
+		if (!out->contents && cm_q3_emptyLeaf == -1)
 			cm_q3_emptyLeaf = i;
 	}
 
