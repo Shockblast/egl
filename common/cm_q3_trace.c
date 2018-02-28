@@ -373,13 +373,13 @@ CM_Q3BSP_ClipBoxToBrush
 */
 static void CM_Q3BSP_ClipBoxToBrush (cbrush_t *brush)
 {
-	int				i;
-	cBspPlane_t		*p, *clipPlane;
-	float			enterFrac, leaveFrac;
-	float			d1, d2;
-	qBool			getOut, startOut;
-	float			f;
-	cbrushside_t	*side, *leadSide;
+	int					i, j;
+	cBspPlane_t			*p, *clipPlane;
+	float				dist, dot1, dot2, f;
+	float				enterFrac, leaveFrac;
+	vec3_t				ofs;
+	qBool				getOut, startOut;
+	cbrushside_t		*side, *leadSide;
 
 	enterFrac = -1;
 	leaveFrac = 1;
@@ -394,71 +394,48 @@ static void CM_Q3BSP_ClipBoxToBrush (cbrush_t *brush)
 	startOut = qFalse;
 	leadSide = NULL;
 
-	for (i=0, side=&cm_q3_brushSides[brush->firstBrushSide] ; i<brush->numSides ; side++, i++) {
+	for (i=0, side=&cm_q3_brushSides[brush->firstBrushSide] ; i<brush->numSides ; side++, i++) 	{
 		p = side->plane;
 
-		// Push the plane out apropriately for mins/maxs
-		if (p->type < 3) {
-			d1 = cm_q3_traceStartMins[p->type] - p->dist;
-			d2 = cm_q3_traceEndMins[p->type] - p->dist;
+		// FIXME: special case for axial
+		if (!cm_q3_traceIsPoint) {
+			// general box case
+			// push the plane out apropriately for mins/maxs
+			// FIXME: use signBits into 8 way lookup for each mins/maxs
+			for (j=0 ; j<3 ; j++) {
+				if (p->normal[j] < 0)
+					ofs[j] = cm_q3_traceMaxs[j];
+				else
+					ofs[j] = cm_q3_traceMins[j];
+			}
+			dist = DotProduct (ofs, p->normal);
+			dist = p->dist - dist;
 		}
 		else {
-			switch (p->signBits) {
-			case 0:
-				d1 = p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMins[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMins[0] + p->normal[1]*cm_q3_traceEndMins[1] + p->normal[2]*cm_q3_traceEndMins[2] - p->dist;
-				break;
-			case 1:
-				d1 = p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMins[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMaxs[0] + p->normal[1]*cm_q3_traceEndMins[1] + p->normal[2]*cm_q3_traceEndMins[2] - p->dist;
-				break;
-			case 2:
-				d1 = p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMins[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMins[0] + p->normal[1]*cm_q3_traceEndMaxs[1] + p->normal[2]*cm_q3_traceEndMins[2] - p->dist;
-				break;
-			case 3:
-				d1 = p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMins[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMaxs[0] + p->normal[1]*cm_q3_traceEndMaxs[1] + p->normal[2]*cm_q3_traceEndMins[2] - p->dist;
-				break;
-			case 4:
-				d1 = p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMaxs[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMins[0] + p->normal[1]*cm_q3_traceEndMins[1] + p->normal[2]*cm_q3_traceEndMaxs[2] - p->dist;
-				break;
-			case 5:
-				d1 = p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMaxs[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMaxs[0] + p->normal[1]*cm_q3_traceEndMins[1] + p->normal[2]*cm_q3_traceEndMaxs[2] - p->dist;
-				break;
-			case 6:
-				d1 = p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMaxs[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMins[0] + p->normal[1]*cm_q3_traceEndMaxs[1] + p->normal[2]*cm_q3_traceEndMaxs[2] - p->dist;
-				break;
-			case 7:
-				d1 = p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMaxs[2] - p->dist;
-				d2 = p->normal[0]*cm_q3_traceEndMaxs[0] + p->normal[1]*cm_q3_traceEndMaxs[1] + p->normal[2]*cm_q3_traceEndMaxs[2] - p->dist;
-				break;
-			default:
-				d1 = d2 = 0;	// Shut up compiler
-				assert (0);
-				break;
-			}
+			// Special point case
+			dist = p->dist;
 		}
 
-		if (d2 > 0)
+		dot1 = DotProduct (cm_q3_traceStart, p->normal) - dist;
+		dot2 = DotProduct (cm_q3_traceEnd, p->normal) - dist;
+
+		if (dot2 > 0)
 			getOut = qTrue;	// Endpoint is not in solid
-		if (d1 > 0)
+		if (dot1 > 0)
 			startOut = qTrue;
 
 		// If completely in front of face, no intersection
-		if (d1 > 0 && d2 >= d1)
+		if (dot1 > 0 && dot2 >= dot1)
 			return;
-		if (d1 <= 0 && d2 <= 0)
+
+		if (dot1 <= 0 && dot2 <= 0)
 			continue;
 
 		// Crosses face
-		f = d1 - d2;
+		f = dot1 - dot2;
 		if (f > 0) {
 			// Enter
-			f = (d1 - DIST_EPSILON) / f;
+			f = (dot1 - DIST_EPSILON) / f;
 			if (f > enterFrac) {
 				enterFrac = f;
 				clipPlane = p;
@@ -467,7 +444,7 @@ static void CM_Q3BSP_ClipBoxToBrush (cbrush_t *brush)
 		}
 		else {
 			// Leave
-			f = (d1 + DIST_EPSILON) / f;
+			f = (dot1 + DIST_EPSILON) / f;
 			if (f < leaveFrac)
 				leaveFrac = f;
 		}
@@ -481,18 +458,16 @@ static void CM_Q3BSP_ClipBoxToBrush (cbrush_t *brush)
 		return;
 	}
 
-	if (enterFrac-(1.0f/1024.0f) <= leaveFrac) {
-		if (enterFrac > -1 && enterFrac < cm_q3_currentTrace.fraction) {
-			if (enterFrac < 0)
-				enterFrac = 0;
-			cm_q3_currentTrace.fraction = enterFrac;
-			cm_q3_currentTrace.plane = *clipPlane;
-			cm_q3_currentTrace.surface = leadSide->surface;
-			cm_q3_currentTrace.contents = brush->contents;
-		}
+	if (enterFrac < leaveFrac && enterFrac > -1 && enterFrac < cm_q3_currentTrace.fraction) {
+		if (enterFrac < 0)
+			enterFrac = 0;
+
+		cm_q3_currentTrace.fraction = enterFrac;
+		cm_q3_currentTrace.plane = *clipPlane;
+		cm_q3_currentTrace.surface = leadSide->surface;
+		cm_q3_currentTrace.contents = brush->contents;
 	}
 }
-
 
 /*
 ================
@@ -559,9 +534,11 @@ CM_Q3BSP_TestBoxInBrush
 */
 static void CM_Q3BSP_TestBoxInBrush (cbrush_t *brush)
 {
-	int				i;
-	cBspPlane_t		*p;
-	cbrushside_t	*side;
+	int					i, j;
+	vec3_t				ofs;
+	cBspPlane_t			*p;
+	cbrushside_t		*side;
+	float				dist, dot;
 
 	if (!brush->numSides)
 		return;
@@ -569,51 +546,23 @@ static void CM_Q3BSP_TestBoxInBrush (cbrush_t *brush)
 	for (i=0, side=&cm_q3_brushSides[brush->firstBrushSide] ; i<brush->numSides ; side++, i++) {
 		p = side->plane;
 
-		// Push the plane out apropriately for mins/maxs
-		// if completely in front of face, no intersection
-		if (p->type < 3) {
-			if (cm_q3_traceStartMins[p->type] > p->dist)
-				return;
+		// FIXME: special case for axial
+		// general box case
+		// push the plane out apropriately for mins/maxs
+		// FIXME: use signBits into 8 way lookup for each mins/maxs
+		for (j=0 ; j<3 ; j++) {
+			if (p->normal[j] < 0)
+				ofs[j] = cm_q3_traceMaxs[j];
+			else
+				ofs[j] = cm_q3_traceMins[j];
 		}
-		else {
-			switch (p->signBits) {
-			case 0:
-				if (p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMins[2] > p->dist)
-					return;
-				break;
-			case 1:
-				if (p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMins[2] > p->dist)
-					return;
-				break;
-			case 2:
-				if (p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMins[2] > p->dist)
-					return;
-				break;
-			case 3:
-				if (p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMins[2] > p->dist)
-					return;
-				break;
-			case 4:
-				if (p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMaxs[2] > p->dist)
-					return;
-				break;
-			case 5:
-				if (p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMins[1] + p->normal[2]*cm_q3_traceStartMaxs[2] > p->dist)
-					return;
-				break;
-			case 6:
-				if (p->normal[0]*cm_q3_traceStartMins[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMaxs[2] > p->dist)
-					return;
-				break;
-			case 7:
-				if (p->normal[0]*cm_q3_traceStartMaxs[0] + p->normal[1]*cm_q3_traceStartMaxs[1] + p->normal[2]*cm_q3_traceStartMaxs[2] > p->dist)
-					return;
-				break;
-			default:
-				assert (0);
-				return;
-			}
-		}
+
+		dist = p->dist - DotProduct (ofs, p->normal);
+		dot = DotProduct (cm_q3_traceStart, p->normal) - dist;
+
+		// If completely in front of face, no intersection
+		if (dot > 0)
+			return;
 	}
 
 	// Inside this brush
