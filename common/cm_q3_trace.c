@@ -160,9 +160,9 @@ void CM_Q3BSP_InitBoxHull (void)
 
 		p = &cm_q3_boxPlanes[i*2+1];
 		p->type = 3 + (i>>1);
-		p->signBits = 0;
 		Vec3Clear (p->normal);
 		p->normal[i>>1] = -1;
+		p->signBits = SignbitsForPlane(p);
 	}
 }
 
