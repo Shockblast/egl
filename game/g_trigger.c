@@ -418,7 +418,16 @@ void trigger_push_touch (edict_t *self, edict_t *other, cBspPlane_t *plane, cBsp
 
 void trigger_push_q3touch (edict_t *self, edict_t *other, cBspPlane_t *plane, cBspSurface_t *surf)
 {
-	Vec3Scale (self->movedir, self->speed * 10, other->velocity);
+	// if we didn't hit this same jumppad the previous frame
+	// then don't play the event sound again if we are in a fat trigger
+	if (other->fly_sound_debounce_time < level.time)
+	{
+		other->fly_sound_debounce_time = level.time + 1.5;
+		gi.sound (other, CHAN_AUTO, windsound, 1, ATTN_NORM, 0);
+	}
+
+	// give the player the velocity from the jumppad
+	Vec3Copy( self->pos1, other->velocity );
 
 	if (other->client)
 	{
@@ -427,14 +436,47 @@ void trigger_push_q3touch (edict_t *self, edict_t *other, cBspPlane_t *plane, cB
 	}
 }
 
+void trigger_push_q3aim (edict_t *self)
+{
+	edict_t		*ent;
+	vec3_t		origin;
+	float		height, gravity, time, forward;
+	float		dist;
+
+	Vec3Add( self->absMin, self->absMax, origin );
+	Vec3Scale ( origin, 0.5, origin );
+
+	ent = G_PickTarget( self->target );
+	if ( !ent ) {
+		G_FreeEdict( self );
+		return;
+	}
+
+	height = ent->s.origin[2] - origin[2];
+	gravity = sv_gravity->floatVal;
+	time = sqrt( height / ( .5 * gravity ) );
+	if ( !time ) {
+		G_FreeEdict( self );
+		return;
+	}
+
+	// set s.origin2 to the push velocity
+	Vec3Subtract ( ent->s.origin, origin, self->pos1 );
+	self->pos1[2] = 0;
+	dist = VectorNormalizef( self->pos1, self->pos1 );
+
+	forward = dist / time;
+	Vec3Scale( self->pos1, forward, self->pos1 );
+
+	self->pos1[2] = time * gravity;
+}
+
 /*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
 Pushes the player
 "speed"		defaults to 1000
 */
 void SP_trigger_push (edict_t *self)
 {
-	edict_t	*target;
-
 	InitTrigger (self);
 
 	windsound = gi.soundindex ("misc/windfly.wav");
@@ -446,12 +488,12 @@ void SP_trigger_push (edict_t *self)
 		return;
 	}
 
-	target = G_Find (NULL, FOFS(targetname), self->target);
-	if (target) {
+	//target = G_Find (NULL, FOFS(targetname), self->target);
+	if (self->target) {
 		// Quake3
-		//self->touch = trigger_push_q3touch;
-		// TODO FIXME
-		G_FreeEdict (self);
+		self->think = trigger_push_q3aim;
+		self->nextthink = level.time + FRAMETIME;
+		self->touch = trigger_push_q3touch;
 	}
 	else {
 		// Quake2
