@@ -979,6 +979,7 @@ typedef struct cBspSurface_s {
 
 	// Q3BSP
 	int				contents;
+	char			rname[MAX_QPATH];
 } cBspSurface_t;
 
 // A trace is returned when a box is swept through the world

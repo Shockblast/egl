@@ -721,6 +721,8 @@ static void CM_Q3BSP_LoadSurfaces (dQ3BspLump_t *l)
 	// Byte swap
 	out = cm_q3_surfaces;
 	for (i=0 ; i<cm_q3_numShaderRefs ; i++, in++, out++) {
+		Q_strncpyz (out->rname, in->name, sizeof (out->rname));
+		Q_strncpyz (out->name, in->name, sizeof (out->name));
 		out->flags = LittleLong (in->flags);
 		out->contents = LittleLong (in->contents);
 	}

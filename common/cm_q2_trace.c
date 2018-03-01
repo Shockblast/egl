@@ -466,7 +466,7 @@ static void CM_Q2BSP_ClipBoxToBrush (cQ2BspBrush_t *brush)
 
 		cm_q2_currentTrace.fraction = enterFrac;
 		cm_q2_currentTrace.plane = *clipPlane;
-		cm_q2_currentTrace.surface = &(leadSide->surface->c);
+		cm_q2_currentTrace.surface = leadSide->surface;
 		cm_q2_currentTrace.contents = brush->contents;
 	}
 }
@@ -718,7 +718,7 @@ trace_t CM_Q2BSP_BoxTrace (vec3_t start, vec3_t end, vec3_t mins, vec3_t maxs, i
 	cm_q2_currentTrace.plane.signBits = 0;
 	cm_q2_currentTrace.plane.type = 0;
 	cm_q2_currentTrace.startSolid = qFalse;
-	cm_q2_currentTrace.surface = &(cm_q2_nullSurface.c);
+	cm_q2_currentTrace.surface = &cm_q2_nullSurface;
 
 	if (!cm_q2_numNodes)	// Map not loaded
 		return cm_q2_currentTrace;

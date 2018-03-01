@@ -166,11 +166,11 @@ enum {
 int CG_StepTypeForTexture (cBspSurface_t *surf)
 {
 //	int		surfflags;
-	char	newName[16];
+	char	newName[sizeof(surf->rname)];
 	int		type;
 
 	// some maps have UPPERCASE TEXTURE NAMES
-	strcpy (newName, surf->name);
+	strcpy (newName, surf->rname);
 	Q_strlwr (newName);
 
 	// this will be done after map load

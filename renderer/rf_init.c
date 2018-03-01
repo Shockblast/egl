@@ -1217,7 +1217,7 @@ static void R_Register (void)
 	r_noVis				= Cvar_Register ("r_noVis",				"0",			0);
 	r_offsetFactor		= Cvar_Register ("r_offsetFactor",		"-1",			CVAR_CHEAT);
 	r_offsetUnits		= Cvar_Register ("r_offsetUnits",		"-2",			CVAR_CHEAT);
-	r_patchDivLevel		= Cvar_Register ("r_patchDivLevel",		"4",			CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
+	r_patchDivLevel		= Cvar_Register ("r_patchDivLevel",		"3",			CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	r_roundImagesDown	= Cvar_Register ("r_roundImagesDown",	"0",			CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	r_skipBackend		= Cvar_Register ("r_skipBackend",		"0",			CVAR_CHEAT);
 	r_speeds			= Cvar_Register ("r_speeds",			"0",			0);
