@@ -246,7 +246,7 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 	case F_LSTRING:
 	case F_GSTRING:
 		if ( *(char **)p )
-			len = strlen(*(char **)p) + 1;
+			len = (int) strlen(*(char **)p) + 1;
 		else
 			len = 0;
 		*(int *)p = len;
@@ -292,7 +292,7 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 		break;
 
 	default:
-		gi.error ("WriteEdict: unknown field type");
+		Com_Error (ERR_FATAL, "WriteEdict: unknown field type");
 	}
 }
 
@@ -311,7 +311,7 @@ void WriteField2 (FILE *f, field_t *field, byte *base)
 	case F_LSTRING:
 		if ( *(char **)p )
 		{
-			len = strlen(*(char **)p) + 1;
+			len = (int) strlen(*(char **)p) + 1;
 			fwrite (*(char **)p, len, 1, f);
 		}
 		break;
@@ -388,7 +388,7 @@ void ReadField (FILE *f, field_t *field, byte *base)
 		break;
 
 	default:
-		gi.error ("ReadEdict: unknown field type");
+		Com_Error (ERR_FATAL, "ReadEdict: unknown field type");
 	}
 }
 
@@ -469,7 +469,7 @@ void WriteGame (char *filename, qBool autosave)
 
 	f = fopen (filename, "wb");
 	if (!f)
-		gi.error ("Couldn't open %s", filename);
+		Com_Error (ERR_FATAL, "Couldn't open %s", filename);
 
 	memset (str, 0, sizeof(str));
 	strcpy (str, __DATE__);
@@ -495,13 +495,15 @@ void ReadGame (char *filename)
 
 	f = fopen (filename, "rb");
 	if (!f)
-		gi.error ("Couldn't open %s", filename);
+		Com_Error (ERR_FATAL, "Couldn't open %s", filename);
 
 	fread (str, sizeof(str), 1, f);
+	str[sizeof(str) - 1] = '\0';
+
 	if (strcmp (str, __DATE__))
 	{
 		fclose (f);
-		gi.error ("Savegame from an older version.\n");
+		Com_Error (ERR_FATAL, "Savegame from an older version.\n");
 	}
 
 	g_edicts =  gi.TagMalloc (game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
@@ -635,7 +637,7 @@ void WriteLevel (char *filename)
 
 	f = fopen (filename, "wb");
 	if (!f)
-		gi.error ("Couldn't open %s", filename);
+		Com_Error (ERR_FATAL, "Couldn't open %s", filename);
 
 	// write out edict size for checking
 	i = sizeof(edict_t);
@@ -690,7 +692,7 @@ void ReadLevel (char *filename)
 
 	f = fopen (filename, "rb");
 	if (!f)
-		gi.error ("Couldn't open %s", filename);
+		Com_Error (ERR_FATAL, "Couldn't open %s", filename);
 
 	// free any dynamic memory allocated by loading the level
 	// base state
@@ -705,7 +707,7 @@ void ReadLevel (char *filename)
 	if (i != sizeof(edict_t))
 	{
 		fclose (f);
-		gi.error ("ReadLevel: mismatched edict size");
+		Com_Error (ERR_FATAL, "ReadLevel: mismatched edict size");
 	}
 
 	// check function pointer base address
@@ -714,7 +716,7 @@ void ReadLevel (char *filename)
 	if (base != (void *)InitGame)
 	{
 		fclose (f);
-		gi.error ("ReadLevel: function pointers have moved");
+		Com_Error (ERR_FATAL, "ReadLevel: function pointers have moved");
 	}
 #else
 	gi.dprintf("Function offsets %d\n", ((byte *)base) - ((byte *)InitGame));
@@ -729,7 +731,7 @@ void ReadLevel (char *filename)
 		if (fread (&entNum, sizeof(entNum), 1, f) != 1)
 		{
 			fclose (f);
-			gi.error ("ReadLevel: failed to read entNum");
+			Com_Error (ERR_FATAL, "ReadLevel: failed to read entNum");
 		}
 		if (entNum == -1)
 			break;

@@ -186,7 +186,7 @@ SV_CopySaveGame
 static void SV_CopySaveGame (char *src, char *dst)
 {
 	char	name[MAX_OSPATH], name2[MAX_OSPATH];
-	int		l, len;
+	size_t	l, len;
 	char	*found;
 
 	Com_DevPrintf (0, "SV_CopySaveGame (%s, %s)\n", src, dst);
@@ -736,7 +736,7 @@ SV_Status_f
 */
 static void SV_Status_f (void)
 {
-	int			i, j, l;
+	size_t		i, j, l;
 	svClient_t	*cl;
 	char		*s;
 	int			ping;
@@ -750,7 +750,7 @@ static void SV_Status_f (void)
 
 	Com_Printf (0, "num score ping name            lastmsg address               qPort  ver\n");
 	Com_Printf (0, "--- ----- ---- --------------- ------- --------------------- ------ ---\n");
-	for (i=0, cl=svs.clients ; i<maxclients->intVal ; i++, cl++) {
+	for (i=0, cl=svs.clients ; i<(size_t)maxclients->intVal ; i++, cl++) {
 		if (!cl->state)
 			continue;
 		Com_Printf (0, "%3i ", i);
@@ -888,7 +888,7 @@ recorded, but no playerinfo will be stored.  Primarily for demo merging.
 static void SV_ServerRecord_f (void)
 {
 	char		name[MAX_OSPATH];
-	byte		buf_data[32768];
+	static byte	buf_data[32768];
 	netMsg_t	buf;
 	int			len;
 	int			i;
@@ -959,7 +959,7 @@ static void SV_ServerRecord_f (void)
 
 	// Write it to the demo file
 	Com_DevPrintf (0, "signon message length: %i\n", buf.curSize);
-	len = LittleLong (buf.curSize);
+	len = LittleLong ((int) buf.curSize);
 	FS_Write (&len, sizeof (len), svs.demoFile);
 	FS_Write (buf.data, buf.curSize, svs.demoFile);
 

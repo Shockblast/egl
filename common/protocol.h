@@ -163,14 +163,14 @@ typedef struct netMsg_s {
 	qBool		allowOverflow;	// if false, do a Com_Error
 	qBool		overFlowed;		// set to true if the buffer size failed
 	byte		*data;
-	int			maxSize;
-	int			curSize;
-	int			readCount;
-	int			bufferSize;
+	size_t		maxSize;
+	size_t		curSize;
+	size_t		readCount;
+	size_t		bufferSize;
 } netMsg_t;
 
 // supporting functions
-void	MSG_Init (netMsg_t *dest, byte *data, int length);
+void	MSG_Init (netMsg_t *dest, byte *data, size_t length);
 void	MSG_Clear (netMsg_t *dest);
 
 // writing
@@ -181,13 +181,13 @@ void	MSG_Clear (netMsg_t *dest);
 
 void	MSG_WriteByte (netMsg_t *dest, int c);
 void	MSG_WriteChar (netMsg_t *dest, int c);
-void	MSG_WriteDeltaUsercmd (netMsg_t *dest, struct userCmd_s *from, struct userCmd_s *cmd);
+void	MSG_WriteDeltaUsercmd (netMsg_t *dest, struct userCmd_s *from, struct userCmd_s *cmd, int protocolMinorVersion);
 void	MSG_WriteDeltaEntity (netMsg_t *dest, entityStateOld_t *from, entityStateOld_t *to, qBool force, qBool newEntity);
 void	MSG_WriteDir (netMsg_t *dest, vec3_t vector);
 void	MSG_WriteFloat (netMsg_t *dest, float f);
 void	MSG_WriteInt3 (netMsg_t *dest, int c);
 void	MSG_WriteLong (netMsg_t *dest, int c);
-void	MSG_WriteRaw (netMsg_t *dest, void *data, int length);
+void	MSG_WriteRaw (netMsg_t *dest, void *data, size_t length);
 void	MSG_WriteShort (netMsg_t *dest, int c);
 void	MSG_WriteString (netMsg_t *dest, char *s);
 void	MSG_WriteStringCat (netMsg_t *dest, char *data);
@@ -201,7 +201,7 @@ void	MSG_WriteStringCat (netMsg_t *dest, char *data);
 void	MSG_BeginReading (netMsg_t *src);
 int		MSG_ReadByte (netMsg_t *src);
 int		MSG_ReadChar (netMsg_t *src);
-void	MSG_ReadData (netMsg_t *src, void *buffer, int size);
+void	MSG_ReadData (netMsg_t *src, void *buffer, size_t size);
 void	MSG_ReadDeltaUsercmd (netMsg_t *src, struct userCmd_s *from, struct userCmd_s *cmd);
 void	MSG_ReadDir (netMsg_t *src, vec3_t vector);
 float	MSG_ReadFloat (netMsg_t *src);
@@ -306,7 +306,7 @@ typedef struct netAdr_s {
 	a->port = ((struct sockaddr_in *)s)->sin_port;
 
 // Checks if an address is a loopback address
-#ifdef WIN32
+#ifdef _WIN32
 # define NET_IsLocalAddress(adr) ((adr.naType == NA_LOOPBACK) ? qTrue : qFalse)
 #else
 qBool		NET_IsLocalAddress (netAdr_t adr);
@@ -318,7 +318,7 @@ void		NET_Shutdown (void);
 netConfig_t NET_Config (netConfig_t openFlags);
 
 qBool		NET_GetPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *message);
-int			NET_SendPacket (netSrc_t sock, int length, void *data, netAdr_t *to);
+int			NET_SendPacket (netSrc_t sock, size_t length, void *data, netAdr_t *to);
 
 char		*NET_AdrToString (netAdr_t *a);
 qBool		NET_StringToAdr (char *s, netAdr_t *a);
@@ -339,29 +339,29 @@ typedef struct netChan_s {
 	uint16		protocol;
 
 	// Sequencing variables
-	int			incomingSequence;
-	int			incomingAcknowledged;
-	int			incomingReliableAcknowledged;	// single bit
-	int			incomingReliableSequence;		// single bit, maintained local
+	uint32		incomingSequence;
+	uint32		incomingAcknowledged;
+	uint32		incomingReliableAcknowledged;	// single bit
+	uint32		incomingReliableSequence;		// single bit, maintained local
 	qBool		gotReliable;
 
-	int			outgoingSequence;
-	int			reliableSequence;				// single bit
-	int			lastReliableSequence;			// sequence number of last send
+	uint32		outgoingSequence;
+	uint32		reliableSequence;				// single bit
+	uint32		lastReliableSequence;			// sequence number of last send
 
 	// Reliable staging and holding areas
 	netMsg_t	message;		// writing buffer to send to server
 	byte		messageBuff[MAX_CL_USABLEMSG];	// leave space for header
 
 	// Message is copied to this buffer when it is first transfered
-	int			reliableLength;
+	size_t		reliableLength;
 	byte		reliableBuff[MAX_CL_USABLEMSG];	// unacked reliable message
 } netChan_t;
 
 void		Netchan_Init (void);
 void		Netchan_Setup (netSrc_t sock, netChan_t *chan, netAdr_t *adr, int protocol, int qPort, uint32 msgLen);
 
-int			Netchan_Transmit (netChan_t *chan, int length, byte *data);
-void		Netchan_OutOfBand (netSrc_t netSocket, netAdr_t *adr, int length, byte *data);
+int			Netchan_Transmit (netChan_t *chan, size_t length, byte *data);
+void		Netchan_OutOfBand (netSrc_t netSocket, netAdr_t *adr, size_t length, byte *data);
 void		Netchan_OutOfBandPrint (netSrc_t netSocket, netAdr_t *adr, char *format, ...);
 qBool		Netchan_Process (netChan_t *chan, netMsg_t *msg);

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #include "rf_local.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 # include "../include/jpeg/jpeglib.h"
 # include "../include/zlibpng/png.h"
 #else
@@ -190,7 +190,7 @@ void GL_TextureMode (qBool verbose, qBool verboseOnly)
 	for (i=0, image=r_imageList ; i<r_numImages ; i++, image++) {
 		if (!image->touchFrame)
 			continue;	// Free r_imageList slot
-		if (image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))
+		if (image->flags & IF_NOMIPMAP_MASK)
 			continue;
 
 		RB_BindTexture (image);
@@ -220,7 +220,7 @@ void GL_ResetAnisotropy (void)
 	for (i=0, image=r_imageList ; i<r_numImages ; i++, image++) {
 		if (!image->touchFrame)
 			continue;	// Free r_imageList slot
-		if (image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))
+		if (image->flags & IF_NOMIPMAP_MASK)
 			continue;	// Skip non-mipmapped imagery
 
 		RB_BindTexture (image);
@@ -259,21 +259,6 @@ static void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 {
     cinfo->src->next_input_byte += (size_t) num_bytes;
     cinfo->src->bytes_in_buffer -= (size_t) num_bytes;
-}
-
-static void jpeg_mem_src (j_decompress_ptr cinfo, byte *mem, int len)
-{
-    cinfo->src = (struct jpeg_source_mgr *)
-	(*cinfo->mem->alloc_small)((j_common_ptr) cinfo,
-				   JPOOL_PERMANENT,
-				   sizeof(struct jpeg_source_mgr));
-    cinfo->src->init_source = jpg_noop;
-    cinfo->src->fill_input_buffer = jpg_fill_input_buffer;
-    cinfo->src->skip_input_data = jpg_skip_input_data;
-    cinfo->src->resync_to_restart = jpeg_resync_to_restart;
-    cinfo->src->term_source = jpg_noop;
-    cinfo->src->bytes_in_buffer = len;
-    cinfo->src->next_input_byte = mem;
 }
 
 /*
@@ -330,8 +315,8 @@ static void R_LoadJPG (char *name, byte **pic, int *width, int *height)
 	if (height)
 		*height = cinfo.output_height;
 
-	img = Mem_PoolAllocExt (cinfo.output_width * cinfo.output_height * 4, qFalse, ri.imageSysPool, r_imageAllocTag);
-	dummy = Mem_PoolAllocExt (cinfo.output_width * components, qFalse, ri.imageSysPool, r_imageAllocTag);
+	img = Mem_PoolAlloc (cinfo.output_width * cinfo.output_height * 4, ri.imageSysPool, r_imageAllocTag);
+	dummy = Mem_PoolAlloc (cinfo.output_width * components, ri.imageSysPool, r_imageAllocTag);
 
 	if (pic)
 		*pic = img;
@@ -470,12 +455,12 @@ static void R_LoadPCX (char *name, byte **pic, byte **palette, int *width, int *
 
 	// FIXME: Some images with weird dimensions will crash if I don't do this...
 	x = max (pcx->yMax+1, pcx->xMax+1);
-	pix = out = Mem_PoolAllocExt (x * x, qFalse, ri.imageSysPool, r_imageAllocTag);
+	pix = out = Mem_PoolAlloc (x * x, ri.imageSysPool, r_imageAllocTag);
 	if (pic)
 		*pic = out;
 
 	if (palette) {
-		*palette = Mem_PoolAllocExt (768, qFalse, ri.imageSysPool, r_imageAllocTag);
+		*palette = Mem_PoolAlloc (768, ri.imageSysPool, r_imageAllocTag);
 		memcpy (*palette, (byte *)pcx + fileLen - 768, 768);
 	}
 
@@ -529,10 +514,10 @@ static void R_LoadPCX (char *name, byte **pic, byte **palette, int *width, int *
 
 typedef struct pngBuf_s {
 	byte	*buffer;
-	int		pos;
+	size_t	pos;
 } pngBuf_t;
 
-void __cdecl PngReadFunc (png_struct *Png, png_bytep buf, png_size_t size)
+void PngReadFunc (png_struct *Png, png_bytep buf, png_size_t size)
 {
 	pngBuf_t *PngFileBuffer = (pngBuf_t*)png_get_io_ptr(Png);
 	memcpy (buf,PngFileBuffer->buffer + PngFileBuffer->pos, size);
@@ -546,14 +531,12 @@ R_LoadPNG
 */
 static void R_LoadPNG (char *name, byte **pic, int *width, int *height, int *samples)
 {
-	int				rowbytes;
 	png_structp		png_ptr;
 	png_infop		info_ptr;
 	png_infop		end_info;
 	png_bytepp		row_pointers;
 	png_bytep		pic_ptr;
-	int				fileLen;
-	uint32			i;
+	size_t			rowbytes, fileLen, i;
 	pngBuf_t		PngFileBuffer = { NULL, 0 };
 
 	if (pic)
@@ -601,46 +584,46 @@ static void R_LoadPNG (char *name, byte **pic, int *width, int *height, int *sam
 	png_read_info (png_ptr, info_ptr);
 
 	// Color
-	if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE) {
+	if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_PALETTE) {
 		png_set_palette_to_rgb (png_ptr);
 		png_read_update_info (png_ptr, info_ptr);
 	}
 
-	if (info_ptr->color_type == PNG_COLOR_TYPE_RGB)
+	if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB)
 		png_set_filler (png_ptr, 0xFF, PNG_FILLER_AFTER);
 
-	if (info_ptr->color_type == PNG_COLOR_TYPE_GRAY && info_ptr->bit_depth < 8)
-		png_set_gray_1_2_4_to_8 (png_ptr);
+	if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY && png_get_bit_depth(png_ptr, info_ptr) < 8)
+		png_set_expand_gray_1_2_4_to_8 (png_ptr);
 
 	if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS))
 		png_set_tRNS_to_alpha (png_ptr);
 
-	if (info_ptr->color_type == PNG_COLOR_TYPE_GRAY || info_ptr->color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+	if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY || png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb (png_ptr);
 
-	if (info_ptr->bit_depth == 16)
+	if (png_get_bit_depth(png_ptr, info_ptr) == 16)
 		png_set_strip_16 (png_ptr);
 
-	if (info_ptr->bit_depth < 8)
+	if (png_get_bit_depth(png_ptr, info_ptr) < 8)
         png_set_packing (png_ptr);
 
 	png_read_update_info (png_ptr, info_ptr);
 
 	rowbytes = png_get_rowbytes (png_ptr, info_ptr);
 
-	if (!info_ptr->channels) {
+	if (!png_get_channels(png_ptr, info_ptr)) {
 		png_destroy_read_struct (&png_ptr, &info_ptr, (png_infopp)NULL);
 		Com_Printf (PRNT_WARNING, "R_LoadPNG: Bad PNG file: %s\n", name);
 		FS_FreeFile (PngFileBuffer.buffer);
 	}
 
-	pic_ptr = Mem_PoolAllocExt (info_ptr->height * rowbytes, qFalse, ri.imageSysPool, r_imageAllocTag);
+	pic_ptr = Mem_PoolAlloc (png_get_image_height(png_ptr, info_ptr) * rowbytes, ri.imageSysPool, r_imageAllocTag);
 	if (pic)
 		*pic = pic_ptr;
 
-	row_pointers = Mem_PoolAllocExt (sizeof (png_bytep) * info_ptr->height, qFalse, ri.imageSysPool, r_imageAllocTag);
+	row_pointers = Mem_PoolAlloc (sizeof (png_bytep) * png_get_image_height(png_ptr, info_ptr), ri.imageSysPool, r_imageAllocTag);
 
-	for (i=0 ; i<info_ptr->height ; i++) {
+	for (i=0 ; i<png_get_image_height(png_ptr, info_ptr) ; i++) {
 		row_pointers[i] = pic_ptr;
 		pic_ptr += rowbytes;
 	}
@@ -648,11 +631,11 @@ static void R_LoadPNG (char *name, byte **pic, int *width, int *height, int *sam
 	png_read_image (png_ptr, row_pointers);
 
 	if (width)
-		*width = info_ptr->width;
+		*width = png_get_image_width(png_ptr, info_ptr);
 	if (height)
-		*height = info_ptr->height;
+		*height = png_get_image_height(png_ptr, info_ptr);
 	if (samples)
-		*samples = info_ptr->channels;
+		*samples = png_get_channels(png_ptr, info_ptr);
 
 	png_read_end (png_ptr, end_info);
 	png_destroy_read_struct (&png_ptr, &info_ptr, &end_info);
@@ -692,12 +675,12 @@ static void R_WritePNG (FILE *f, byte *buffer, int width, int height)
 	png_set_IHDR (png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB,
 				PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
-	png_set_compression_level (png_ptr, Z_DEFAULT_COMPRESSION);
+	png_set_compression_level (png_ptr, PNG_Z_DEFAULT_COMPRESSION);
 	png_set_compression_mem_level (png_ptr, 9);
 
 	png_write_info (png_ptr, info_ptr);
 
-	row_pointers = Mem_PoolAllocExt (height * sizeof (png_bytep), qFalse, ri.imageSysPool, IMGTAG_DEFAULT);
+	row_pointers = Mem_PoolAlloc (height * sizeof (png_bytep), ri.imageSysPool, IMGTAG_DEFAULT);
 	for (i=0 ; i<height ; i++)
 		row_pointers[i] = buffer + (height - 1 - i) * 3 * width;
 
@@ -852,7 +835,7 @@ static void R_LoadTGA (char *name, byte **pic, int *width, int *height, int *sam
 	if (height)
 		*height = rows;
 
-	targaRGBA = Mem_PoolAllocExt (columns * rows * 4, qFalse, ri.imageSysPool, r_imageAllocTag);
+	targaRGBA = Mem_PoolAlloc (columns * rows * 4, ri.imageSysPool, r_imageAllocTag);
 	*pic = targaRGBA;
 
 	// If bit 5 of attributes isn't set, the image has been stored from bottom to top
@@ -945,7 +928,7 @@ static void R_WriteTGA (FILE *f, byte *buffer, int width, int height, qBool rgb)
 
 	// Allocate an output buffer
 	size = (width * height * 3) + 18;
-	out = Mem_PoolAllocExt (size, qTrue, ri.imageSysPool, IMGTAG_DEFAULT);
+	out = Mem_PoolAlloc (size, ri.imageSysPool, IMGTAG_DEFAULT);
 
 	// Fill in header
 	out[2] = 2;		// Uncompressed type
@@ -1018,7 +1001,7 @@ static void R_LoadWal (char *name, byte **pic, int *width, int *height)
 		*height = mt->height;
 
 	// Copy data
-	*pic = out = Mem_PoolAllocExt (mt->width*mt->height, qFalse, ri.imageSysPool, r_imageAllocTag);
+	*pic = out = Mem_PoolAlloc (mt->width*mt->height, ri.imageSysPool, r_imageAllocTag);
 	for (i=0 ; i<mt->width*mt->height ; i++)
 		*out++ = *(buffer + mt->offsets[0] + i);
 
@@ -1085,30 +1068,38 @@ static void R_ColorMipLevel (byte *image, int size, int level)
 R_ImageFormat
 ===============
 */
-static inline int R_ImageFormat (char *name, int flags, int *samples)
+static inline int R_ImageFormat (char *name, texFlags_t flags, int *samples)
 {
 	GLint		format;
 
 	if (flags & IF_NOALPHA && *samples == 4)
 		*samples = 3;
 
-	switch (*samples) {
-	case 3:
+	if (flags & IF_GREYSCALE) {
 		if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
-			format = ri.rgbFormat;
+			format = ri.greyFormat;
 		else
-			format = ri.rgbFormatCompressed;
-		break;
+			format = ri.greyFormatCompressed;
+	}
+	else {
+		switch (*samples) {
+		case 3:
+			if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
+				format = ri.rgbFormat;
+			else
+				format = ri.rgbFormatCompressed;
+			break;
 
-	default:
-		Com_Printf (PRNT_WARNING, "WARNING: Invalid image sample count '%d' on '%s', assuming '4'\n", samples, name);
-		*samples = 4;
-	case 4:
-		if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
-			format = ri.rgbaFormat;
-		else
-			format = ri.rgbaFormatCompressed;
-		break;
+		default:
+			Com_Printf (PRNT_WARNING, "WARNING: Invalid image sample count '%d' on '%s', assuming '4'\n", samples, name);
+			*samples = 4;
+		case 4:
+			if (!ri.config.extTexCompression || flags & IF_NOCOMPRESS)
+				format = ri.rgbaFormat;
+			else
+				format = ri.rgbaFormatCompressed;
+			break;
+		}
 	}
 
 	return format;
@@ -1209,7 +1200,7 @@ static void R_ResampleImage (uint32 *in, int inWidth, int inHeight, uint32 *out,
 		noFree = qTrue;
 	}
 	else {
-		resampleBuffer = Mem_PoolAllocExt (outWidth * outHeight * sizeof (uint32), qFalse, ri.imageSysPool, r_imageAllocTag);
+		resampleBuffer = Mem_PoolAlloc (outWidth * outHeight * sizeof (uint32), ri.imageSysPool, r_imageAllocTag);
 		noFree = qFalse;
 	}
 
@@ -1268,7 +1259,7 @@ static void R_ResampleImage (uint32 *in, int inWidth, int inHeight, uint32 *out,
 R_UploadCMImage
 ===============
 */
-static void R_UploadCMImage (char *name, byte **data, int width, int height, int flags, int samples, int *upWidth, int *upHeight, int *upFormat)
+static void R_UploadCMImage (char *name, byte **data, int width, int height, texFlags_t flags, int samples, int *upWidth, int *upHeight, int *upFormat)
 {
 	GLsizei		scaledWidth, scaledHeight;
 	uint32		*scaledData;
@@ -1288,7 +1279,7 @@ static void R_UploadCMImage (char *name, byte **data, int width, int height, int
 	}
 
 	// Mipmap
-	mipMap = (flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)) ? qFalse : qTrue;
+	mipMap = (flags & IF_NOMIPMAP_MASK) ? qFalse : qTrue;
 
 	// Let people sample down the world textures for speed
 	if (mipMap && !(flags & IF_NOPICMIP)) {
@@ -1359,7 +1350,7 @@ static void R_UploadCMImage (char *name, byte **data, int width, int height, int
 		noFree = qTrue;
 	}
 	else {
-		scaledData = Mem_PoolAllocExt (scaledWidth * scaledHeight * 4, qFalse, ri.imageSysPool, r_imageAllocTag);
+		scaledData = Mem_PoolAlloc (scaledWidth * scaledHeight * 4, ri.imageSysPool, r_imageAllocTag);
 		noFree = qFalse;
 	}
 
@@ -1430,7 +1421,7 @@ static void R_UploadCMImage (char *name, byte **data, int width, int height, int
 R_Upload2DImage
 ===============
 */
-static void R_Upload2DImage (char *name, byte *data, int width, int height, int flags, int samples, int *upWidth, int *upHeight, int *upFormat)
+static void R_Upload2DImage (char *name, byte *data, int width, int height, texFlags_t flags, int samples, int *upWidth, int *upHeight, int *upFormat)
 {
 	GLsizei		scaledWidth, scaledHeight;
 	uint32		*scaledData;
@@ -1450,7 +1441,7 @@ static void R_Upload2DImage (char *name, byte *data, int width, int height, int 
 	}
 
 	// Mipmap
-	mipMap = (flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)) ? qFalse : qTrue;
+	mipMap = (flags & IF_NOMIPMAP_MASK) ? qFalse : qTrue;
 
 	// Let people sample down the world textures for speed
 	if (mipMap && !(flags & IF_NOPICMIP)) {
@@ -1504,17 +1495,24 @@ static void R_Upload2DImage (char *name, byte *data, int width, int height, int 
 	}
 
 	// Texture edge clamping
-	if (!(flags & IF_CLAMP)) {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	}
-	else if (ri.config.extTexEdgeClamp) {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	if (flags & IF_CLAMP_S) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	}
 	else {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	}
+
+	if (flags & IF_CLAMP_T) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
+	else {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
 	// Allocate a buffer
@@ -1523,7 +1521,7 @@ static void R_Upload2DImage (char *name, byte *data, int width, int height, int 
 		noFree = qTrue;
 	}
 	else {
-		scaledData = Mem_PoolAllocExt (scaledWidth * scaledHeight * 4, qFalse, ri.imageSysPool, r_imageAllocTag);
+		scaledData = Mem_PoolAlloc (scaledWidth * scaledHeight * 4, ri.imageSysPool, r_imageAllocTag);
 		noFree = qFalse;
 	}
 
@@ -1596,7 +1594,7 @@ FIXME:
 - r_roundImagesDown, r_colorMipLevels
 ===============
 */
-static void R_Upload3DImage (char *name, byte **data, int width, int height, int depth, int flags, int samples, int *upWidth, int *upHeight, int *upDepth, int *upFormat)
+static void R_Upload3DImage (char *name, byte **data, int width, int height, int depth, texFlags_t flags, int samples, int *upWidth, int *upHeight, int *upDepth, int *upFormat)
 {
 	GLsizei		scaledWidth, scaledHeight, scaledDepth;
 	GLint		format;
@@ -1609,7 +1607,7 @@ static void R_Upload3DImage (char *name, byte **data, int width, int height, int
 	for (scaledDepth=1 ; scaledDepth<depth ; scaledDepth<<=1) ;
 
 	// Mipmap
-	mipMap = (flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST)) ? qFalse : qTrue;
+	mipMap = (flags & IF_NOMIPMAP_MASK) ? qFalse : qTrue;
 
 	// Mipmapping not supported
 	if (mipMap && !ri.config.extSGISGenMipmap)
@@ -1661,20 +1659,35 @@ static void R_Upload3DImage (char *name, byte **data, int width, int height, int
 	}
 
 	// Texture edge clamping
-	if (!(flags & IF_CLAMP)) {
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	}
-	else if (ri.config.extTexEdgeClamp) {
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	// Texture edge clamping
+	if (flags & IF_CLAMP_S) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	}
 	else {
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		qglTexParameterf (GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	}
+
+	if (flags & IF_CLAMP_T) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
+	else {
+		qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	if (flags & IF_CLAMP_R) {
+		if (ri.config.extTexEdgeClamp)
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		else
+			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+	}
+	else {
+		qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	}
 
 	// Scan and replace channels if desired
@@ -1737,11 +1750,11 @@ typedef struct floodFill_s {
 
 static void R_FloodFillSkin (byte *skin, int skinWidth, int skinHeight)
 {
-	byte		fillColor;
-	floodFill_t	fifo[FLOODFILL_FIFO_SIZE];
-	int			inpt = 0, outpt = 0;
-	int			filledColor;
-	int			i;
+	byte				fillColor;
+	static floodFill_t	fifo[FLOODFILL_FIFO_SIZE];
+	int					inpt = 0, outpt = 0;
+	int					filledColor;
+	int					i;
 
 	// Assume this is the pixel to fill
 	fillColor = *skin;
@@ -1787,7 +1800,7 @@ static void R_FloodFillSkin (byte *skin, int skinWidth, int skinHeight)
 		skin[x + skinWidth * y] = fdc;
 	}
 }
-static void R_PalToRGBA (char *name, byte *data, int width, int height, int flags, image_t *image, qBool isPCX)
+static void R_PalToRGBA (char *name, byte *data, int width, int height, texFlags_t flags, image_t *image, qBool isPCX)
 {
 	uint32	*trans;
 	int		i, s, pxl;
@@ -1800,7 +1813,7 @@ static void R_PalToRGBA (char *name, byte *data, int width, int height, int flag
 		noFree = qTrue;
 	}
 	else {
-		trans = Mem_PoolAllocExt (s * 4, qFalse, ri.imageSysPool, r_imageAllocTag);
+		trans = Mem_PoolAlloc (s * 4, ri.imageSysPool, r_imageAllocTag);
 		noFree = qFalse;
 	}
 
@@ -1875,7 +1888,7 @@ static const char *R_BareImageName (const char *name)
 R_FindImage
 ================
 */
-static image_t *R_FindImage (const char *bareName, int flags)
+static image_t *R_FindImage (const char *bareName, texFlags_t flags)
 {
 	image_t	*image;
 	uint32	hash;
@@ -1959,7 +1972,7 @@ image_t *R_LoadImage (char *name, const char *bareName, byte **pic, int width, i
 	image->depth = depth;
 
 	// Texture scaling, hacky special case!
-	if (!upload8 && !(flags & (IF_NOMIPMAP_NEAREST|IF_NOMIPMAP_LINEAR))) {
+	if (!upload8 && !(flags & IF_NOMIPMAP_MASK)) {
 		char		newName[MAX_QPATH];
 		walTex_t	*mt;
 		int			fileLen;
@@ -2025,7 +2038,8 @@ Static because R_RegisterImage uses it if it's passed the IT_CUBEMAP flag
 static inline image_t *R_RegisterCubeMap (char *name, texFlags_t flags)
 {
 	image_t		*image;
-	int			i, len;
+	int			i;
+	size_t		len;
 	int			samples;
 	byte		*pic[6];
 	int			width, height;
@@ -2034,7 +2048,7 @@ static inline image_t *R_RegisterCubeMap (char *name, texFlags_t flags)
 	const char	*bareName;
 
 	// Make sure we have this
-	flags |= (IT_CUBEMAP|IF_CLAMP);
+	flags |= (IT_CUBEMAP|IF_CLAMP_ALL);
 
 	// Generate the bare name
 	bareName = R_BareImageName (name);
@@ -2122,7 +2136,8 @@ image_t	*R_RegisterImage (char *name, texFlags_t flags)
 {
 	image_t		*image;
 	byte		*pic;
-	int			len, width, height, samples;
+	size_t		len;
+	int			width, height, samples;
 	char		loadName[MAX_QPATH];
 	const char	*bareName;
 
@@ -2253,9 +2268,9 @@ R_BeginImageRegistration
 void R_BeginImageRegistration (void)
 {
 	// Allocate a registration scratch space
-	r_palScratch = Mem_PoolAllocExt (MAX_IMAGE_SCRATCHSIZE*MAX_IMAGE_SCRATCHSIZE*4, qFalse, ri.imageSysPool, IMGTAG_REG);
-	r_imageScaleScratch = Mem_PoolAllocExt (MAX_IMAGE_SCRATCHSIZE*MAX_IMAGE_SCRATCHSIZE*sizeof(uint32), qFalse, ri.imageSysPool, IMGTAG_REG);
-	r_imageResampleScratch = Mem_PoolAllocExt (MAX_IMAGE_SCRATCHSIZE*MAX_IMAGE_SCRATCHSIZE*sizeof(uint32), qFalse, ri.imageSysPool, IMGTAG_REG);
+	r_palScratch = Mem_PoolAlloc (MAX_IMAGE_SCRATCHSIZE*MAX_IMAGE_SCRATCHSIZE*4, ri.imageSysPool, IMGTAG_REG);
+	r_imageScaleScratch = Mem_PoolAlloc (MAX_IMAGE_SCRATCHSIZE*MAX_IMAGE_SCRATCHSIZE*sizeof(uint32), ri.imageSysPool, IMGTAG_REG);
+	r_imageResampleScratch = Mem_PoolAlloc (MAX_IMAGE_SCRATCHSIZE*MAX_IMAGE_SCRATCHSIZE*sizeof(uint32), ri.imageSysPool, IMGTAG_REG);
 }
 
 
@@ -2331,7 +2346,7 @@ qBool R_UpdateTexture (char *name, byte *data, int width, int height)
 	}
 
 	// Can't be mipmapped
-	if (!(image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))) {
+	if (!(image->flags & IF_NOMIPMAP_MASK)) {
 		Com_DevPrintf (PRNT_WARNING, "R_UpdateTexture: %s: can not update mipmapped images!\n", name);
 		return qFalse;
 	}
@@ -2360,13 +2375,13 @@ qBool R_UpdateTexture (char *name, byte *data, int width, int height)
 R_GetImageSize
 ===============
 */
-void R_GetImageSize (shader_t *shader, int *width, int *height)
+void R_GetImageSize (material_t *mat, int *width, int *height)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	image_t			*image;
 	int				i;
 
-	if (!shader || !shader->numPasses) {
+	if (!mat || !mat->numPasses) {
 		if (width)
 			*width = 0;
 		if (height)
@@ -2375,8 +2390,8 @@ void R_GetImageSize (shader_t *shader, int *width, int *height)
 	}
 
 	image = NULL;
-	for (i=0, pass=shader->passes ; i<shader->numPasses ; pass++, i++) {
-		if (i != shader->sizeBase)
+	for (i=0, pass=mat->passes ; i<mat->numPasses ; pass++, i++) {
+		if (i != mat->sizeBase)
 			continue;
 
 		image = pass->animImages[0];
@@ -2463,7 +2478,9 @@ static void R_ImageList_f (void)
 		Com_Printf (0, "%s", (image->flags & IF_NOGAMMA)	? "-" : "G");
 		Com_Printf (0, "%s", (image->flags & IF_NOINTENS)	? "-" : "I");
 		Com_Printf (0, "%s", (image->flags & IF_NOFLUSH)	? "F" : "-");
-		Com_Printf (0, "%s", (image->flags & IF_CLAMP)		? "C" : "-");
+		Com_Printf (0, "%s", (image->flags & IF_CLAMP_S)	? "Cs" : "--");
+		Com_Printf (0, "%s", (image->flags & IF_CLAMP_T)	? "Ct" : "--");
+		Com_Printf (0, "%s", (image->flags & IF_CLAMP_R)	? "Cr" : "--");
 
 		// Width/height name
 		Com_Printf (0, " %5i  %5i %s\n", image->upWidth, image->upHeight, image->name);
@@ -2471,7 +2488,7 @@ static void R_ImageList_f (void)
 		// Increment counters
 		totalImages++;
 		texels += image->upWidth * image->upHeight;
-		if (!(image->flags & (IF_NOMIPMAP_LINEAR|IF_NOMIPMAP_NEAREST))) {
+		if (!(image->flags & IF_NOMIPMAP_MASK)) {
 			tempWidth=image->upWidth, tempHeight=image->upHeight;
 			while (tempWidth > 1 || tempHeight > 1) {
 				tempWidth >>= 1;
@@ -2501,14 +2518,14 @@ R_ScreenShot_f
 ================== 
 */
 enum {
-	SSHOTTYPE_JPG,
 	SSHOTTYPE_PNG,
+	SSHOTTYPE_JPG,
 	SSHOTTYPE_TGA,
 };
 static void R_ScreenShot_f (void)
 {
 	char	checkName[MAX_OSPATH];
-	int		type, shotNum, quality;
+	int		type, shotNum;
 	char	*ext;
 	byte	*buffer;
 	FILE	*f;
@@ -2530,25 +2547,16 @@ static void R_ScreenShot_f (void)
 	switch (type) {
 	case SSHOTTYPE_TGA:
 		Com_Printf (0, "Taking TGA screenshot...\n");
-		quality = 100;
 		ext = "tga";
 		break;
 
 	case SSHOTTYPE_PNG:
 		Com_Printf (0, "Taking PNG screenshot...\n");
-		quality = 100;
 		ext = "png";
 		break;
 
 	case SSHOTTYPE_JPG:
-		if (Cmd_Argc () == 3)
-			quality = atoi (Cmd_Argv (2));
-		else
-			quality = gl_jpgquality->intVal;
-		if (quality > 100 || quality <= 0)
-			quality = 100;
-
-		Com_Printf (0, "Taking JPG screenshot (at %i%% quality)...\n", quality);
+		Com_Printf (0, "Taking JPG screenshot...\n");
 		ext = "jpg";
 		break;
 	}
@@ -2570,12 +2578,14 @@ static void R_ScreenShot_f (void)
 	f = fopen (checkName, "wb");
 	if (shotNum == 1000 || !f) {
 		Com_Printf (PRNT_WARNING, "R_ScreenShot_f: Couldn't create a file\n"); 
-		fclose (f);
+
+		if (f)
+			fclose (f);
 		return;
 	}
 
 	// Allocate room for a copy of the framebuffer
-	buffer = Mem_PoolAllocExt (ri.config.vidWidth * ri.config.vidHeight * 3, qFalse, ri.imageSysPool, IMGTAG_DEFAULT);
+	buffer = Mem_PoolAlloc (ri.config.vidWidth * ri.config.vidHeight * 3, ri.imageSysPool, IMGTAG_DEFAULT);
 
 	// Read the framebuffer into our storage
 	if (ri.config.extBGRA && type == SSHOTTYPE_TGA) {
@@ -2621,7 +2631,7 @@ static void R_ScreenShot_f (void)
 		break;
 
 	case SSHOTTYPE_JPG:
-		R_WriteJPG (f, buffer, ri.config.vidWidth, ri.config.vidHeight, quality);
+		R_WriteJPG (f, buffer, ri.config.vidWidth, ri.config.vidHeight, 100);
 		break;
 	}
 
@@ -2685,7 +2695,7 @@ static void R_InitSpecialTextures (void)
 	/*
 	** ri.noTexture
 	*/
-	data = Mem_PoolAllocExt (INTTEXSIZE * INTTEXSIZE * INTTEXBYTES, qFalse, ri.imageSysPool, IMGTAG_BATCH);
+	data = Mem_PoolAlloc (INTTEXSIZE * INTTEXSIZE * INTTEXBYTES, ri.imageSysPool, IMGTAG_BATCH);
 	for (x=0 ; x<INTTEXSIZE ; x++) {
 		for (y=0 ; y<INTTEXSIZE ; y++) {
 			data[(y*INTTEXSIZE + x)*4+3] = 255;
@@ -2727,22 +2737,22 @@ static void R_InitSpecialTextures (void)
 	** ri.cinTexture
 	** Reserve a texNum for cinematics
 	*/
-	data = Mem_PoolAllocExt (256 * 256 * 4, qFalse, ri.imageSysPool, IMGTAG_BATCH);
+	data = Mem_PoolAlloc (256 * 256 * 4, ri.imageSysPool, IMGTAG_BATCH);
 	memset (data, 0, 256 * 256 * 4);
 	memset (&ri.cinTexture, 0, sizeof (ri.cinTexture));
 	ri.cinTexture = R_Load2DImage ("***r_cinTexture***", &data, 256, 256,
-		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_CLAMP|IF_NOINTENS|IF_NOGAMMA|IF_NOCOMPRESS, 3);
+		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_CLAMP_ALL|IF_NOINTENS|IF_NOGAMMA|IF_NOCOMPRESS, 3);
 
 	/*
 	** ri.dLightTexture
 	*/
 	if (ri.config.extTex3D) {
 		size = 32;
-		data = Mem_PoolAllocExt (size * size * size * 4, qFalse, ri.imageSysPool, IMGTAG_BATCH);
+		data = Mem_PoolAlloc (size * size * size * 4, ri.imageSysPool, IMGTAG_BATCH);
 	}
 	else {
 		size = 64;
-		data = Mem_PoolAllocExt (size * size * 4, qFalse, ri.imageSysPool, IMGTAG_BATCH);
+		data = Mem_PoolAlloc (size * size * 4, ri.imageSysPool, IMGTAG_BATCH);
 	}
 
 	for (x=0 ; x<size ; x++) {
@@ -2774,10 +2784,10 @@ static void R_InitSpecialTextures (void)
 	memset (&ri.dLightTexture, 0, sizeof (ri.dLightTexture));
 	if (ri.config.extTex3D)
 		ri.dLightTexture = R_Load3DImage ("***r_dLightTexture***", &data, size, size, size,
-			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP|IT_3D, 4);
+			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP_ALL|IT_3D, 4);
 	else
 		ri.dLightTexture = R_Load2DImage ("***r_dLightTexture***", &data, size, size,
-			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP, 4);
+			IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP_ALL, 4);
 
 	/*
 	** ri.fogTexture
@@ -2785,7 +2795,7 @@ static void R_InitSpecialTextures (void)
 	tw = 1.0f / ((float)FOGTEX_WIDTH - 1.0f);
 	th = 1.0f / ((float)FOGTEX_HEIGHT - 1.0f);
 
-	data = Mem_PoolAllocExt (FOGTEX_WIDTH * FOGTEX_HEIGHT * 4, qFalse, ri.imageSysPool, IMGTAG_BATCH);
+	data = Mem_PoolAlloc (FOGTEX_WIDTH * FOGTEX_HEIGHT * 4, ri.imageSysPool, IMGTAG_BATCH);
 	memset (data, 255, FOGTEX_WIDTH*FOGTEX_HEIGHT*4);
 
 	for (y=0, ty=0.0f ; y<FOGTEX_HEIGHT ; y++, ty+=th) {
@@ -2798,7 +2808,7 @@ static void R_InitSpecialTextures (void)
 	}
 	memset (&ri.fogTexture, 0, sizeof (ri.fogTexture));
 	ri.fogTexture = R_Load2DImage ("***r_fogTexture***", &data, FOGTEX_WIDTH, FOGTEX_HEIGHT,
-		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP, 4);
+		IF_NOFLUSH|IF_NOPICMIP|IF_NOMIPMAP_LINEAR|IF_NOINTENS|IF_NOGAMMA|IF_CLAMP_ALL, 4);
 
 	Mem_FreeTag (ri.imageSysPool, IMGTAG_BATCH);
 }
@@ -2934,7 +2944,7 @@ R_ImageShutdown
 void R_ImageShutdown (void)
 {
 	image_t	*image;
-	uint32	size, i;
+	size_t	size, i;
 
 	Com_Printf (0, "Image system shutdown:\n");
 

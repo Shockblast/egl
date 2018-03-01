@@ -49,12 +49,12 @@ void CG_InitBaseMedia (void)
 	cgMedia.whiteTexture			= cgi.R_RegisterPic ("***r_whiteTexture***");
 	cgMedia.blackTexture			= cgi.R_RegisterPic ("***r_blackTexture***");
 
-	cgMedia.tileBackShader			= cgi.R_RegisterPic ("pics/backtile.tga");
+	cgMedia.tileBackMat				= cgi.R_RegisterPic ("pics/backtile.tga");
 
 	cgMedia.alienInfraredVision		= cgi.R_RegisterPic ("alienInfraredVision");
 	cgMedia.infraredGoggles			= cgi.R_RegisterPic ("infraredGoggles");
 
-	cgMedia.consoleShader			= cgi.R_RegisterPic ("pics/conback.tga");
+	cgMedia.consoleMaterial			= cgi.R_RegisterPic ("pics/conback.tga");
 
 	cgMedia.loadSplash				= cgi.R_RegisterPic ("egl/ui/loadscreen/loadsplash.tga");
 	cgMedia.loadBarPos				= cgi.R_RegisterPic ("egl/ui/loadscreen/barpos.tga");
@@ -66,10 +66,10 @@ void CG_InitBaseMedia (void)
 	// Menu image media
 	uiMedia.bgBig					= cgi.R_RegisterPic ("egl/ui/bg_big.tga");
 
-	uiMedia.cursorShader			= cgi.R_RegisterPic ("egl/ui/cursor.tga");
-	uiMedia.cursorHoverShader		= cgi.R_RegisterPic ("egl/ui/cursorhover.tga");
+	uiMedia.cursorMat				= cgi.R_RegisterPic ("egl/ui/cursor.tga");
+	uiMedia.cursorHoverMat			= cgi.R_RegisterPic ("egl/ui/cursorhover.tga");
 
-	cgi.R_GetImageSize (uiMedia.cursorShader, &uiState.cursorW, &uiState.cursorH);
+	cgi.R_GetImageSize (uiMedia.cursorMat, &uiState.cursorW, &uiState.cursorH);
 
 	// Banners
 	uiMedia.banners.addressBook		= cgi.R_RegisterPic ("pics/m_banner_addressbook.tga");
@@ -113,7 +113,7 @@ CG_MapMediaInit
 static void CG_MapMediaInit (void)
 {
 	float		rotate, pctInc;
-	vec3_t		axis;
+	vec3_t		axis = { 1, 0, 0 };
 	int			i, j;
 
 	if (!cg.configStrings[CS_MODELS+1][0])
@@ -192,7 +192,7 @@ static void CG_MapMediaInit (void)
 	}
 	pctInc = 1.0f/(float)j;
 
-	for (i=0 ; i<MAX_CS_CLIENTS ; i++) {
+	for (i=0 ; i<j ; i++) {
 		if (!cg.configStrings[CS_PLAYERSKINS+i][0])
 			continue;
 
@@ -210,7 +210,8 @@ static void CG_MapMediaInit (void)
 	// Set sky textures and speed
 	CG_LoadingString ("Loading sky env...");
 	rotate = (float)atof (cg.configStrings[CS_SKYROTATE]);
-	sscanf (cg.configStrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]);
+	if (sscanf (cg.configStrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]) != 3)
+		Com_DevPrintf (PRNT_WARNING, "Couldn't decode sky axis\n");
 	cgi.R_SetSky (cg.configStrings[CS_SKY], rotate, axis);
 }
 
@@ -255,16 +256,16 @@ static void CG_ModelMediaInit (void)
 
 /*
 ================
-CG_CrosshairShaderInit
+CG_CrosshairMaterialInit
 ================
 */
-void CG_CrosshairShaderInit (void)
+void CG_CrosshairMaterialInit (void)
 {
 	crosshair->modified = qFalse;
 	if (crosshair->intVal) {
 		crosshair->intVal = (crosshair->intVal < 0) ? 0 : crosshair->intVal;
 
-		cgMedia.crosshairShader = cgi.R_RegisterPic (Q_VarArgs ("pics/ch%d.tga", crosshair->intVal));
+		cgMedia.crosshairMat = cgi.R_RegisterPic (Q_VarArgs ("pics/ch%d.tga", crosshair->intVal));
 	}
 }
 
@@ -285,7 +286,7 @@ static void CG_PicMediaInit (void)
 	CG_LoadingString ("Loading image media...");
 	CG_LoadingFilename ("Crosshair");
 
-	CG_CrosshairShaderInit ();
+	CG_CrosshairMaterialInit ();
 
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("Pics");
@@ -298,14 +299,14 @@ static void CG_PicMediaInit (void)
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("HUD");
 
-	cgMedia.hudFieldShader		= cgi.R_RegisterPic ("pics/field_3.tga");
-	cgMedia.hudInventoryShader	= cgi.R_RegisterPic ("pics/inventory.tga");
-	cgMedia.hudNetShader		= cgi.R_RegisterPic ("pics/net.tga");
+	cgMedia.hudFieldMat		= cgi.R_RegisterPic ("pics/field_3.tga");
+	cgMedia.hudInventoryMat	= cgi.R_RegisterPic ("pics/inventory.tga");
+	cgMedia.hudNetMat		= cgi.R_RegisterPic ("pics/net.tga");
 	for (i=0 ; i<2 ; i++) {
 		for (j=0 ; j<11 ; j++)
-			cgMedia.hudNumShaders[i][j] = cgi.R_RegisterPic (Q_VarArgs ("pics/%s.tga", sb_nums[i][j]));
+			cgMedia.hudNumMats[i][j] = cgi.R_RegisterPic (Q_VarArgs ("pics/%s.tga", sb_nums[i][j]));
 	}
-	cgMedia.hudPausedShader		= cgi.R_RegisterPic ("pics/pause.tga");
+	cgMedia.hudPausedMat		= cgi.R_RegisterPic ("pics/pause.tga");
 
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("Disguise skins");
@@ -333,6 +334,8 @@ CG_FXMediaInit
 */
 static void CG_FXMediaInit (void)
 {
+	struct material_s *tempMat, *greenMat;
+	float	yOffset;
 	int		i;
 
 	// Particles / Decals
@@ -341,6 +344,11 @@ static void CG_FXMediaInit (void)
 
 	for (i=0 ; i<(NUMVERTEXNORMALS*3) ; i++)
 		cg_randVels[0][i] = (frand () * 255) * 0.01f;
+
+	// Set default subUV coords
+	for (i=0 ; i<PT_PICTOTAL ; i++) {
+		Vec4Set(cgMedia.particleCoords[i], 0, 0, 1, 1);
+	}
 
 	cgMedia.particleTable[PT_BFG_DOT]		= cgi.R_RegisterPoly ("egl/parts/bfg_dot.tga");
 
@@ -364,34 +372,70 @@ static void CG_FXMediaInit (void)
 	cgMedia.particleTable[PT_SMOKEGLOW2]	= cgi.R_RegisterPoly ("egl/parts/smoke_glow2.tga");
 
 	cgMedia.particleTable[PT_BLUEFIRE]		= cgi.R_RegisterPoly ("egl/parts/bluefire.tga");
-	cgMedia.particleTable[PT_FIRE1]			= cgi.R_RegisterPoly ("egl/parts/fire1.tga");
-	cgMedia.particleTable[PT_FIRE2]			= cgi.R_RegisterPoly ("egl/parts/fire2.tga");
-	cgMedia.particleTable[PT_FIRE3]			= cgi.R_RegisterPoly ("egl/parts/fire3.tga");
-	cgMedia.particleTable[PT_FIRE4]			= cgi.R_RegisterPoly ("egl/parts/fire4.tga");
+
+	tempMat = cgi.R_RegisterPoly("egl/parts/firetable.tga");
+	yOffset = 0;
+	for (i=0 ; i<4 ; i++) {
+		cgMedia.particleTable[PT_FIRE1+i] = tempMat;
+
+		if (i == 2)
+			yOffset += 0.5f;
+
+		cgMedia.particleCoords[PT_FIRE1+i][0] = (i&1) * 0.5f;
+		cgMedia.particleCoords[PT_FIRE1+i][1] = yOffset;
+		cgMedia.particleCoords[PT_FIRE1+i][2] = cgMedia.particleCoords[PT_FIRE1+i][0] + 0.5f;
+		cgMedia.particleCoords[PT_FIRE1+i][3] = cgMedia.particleCoords[PT_FIRE1+i][1] + 0.5f;
+	}
+
 	cgMedia.particleTable[PT_EMBERS1]		= cgi.R_RegisterPoly ("egl/parts/embers1.tga");
 	cgMedia.particleTable[PT_EMBERS2]		= cgi.R_RegisterPoly ("egl/parts/embers2.tga");
 	cgMedia.particleTable[PT_EMBERS3]		= cgi.R_RegisterPoly ("egl/parts/embers3.tga");
 
-	cgMedia.particleTable[PT_BLOOD]			= cgi.R_RegisterPoly ("egl/parts/blood.tga");
-	cgMedia.particleTable[PT_BLOOD2]		= cgi.R_RegisterPoly ("egl/parts/blood2.tga");
-	cgMedia.particleTable[PT_BLOOD3]		= cgi.R_RegisterPoly ("egl/parts/blood3.tga");
-	cgMedia.particleTable[PT_BLOOD4]		= cgi.R_RegisterPoly ("egl/parts/blood4.tga");
-	cgMedia.particleTable[PT_BLOOD5]		= cgi.R_RegisterPoly ("egl/parts/blood5.tga");
-	cgMedia.particleTable[PT_BLOOD6]		= cgi.R_RegisterPoly ("egl/parts/blood6.tga");
+	tempMat = cgi.R_RegisterPoly("egl/parts/bloodparticles.tga");
+	greenMat = cgi.R_RegisterPoly("egl/parts/bloodparticles_green.tga");
 
-	cgMedia.particleTable[PT_GRNBLOOD]		= cgi.R_RegisterPoly ("egl/parts/blood_grn.tga");
-	cgMedia.particleTable[PT_GRNBLOOD2]		= cgi.R_RegisterPoly ("egl/parts/blood_grn2.tga");
-	cgMedia.particleTable[PT_GRNBLOOD3]		= cgi.R_RegisterPoly ("egl/parts/blood_grn3.tga");
-	cgMedia.particleTable[PT_GRNBLOOD4]		= cgi.R_RegisterPoly ("egl/parts/blood_grn4.tga");
-	cgMedia.particleTable[PT_GRNBLOOD5]		= cgi.R_RegisterPoly ("egl/parts/blood_grn5.tga");
-	cgMedia.particleTable[PT_GRNBLOOD6]		= cgi.R_RegisterPoly ("egl/parts/blood_grn6.tga");
+	yOffset = 0;
+	for (i=0 ; i<8 ; i++) {
+		cgMedia.particleTable[PT_BLOODTRAIL+i] = tempMat;
+		cgMedia.particleTable[PT_GRNBLOODTRAIL+i] = greenMat;
 
-	cgMedia.particleTable[PT_BLDDRIP01]		= cgi.R_RegisterPoly ("egl/parts/blooddrip01.tga");
-	cgMedia.particleTable[PT_BLDDRIP02]		= cgi.R_RegisterPoly ("egl/parts/blooddrip02.tga");
-	cgMedia.particleTable[PT_BLDDRIP01_GRN]	= cgi.R_RegisterPoly ("egl/parts/blooddrip01_green.tga");
-	cgMedia.particleTable[PT_BLDDRIP02_GRN]	= cgi.R_RegisterPoly ("egl/parts/blooddrip02_green.tga");
-	cgMedia.particleTable[PT_BLDSPURT]		= cgi.R_RegisterPoly ("egl/parts/bloodspurt.tga");
-	cgMedia.particleTable[PT_BLDSPURT2]		= cgi.R_RegisterPoly ("egl/parts/bloodspurt2.tga");
+		if (i && !(i&1))
+			yOffset += 0.25f;
+
+		cgMedia.particleCoords[PT_BLOODTRAIL+i][0] = (i&1) * 0.25f;
+		cgMedia.particleCoords[PT_BLOODTRAIL+i][1] = yOffset;
+		cgMedia.particleCoords[PT_BLOODTRAIL+i][2] = cgMedia.particleCoords[PT_BLOODTRAIL+i][0] + 0.25f;
+		cgMedia.particleCoords[PT_BLOODTRAIL+i][3] = cgMedia.particleCoords[PT_BLOODTRAIL+i][1] + 0.25f;
+
+		Vec4Copy(cgMedia.particleCoords[PT_BLOODTRAIL+i], cgMedia.particleCoords[PT_GRNBLOODTRAIL+i]);
+	}
+
+	for (i=0 ; i<2 ; i++) {
+		cgMedia.particleTable[PT_BLDDRIP01+i] = tempMat;
+		cgMedia.particleTable[PT_BLDDRIP01_GRN+i] = greenMat;
+
+		cgMedia.particleCoords[PT_BLDDRIP01+i][0] = 0.5f;
+		cgMedia.particleCoords[PT_BLDDRIP01+i][1] = (i*0.5f);
+		cgMedia.particleCoords[PT_BLDDRIP01+i][2] = cgMedia.particleCoords[PT_BLDDRIP01+i][0] + 0.25f;
+		cgMedia.particleCoords[PT_BLDDRIP01+i][3] = cgMedia.particleCoords[PT_BLDDRIP01+i][1] + 0.5f;
+
+		Vec4Copy(cgMedia.particleCoords[PT_BLDDRIP01+i], cgMedia.particleCoords[PT_BLDDRIP01_GRN+i]);
+	}
+
+	yOffset = 0;
+	for (i=0 ; i<2 ; i++) {
+		cgMedia.particleTable[PT_BLDSPURT+i] = tempMat;
+		cgMedia.particleTable[PT_BLDSPURT_GREEN+i] = greenMat;
+
+		cgMedia.particleCoords[PT_BLDSPURT+i][0] = 0.75f;
+		cgMedia.particleCoords[PT_BLDSPURT+i][1] = yOffset;
+		cgMedia.particleCoords[PT_BLDSPURT+i][2] = cgMedia.particleCoords[PT_BLDSPURT+i][0] + 0.25f;
+		cgMedia.particleCoords[PT_BLDSPURT+i][3] = cgMedia.particleCoords[PT_BLDSPURT+i][1] + 0.25f;
+
+		Vec4Copy(cgMedia.particleCoords[PT_BLDSPURT+i], cgMedia.particleCoords[PT_BLDSPURT_GREEN+i]);
+
+		yOffset += 0.25f;
+	}
 
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 
@@ -446,6 +490,11 @@ static void CG_FXMediaInit (void)
 	CG_IncLoadPercent (cg_curLoadRange * 0.25f);
 	CG_LoadingFilename ("Decals");
 
+	// Set default subUV coords
+	for (i=0 ; i<DT_PICTOTAL ; i++) {
+		Vec4Set(cgMedia.decalCoords[i], 0, 0, 1, 1);
+	}
+
 	cgMedia.decalTable[DT_BFG_BURNMARK]			= cgi.R_RegisterPoly ("egl/decals/bfg_burnmark.tga");
 	cgMedia.decalTable[DT_BFG_GLOWMARK]			= cgi.R_RegisterPoly ("egl/decals/bfg_glowmark.tga");
 
@@ -459,39 +508,23 @@ static void CG_FXMediaInit (void)
 	cgMedia.decalTable[DT_ENGYREPAIR_BURNMARK]	= cgi.R_RegisterPoly ("egl/decals/engy_repair_burnmark.tga");
 	cgMedia.decalTable[DT_ENGYREPAIR_GLOWMARK]	= cgi.R_RegisterPoly ("egl/decals/engy_repair_glowmark.tga");
 
-	cgMedia.decalTable[DT_BLOOD01]				= cgi.R_RegisterPoly ("egl/decals/blood01.tga");
-	cgMedia.decalTable[DT_BLOOD02]				= cgi.R_RegisterPoly ("egl/decals/blood02.tga");
-	cgMedia.decalTable[DT_BLOOD03]				= cgi.R_RegisterPoly ("egl/decals/blood03.tga");
-	cgMedia.decalTable[DT_BLOOD04]				= cgi.R_RegisterPoly ("egl/decals/blood04.tga");
-	cgMedia.decalTable[DT_BLOOD05]				= cgi.R_RegisterPoly ("egl/decals/blood05.tga");
-	cgMedia.decalTable[DT_BLOOD06]				= cgi.R_RegisterPoly ("egl/decals/blood06.tga");
-	cgMedia.decalTable[DT_BLOOD07]				= cgi.R_RegisterPoly ("egl/decals/blood07.tga");
-	cgMedia.decalTable[DT_BLOOD08]				= cgi.R_RegisterPoly ("egl/decals/blood08.tga");
-	cgMedia.decalTable[DT_BLOOD09]				= cgi.R_RegisterPoly ("egl/decals/blood09.tga");
-	cgMedia.decalTable[DT_BLOOD10]				= cgi.R_RegisterPoly ("egl/decals/blood10.tga");
-	cgMedia.decalTable[DT_BLOOD11]				= cgi.R_RegisterPoly ("egl/decals/blood11.tga");
-	cgMedia.decalTable[DT_BLOOD12]				= cgi.R_RegisterPoly ("egl/decals/blood12.tga");
-	cgMedia.decalTable[DT_BLOOD13]				= cgi.R_RegisterPoly ("egl/decals/blood13.tga");
-	cgMedia.decalTable[DT_BLOOD14]				= cgi.R_RegisterPoly ("egl/decals/blood14.tga");
-	cgMedia.decalTable[DT_BLOOD15]				= cgi.R_RegisterPoly ("egl/decals/blood15.tga");
-	cgMedia.decalTable[DT_BLOOD16]				= cgi.R_RegisterPoly ("egl/decals/blood16.tga");
+	tempMat = cgi.R_RegisterPoly("egl/decals/bloodtable.tga");
+	greenMat = cgi.R_RegisterPoly("egl/decals/bloodtable_green.tga");
+	yOffset = 0;
+	for (i=0 ; i<16 ; i++) {
+		cgMedia.decalTable[DT_BLOOD01+i] = tempMat;
+		cgMedia.decalTable[DT_BLOOD01_GRN+i] = greenMat;
 
-	cgMedia.decalTable[DT_BLOOD01_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood01_green.tga");
-	cgMedia.decalTable[DT_BLOOD02_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood02_green.tga");
-	cgMedia.decalTable[DT_BLOOD03_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood03_green.tga");
-	cgMedia.decalTable[DT_BLOOD04_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood04_green.tga");
-	cgMedia.decalTable[DT_BLOOD05_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood05_green.tga");
-	cgMedia.decalTable[DT_BLOOD06_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood06_green.tga");
-	cgMedia.decalTable[DT_BLOOD07_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood07_green.tga");
-	cgMedia.decalTable[DT_BLOOD08_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood08_green.tga");
-	cgMedia.decalTable[DT_BLOOD09_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood09_green.tga");
-	cgMedia.decalTable[DT_BLOOD10_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood10_green.tga");
-	cgMedia.decalTable[DT_BLOOD11_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood11_green.tga");
-	cgMedia.decalTable[DT_BLOOD12_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood12_green.tga");
-	cgMedia.decalTable[DT_BLOOD13_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood13_green.tga");
-	cgMedia.decalTable[DT_BLOOD14_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood14_green.tga");
-	cgMedia.decalTable[DT_BLOOD15_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood15_green.tga");
-	cgMedia.decalTable[DT_BLOOD16_GRN]			= cgi.R_RegisterPoly ("egl/decals/blood16_green.tga");
+		if (i && !(i&3))
+			yOffset += 0.25f;
+
+		cgMedia.decalCoords[DT_BLOOD01+i][0] = (i&3) * 0.25f;
+		cgMedia.decalCoords[DT_BLOOD01+i][1] = yOffset;
+		cgMedia.decalCoords[DT_BLOOD01+i][2] = cgMedia.decalCoords[DT_BLOOD01+i][0] + 0.25f;
+		cgMedia.decalCoords[DT_BLOOD01+i][3] = cgMedia.decalCoords[DT_BLOOD01+i][1] + 0.25f;
+
+		Vec4Copy(cgMedia.decalCoords[DT_BLOOD01+i], cgMedia.decalCoords[DT_BLOOD01_GRN+i]);
+	}
 
 	cgMedia.decalTable[DT_BULLET]				= cgi.R_RegisterPoly ("egl/decals/bullet.tga");
 

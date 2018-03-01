@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <direct.h>
 #include <io.h>
 #include <conio.h>
+#include <VersionHelpers.h>
 
 #define MINIMUM_WIN_MEMORY	0x0a00000
 #define MAXIMUM_WIN_MEMORY	0x1000000
@@ -56,25 +57,13 @@ Sys_Init
 */
 void Sys_Init (void)
 {
-	OSVERSIONINFO	vinfo;
-
 	// Make sure the timer is high precision, otherwise NT gets 18ms resolution
 	timeBeginPeriod (1);
 
-	// Check operating system info
-	vinfo.dwOSVersionInfoSize = sizeof (vinfo);
-
-	if (!GetVersionEx (&vinfo))
-		Sys_Error ("Couldn't get OS info");
-
-	if (vinfo.dwMajorVersion < 4)
+	if (!IsWindowsVersionOrGreater(4, 0, 0))
 		Sys_Error ("EGL requires windows version 4 or greater");
-	if (vinfo.dwPlatformId == VER_PLATFORM_WIN32s)
-		Sys_Error ("EGL doesn't run on Win32s");
-	else if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-		sys_winInfo.isWin32 = qTrue;
-	else
-		sys_winInfo.isWin32 = qFalse;
+
+	sys_winInfo.isWin32 = qFalse;
 }
 
 
@@ -506,22 +495,17 @@ int Sys_FindFiles (char *path, char *pattern, char **fileList, int maxFiles, int
 ==============================================================================
 */
 
-#if defined(_M_IX86)
-# define LIBARCH		"x86"
+# ifdef _M_X64
+#  define LIBARCH		"x64"
+# else
+#  define LIBARCH		"x86"
+#endif
+
 # ifdef _DEBUG
 #  define LIBDEBUGDIR	"debug"
 # else
 #  define LIBDEBUGDIR	"release"
 # endif
-
-#elif defined(_M_ALPHA)
-# define LIBARCH		"axp"
-# ifdef _DEBUG
-#  define LIBDEBUGDIR	"debugaxp"
-# else
-#  define LIBDEBUGDIR	"releaseaxp"
-# endif
-#endif
 
 typedef struct libList_s {
 	const char		*title;
@@ -559,6 +543,7 @@ void Sys_UnloadLibrary (libType_t libType)
 	*lib = NULL;
 }
 
+typedef void *(*APIFunc_t) (void *);
 
 /*
 =================
@@ -571,7 +556,7 @@ void *Sys_LoadLibrary (libType_t libType, void *parms)
 {
 	HINSTANCE	*lib;
 	const char	*libName;
-	void		*(*APIfunc) (void *);
+	APIFunc_t	APIfunc;
 	char		name[MAX_OSPATH];
 	char		cwd[MAX_OSPATH];
 	char		*path;
@@ -625,7 +610,7 @@ void *Sys_LoadLibrary (libType_t libType, void *parms)
 	}
 
 	// Find the API function
-	APIfunc = (void *)GetProcAddress (*lib, sys_libList[libType].apiFuncName);
+	APIfunc = (APIFunc_t)GetProcAddress (*lib, sys_libList[libType].apiFuncName);
 	if (!APIfunc) {
 		Sys_UnloadLibrary (libType);
 		return NULL;
@@ -680,6 +665,11 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	// Previous instances do not exist in Win32
 	if (hPrevInstance)
 		return 0;
+
+	// Set rounding control
+#ifndef _M_X64
+	_controlfp (_PC_24, _MCW_PC);
+#endif
 
 	sys_winInfo.hInstance = hInstance;
 
@@ -737,7 +727,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 			time = newTime - oldTime;
 		} while (time < 1);
 
-		_controlfp (_PC_24, _MCW_PC);
 		Com_Frame (time);
 
 		oldTime = newTime;

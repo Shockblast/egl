@@ -57,7 +57,7 @@ static void DownloadCallback (void *self)
 		cgi.Cvar_SetValue ("allow_download", f->curValue, qFalse);
 	else if (f == &m_downloadOptionsMenu.download_maps_toggle)
 		cgi.Cvar_SetValue ("allow_download_maps", f->curValue, qFalse);
-	else if (f == &m_downloadOptionsMenu.download_models_toggle, qFalse)
+	else if (f == &m_downloadOptionsMenu.download_models_toggle)
 		cgi.Cvar_SetValue ("allow_download_models", f->curValue, qFalse);
 	else if (f == &m_downloadOptionsMenu.download_players_toggle)
 		cgi.Cvar_SetValue ("allow_download_players", f->curValue, qFalse);
@@ -108,7 +108,7 @@ static void DLOptionsMenu_Init (void)
 	m_downloadOptionsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_downloadOptionsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_downloadOptionsMenu.banner.generic.name		= NULL;
-	m_downloadOptionsMenu.banner.shader				= uiMedia.banners.multiplayer;
+	m_downloadOptionsMenu.banner.mat				= uiMedia.banners.multiplayer;
 
 	m_downloadOptionsMenu.header.generic.type		= UITYPE_ACTION;
 	m_downloadOptionsMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

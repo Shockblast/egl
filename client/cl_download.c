@@ -217,8 +217,8 @@ void CL_ParseDownload (qBool compressed)
 
 	// Insert block
  	if (compressed) {
- 		uint16	uncompressedLen;
- 		byte	uncompressed[0xFFFF];
+ 		uint16		uncompressedLen;
+ 		static byte	uncompressed[0xFFFF];
 
  		uncompressedLen = MSG_ReadShort (&cls.netMessage);
  		if (!uncompressedLen)
@@ -536,7 +536,7 @@ void CL_RequestNextDownload (void)
 		cl_downloadCheck++;
 
 		CM_LoadMap (cl.configStrings[CS_MODELS+1], qTrue, &mapCheckSum);
-		if (mapCheckSum != atoi(cl.configStrings[CS_MAPCHECKSUM])) {
+		if (mapCheckSum != (uint32) atoi(cl.configStrings[CS_MAPCHECKSUM])) {
 			Com_Error (ERR_DROP, "Local map version differs from server: %i != '%s'", mapCheckSum, cl.configStrings[CS_MAPCHECKSUM]);
 			return;
 		}

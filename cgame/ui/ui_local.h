@@ -166,7 +166,7 @@ typedef struct uiField_s {
 	int						cursor;
 
 	int						length;
-	int						visibleLength;
+	size_t					visibleLength;
 	int						visibleOffset;
 } uiField_t;
 
@@ -176,14 +176,14 @@ typedef struct uiList_s {
 	int						curValue;
 
 	char					**itemNames;
-	int						numItemNames;
+	size_t					numItemNames;
 } uiList_t;
 
 typedef struct uiImage_s {
 	uiCommon_t				generic;
 
-	struct shader_s			*shader;
-	struct shader_s			*hoverShader;
+	struct material_s			*mat;
+	struct material_s			*hoverMat;
 
 	int						width;
 	int						height;

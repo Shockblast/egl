@@ -77,7 +77,6 @@ void SV_BroadcastPrintf (int level, char *fmt, ...)
 	// Echo to console
 	if (dedicated->intVal) {
 		char	copy[1024];
-		int		i;
 		
 		// Mask off high bits
 		for (i=0 ; i<1023 && string[i] ; i++)
@@ -222,7 +221,7 @@ void SV_Multicast (vec3_t origin, multiCast_t to)
 
 	// Send the data to all relevent clients
 	for (j=0, client=svs.clients ; j<maxclients->intVal ; j++, client++) {
-		if (client->state == SVCS_FREE || client->state == SVCS_FREE)
+		if (client->state == SVCS_FREE || client->state == SVCS_ZOMBIE)
 			continue;
 		if (client->state != SVCS_SPAWNED && !reliable)
 			continue;
@@ -352,7 +351,7 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel, int soundIndex,
 
 	// Cycle through the different targets and do attenuation calculations
 	for (i=0, client=svs.clients ; i<maxclients->intVal ; i++, client++) {
-		if (client->state == SVCS_FREE || client->state == SVCS_FREE)
+		if (client->state == SVCS_FREE || client->state == SVCS_ZOMBIE)
 			continue;
 
 		if (client->state != SVCS_SPAWNED && !(channel & CHAN_RELIABLE))
@@ -492,7 +491,8 @@ bandwidth estimation and should not be sent another packet
 */
 qBool SV_RateDrop (svClient_t *c)
 {
-	int		total, i;
+	size_t	total;
+	int		i;
 
 	// never drop over the loopback
 	if (c->netChan.remoteAddress.naType == NA_LOOPBACK)
@@ -534,7 +534,7 @@ void SV_SendClientMessages (void)
 		}
 		else {
 			// Get the next message
-			r = FS_Read (&msgLen, sizeof (r), sv.demoFile);
+			r = (int) FS_Read (&msgLen, sizeof (r), sv.demoFile);
 			if (r != 4) {
 				SV_DemoCompleted ();
 				return;
@@ -549,7 +549,7 @@ void SV_SendClientMessages (void)
 			if (msgLen > MAX_SV_MSGLEN)
 				Com_Error (ERR_DROP, "SV_SendClientMessages: msgLen > MAX_SV_MSGLEN");
 
-			r = FS_Read (msgBuf, msgLen, sv.demoFile);
+			r = (int) FS_Read (msgBuf, msgLen, sv.demoFile);
 			if (r != msgLen) {
 				SV_DemoCompleted ();
 				return;

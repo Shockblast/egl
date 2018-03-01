@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 MSG_Init
 ================
 */
-void MSG_Init (netMsg_t *dest, byte *data, int length)
+void MSG_Init (netMsg_t *dest, byte *data, size_t length)
 {
 	assert (length > 0);
 
@@ -75,7 +75,7 @@ void MSG_Clear (netMsg_t *dest)
 MSG_GetWriteSpace
 ================
 */
-static void *MSG_GetWriteSpace (netMsg_t *dest, int length)
+static void *MSG_GetWriteSpace (netMsg_t *dest, size_t length)
 {
 	void	*data;
 
@@ -305,32 +305,86 @@ void MSG_WriteDeltaEntity (netMsg_t *dest, entityStateOld_t *from, entityStateOl
 MSG_WriteDeltaUsercmd
 ================
 */
-void MSG_WriteDeltaUsercmd (netMsg_t *dest, userCmd_t *from, userCmd_t *cmd)
+void MSG_WriteDeltaUsercmd (netMsg_t *dest, userCmd_t *from, userCmd_t *cmd, int protocolMinorVersion)
 {
-	int		bits;
+	int bits;
+	int buttons;
 
 	// Send the movement message
 	bits = 0;
+	buttons = 0;
+
 	if (cmd->angles[0] != from->angles[0])		bits |= CM_ANGLE1;
 	if (cmd->angles[1] != from->angles[1])		bits |= CM_ANGLE2;
 	if (cmd->angles[2] != from->angles[2])		bits |= CM_ANGLE3;
 	if (cmd->forwardMove != from->forwardMove)	bits |= CM_FORWARD;
 	if (cmd->sideMove != from->sideMove)		bits |= CM_SIDE;
 	if (cmd->upMove != from->upMove)			bits |= CM_UP;
-	if (cmd->buttons != from->buttons)			bits |= CM_BUTTONS;
+	if (cmd->buttons != from->buttons) {
+		buttons = cmd->buttons;
+		bits |= CM_BUTTONS;
+	}
 	if (cmd->impulse != from->impulse)			bits |= CM_IMPULSE;
 
 	MSG_WriteByte (dest, bits);
 
-	if (bits & CM_ANGLE1)	MSG_WriteShort (dest, cmd->angles[0]);
-	if (bits & CM_ANGLE2)	MSG_WriteShort (dest, cmd->angles[1]);
+	//waste not what precious bytes we have...
+	if (protocolMinorVersion >= MINOR_VERSION_R1Q2_UCMD_UPDATES) {
+		if (bits & CM_BUTTONS) {
+			if ((bits & CM_FORWARD) && (cmd->forwardMove % 5) == 0)
+				buttons |= BUTTON_UCMD_DBLFORWARD;
+			if ((bits & CM_SIDE) && (cmd->sideMove % 5) == 0)
+				buttons |= BUTTON_UCMD_DBLSIDE;
+			if ((bits & CM_UP) && (cmd->upMove % 5) == 0)
+				buttons |= BUTTON_UCMD_DBLUP;
+
+			if ((bits & CM_ANGLE1) && (cmd->angles[0] % 64) == 0 && (abs(cmd->angles[0] / 64)) < 128)
+				buttons |= BUTTON_UCMD_DBL_ANGLE1;
+			if ((bits & CM_ANGLE2) && (cmd->angles[1] % 256) == 0)
+				buttons |= BUTTON_UCMD_DBL_ANGLE2;
+
+			MSG_WriteByte (dest, buttons);
+		}
+	}
+
+	if (bits & CM_ANGLE1) {
+		if (buttons & BUTTON_UCMD_DBL_ANGLE1)
+			MSG_WriteChar (dest, cmd->angles[0] / 64);
+		else
+			MSG_WriteShort (dest, cmd->angles[0]);
+	}
+	if (bits & CM_ANGLE2) {
+		if (buttons & BUTTON_UCMD_DBL_ANGLE2)
+			MSG_WriteChar (dest, cmd->angles[1] / 256);
+		else
+			MSG_WriteShort (dest, cmd->angles[1]);
+	}
 	if (bits & CM_ANGLE3)	MSG_WriteShort (dest, cmd->angles[2]);
 	
-	if (bits & CM_FORWARD)	MSG_WriteShort (dest, cmd->forwardMove);
-	if (bits & CM_SIDE)		MSG_WriteShort (dest, cmd->sideMove);
-	if (bits & CM_UP)		MSG_WriteShort (dest, cmd->upMove);
+	if (bits & CM_FORWARD) {
+		if (buttons & BUTTON_UCMD_DBLFORWARD)
+			MSG_WriteChar (dest, cmd->forwardMove / 5);
+		else
+			MSG_WriteShort (dest, cmd->forwardMove);
+	}
+	if (bits & CM_SIDE) {
+		if (buttons & BUTTON_UCMD_DBLSIDE)
+			MSG_WriteChar (dest, cmd->sideMove / 5);
+		else
+			MSG_WriteShort (dest, cmd->sideMove);
+	}
+	if (bits & CM_UP) {
+		if (buttons & BUTTON_UCMD_DBLUP)
+			MSG_WriteChar (dest, cmd->upMove / 5);
+		else
+			MSG_WriteShort (dest, cmd->upMove);
+	}
 
-	if (bits & CM_BUTTONS)	MSG_WriteByte (dest, cmd->buttons);
+	if (protocolMinorVersion < MINOR_VERSION_R1Q2_UCMD_UPDATES) {
+		if (bits & CM_BUTTONS)
+			MSG_WriteByte (dest, cmd->buttons);
+	}
+
 	if (bits & CM_IMPULSE)	MSG_WriteByte (dest, cmd->impulse);
 
 	MSG_WriteByte (dest, cmd->msec);
@@ -409,7 +463,7 @@ void MSG_WriteLong (netMsg_t *dest, int c)
 MSG_WriteRaw
 ================
 */
-void MSG_WriteRaw (netMsg_t *dest, void *data, int length)
+void MSG_WriteRaw (netMsg_t *dest, void *data, size_t length)
 {
 	assert (length > 0);
 	memcpy (MSG_GetWriteSpace (dest, length), data, length);		
@@ -452,7 +506,7 @@ MSG_WriteStringCat
 */
 void MSG_WriteStringCat (netMsg_t *dest, char *data)
 {
-	int		len;
+	size_t		len;
 	
 	len = strlen (data) + 1;
 	assert (len > 1);
@@ -532,9 +586,9 @@ int MSG_ReadChar (netMsg_t *src)
 MSG_ReadData
 ================
 */
-void MSG_ReadData (netMsg_t *src, void *data, int len)
+void MSG_ReadData (netMsg_t *src, void *data, size_t len)
 {
-	int		i;
+	size_t		i;
 
 	for (i=0 ; i<len ; i++)
 		((byte *)data)[i] = MSG_ReadByte (src);

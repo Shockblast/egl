@@ -114,7 +114,7 @@ void CG_BlasterBlueParticles (vec3_t org, vec3_t dir)
 		0,									frand () * 360.0f);
 
 	// Smoke
-	count = 6 + (cg_particleSmokeLinger->floatVal * 0.25f);
+	count = 6 + (cg.smokeLingerScale * 2.5f);
 	for (i=0 ; i<count ; i++) {
 		d = 3 + (frand () * 6);
 		rnum = (rand () % 5);
@@ -126,7 +126,7 @@ void CG_BlasterBlueParticles (vec3_t org, vec3_t dir)
 			0,									0,									5 + (frand () * 25),
 			palRed (0x70 + rnum),				palGreen (0x70 + rnum),				palBlue (0x70 + rnum),
 			palRed (0x70 + rnum),				palGreen (0x70 + rnum),				palBlue (0x70 + rnum),
-			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
+			0.9f + (frand() * 0.1f),			-1.0f / (0.6f + (cg.smokeLingerScale * 0.1f) + (frand() * 0.1f)),
 			5 + crand (),						16 + (crand () * 8),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,
@@ -196,7 +196,7 @@ void CG_BlasterGoldParticles (vec3_t org, vec3_t dir)
 		0,									frand () * 360);
 
 	// Smoke
-	count = 6 + (cg_particleSmokeLinger->floatVal * 0.25f);
+	count = 5 + (cg.smokeLingerScale * 2.5f);
 	for (i=0 ; i<count ; i++) {
 		d = 3 + (frand () * 6);
 		rnum = (rand () % 5);
@@ -209,7 +209,7 @@ void CG_BlasterGoldParticles (vec3_t org, vec3_t dir)
 			0,									0,									5 + (frand () * 25),
 			palRed (0xe0 + rnum),				palGreen (0xe0 + rnum),				palBlue (0xe0 + rnum),
 			palRed (0xe0 + rnum2),				palGreen (0xe0 + rnum2),			palBlue (0xe0 + rnum2),
-			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
+			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg.smokeLingerScale * 0.1f) + (frand() * 0.1f)),
 			5 + crand (),						16 + (crand () * 8),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,
@@ -237,6 +237,8 @@ void CG_BlasterGoldParticles (vec3_t org, vec3_t dir)
 			PART_STYLE_QUAD,
 			0);
 	}
+
+	CG_ColorFlash(org, 0, 200, 100, 1, 1, 0);
 }
 
 
@@ -276,7 +278,7 @@ void CG_BlasterGreenParticles (vec3_t org, vec3_t dir)
 		0,									frand () * 360);
 
 	// Smoke
-	count = 6 + (cg_particleSmokeLinger->floatVal * 0.25f);
+	count = 6 + (cg.smokeLingerScale * 2.5f);
 	for (i=0 ; i<count ; i++) {
 		d = 3 + (frand () * 6);
 		randwhite = (rand()&1)?150 + (rand()%26) : 0.0f;
@@ -288,7 +290,7 @@ void CG_BlasterGreenParticles (vec3_t org, vec3_t dir)
 			0,									0,									5 + (frand () * 25),
 			randwhite,							65 + (rand()%150) + randwhite,		(rand()%50) + randwhite,
 			randwhite,							65 + (rand()%150) + randwhite,		(rand()%50) + randwhite,
-			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
+			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg.smokeLingerScale * 0.1f) + (frand() * 0.1f)),
 			5 + crand (),						16 + (crand () * 8),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,
@@ -330,7 +332,7 @@ void CG_BlasterGreyParticles (vec3_t org, vec3_t dir)
 	float	d;
 
 	// Smoke
-	count = 6 + (cg_particleSmokeLinger->floatVal * 0.25f);
+	count = 6 + (cg.smokeLingerScale * 2.5f);
 	for (i=0 ; i<count ; i++) {
 		d = (float)(rand()%13 + 3);
 
@@ -341,7 +343,7 @@ void CG_BlasterGreyParticles (vec3_t org, vec3_t dir)
 			0,									0,									10 + (frand () * 20),
 			130.0f + (rand()%6),				162.0f + (rand()%6),				178.0f + (rand()%6),
 			130.0f + (rand()%6),				162.0f + (rand()%6),				178.0f + (rand()%6),
-			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
+			0.9f + (frand() * 0.1f),			-1.0f / (0.8f + (cg.smokeLingerScale * 0.1f) + (frand() * 0.1f)),
 			5 + crand (),						15 + (crand () * 8),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,
@@ -382,7 +384,7 @@ void CG_BleedEffect (vec3_t org, vec3_t dir, int count)
 	float		d, gore, amount, fly;
 	vec3_t		orgVec, dirVec;
 
-	gore = clamp (cg_particleGore->floatVal, 0.0f, 10.0f);
+	gore = cg.goreScale * 10.0f;
 	fly = (gore * 0.1f) * 30;
 
 	// Splurt
@@ -584,7 +586,7 @@ void CG_ExplosionBFGEffect (vec3_t org)
 			0,								0,								5 + (frand () * 6),
 			rnum,							80 + rnum,						rnum,
 			rnum2,							100+ rnum2,						rnum2,
-			0.75f + (crand () * 0.1f),		-1.0f / (0.25f + (cg_particleSmokeLinger->floatVal * 0.1f) + (crand () * 0.1f)),
+			0.75f + (crand () * 0.1f),		-1.0f / (0.25f + cg.smokeLingerScale + (crand () * 0.1f)),
 			35 + (crand () * 15),			140 + (crand () * 30),
 			pRandGlowSmoke (),				0,
 			pSmokeThink,					qTrue,
@@ -617,7 +619,7 @@ void CG_ExplosionBFGEffect (vec3_t org)
 CG_FlareEffect
 ===============
 */
-void __fastcall CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel)
+void CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel)
 {
 	CG_SpawnParticle (
 		origin[0],						origin[1],						origin[2],
@@ -746,7 +748,7 @@ CG_ParticleEffect
 Wall impact puffs
 ===============
 */
-void __fastcall CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
+void CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, rnum, rnum2;
 	float		d;
@@ -846,7 +848,7 @@ void __fastcall CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 CG_ParticleEffect2
 ===============
 */
-void __fastcall CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count)
+void CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count)
 {
 	if (color == 0xe2 && cg.currGameMod == GAME_MOD_GLOOM) {
 		CG_GloomRepairEffect (org, dir, count);
@@ -883,7 +885,7 @@ void __fastcall CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count
 CG_ParticleEffect3
 ===============
 */
-void __fastcall CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count)
+void CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, rnum, rnum2;
 	float		d;
@@ -917,7 +919,7 @@ CG_ParticleSmokeEffect
 like the steam effect, but unaffected by gravity
 ===============
 */
-void __fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
+void CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
 {
 	int			i, rnum, rnum2;
 	float		d;
@@ -941,7 +943,7 @@ void __fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int c
 			0,								0,								0,
 			palRed (color + rnum),			palGreen (color + rnum),		palBlue (color + rnum),
 			palRed (color + rnum2),			palGreen (color + rnum2),		palBlue (color + rnum2),
-			0.9f + (crand () * 0.1f),		-1.0f / (0.5f + (cg_particleSmokeLinger->floatVal * 0.5f) + (frand () * 0.3f)),
+			0.9f + (crand () * 0.1f),		-1.0f / (0.5f + (cg.smokeLingerScale * 5.0f) + (frand () * 0.3f)),
 			5 + (frand () * 4),				10 + (frand () * 4),
 			pRandSmoke (),					PF_SHADE,
 			pSmokeThink,					qTrue,
@@ -956,7 +958,7 @@ void __fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int c
 CG_RicochetEffect
 ===============
 */
-void __fastcall CG_RicochetEffect (vec3_t org, vec3_t dir, int count)
+void CG_RicochetEffect (vec3_t org, vec3_t dir, int count)
 {
 	int		i, rnum, rnum2;
 	float	d;
@@ -1034,7 +1036,7 @@ void CG_RocketFireParticles (vec3_t org, vec3_t dir)
 CG_SparkEffect
 ===============
 */
-void __fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale)
+void CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale)
 {
 	int			i;
 	float		d, d2;
@@ -1073,7 +1075,7 @@ void __fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel,
 			0,									0,									i*3.5f,
 			rnum,								rnum,								rnum,
 			rnum2,								rnum2,								rnum2,
-			0.9f + (crand () * 0.1f),			-1.0f / (1.5f + (cg_particleSmokeLinger->floatVal * 0.05f) + (crand() * 0.2f)),
+			0.9f + (crand () * 0.1f),			-1.0f / (1.5f + (cg.smokeLingerScale * 0.5f) + (crand() * 0.2f)),
 			(4 + (frand () * 3)) * smokeScale,	(12 + (crand () * 3)) * smokeScale,
 			pRandSmoke (),						PF_SHADE|PF_NOCLOSECULL,
 			pFastSmokeThink,					qTrue,
@@ -1092,7 +1094,7 @@ void __fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel,
 			0,									0,									5,
 			rnum,								rnum,								rnum,
 			rnum2,								rnum2,								rnum2,
-			0.9f + (crand () * 0.1f),			-1.0f / (1.25f + (cg_particleSmokeLinger->floatVal * 0.05f) + (crand() * 0.2f)),
+			0.9f + (crand () * 0.1f),			-1.0f / (1.25f + (cg.smokeLingerScale * 0.5f) + (crand() * 0.2f)),
 			(4 + (frand () * 3)) * smokeScale,	(12 + (crand () * 3)) * smokeScale,
 			pRandSmoke (),						PF_SHADE|PF_NOCLOSECULL,
 			pFastSmokeThink,					qTrue,
@@ -1107,7 +1109,7 @@ void __fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel,
 CG_SplashEffect
 ===============
 */
-void __fastcall CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow)
+void CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow)
 {
 	int		i, rnum, rnum2;
 	vec3_t	angle, dirVec;
@@ -1237,7 +1239,7 @@ void __fastcall CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count
 }
 
 byte		clrtbl[] = {0x00, 0xe0, 0xb0, 0x50, 0xd0, 0xe0, 0xe8};
-void __fastcall CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
+void CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	// this function merely decides what route to take
 	switch (color) {
@@ -1323,7 +1325,7 @@ void CG_BlasterTip (vec3_t start, vec3_t end)
 	CG_BubbleEffect (start);
 
 	// Smoke
-	dec = 1 + (cg_particleSmokeLinger->floatVal * 0.2f);
+	dec = 1 + cg.smokeLingerScale;
 	for (i=0 ; i<dec ; i++) {
 		rnum = (rand () % 5);
 		rnum2 = (rand () % 5);
@@ -1335,8 +1337,8 @@ void CG_BlasterTip (vec3_t start, vec3_t end)
 			0,									0,									5 + (frand () * 25),
 			palRed (0xe0 + rnum),				palGreen (0xe0 + rnum),				palBlue (0xe0 + rnum),
 			palRed (0xe0 + rnum2),				palGreen (0xe0 + rnum2),			palBlue (0xe0 + rnum2),
-			0.9f + (frand() * 0.1f),			-1.0f / (0.25f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
-			5 + crand (),						16 + (crand () * 8),
+			0.9f + (frand() * 0.1f),			-1.0f / (0.25f + (cg.smokeLingerScale * 0.1f) + (frand() * 0.1f)),
+			2 + crand (),						12 + (crand () * 2),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,
 			PART_STYLE_QUAD,
@@ -1365,7 +1367,7 @@ void CG_BlasterTip (vec3_t start, vec3_t end)
 			palRed (0xe0 + rnum),				palGreen (0xe0 + rnum),				palBlue (0xe0 + rnum),
 			palRed (0xe0 + rnum2),				palGreen (0xe0 + rnum2),			palBlue (0xe0 + rnum2),
 			1.0f,								-15,
-			4 + (frand () * 4),					1.5f + (frand () * 2.5f),
+			3 + frand (),						1.5f + frand (),
 			PT_BLASTER_RED,						PF_NOCLOSECULL,
 			0,									qFalse,
 			PART_STYLE_QUAD,
@@ -1495,7 +1497,7 @@ void CG_ExplosionParticles (vec3_t org, float scale, qBool exploOnly, qBool inWa
 			0,								0,								3 + (frand () * 4),
 			rnum,							rnum,							rnum,
 			rnum2,							rnum2,							rnum2,
-			0.75f + (crand () * 0.1f),		-1.0f / (1.5f + (cg_particleSmokeLinger->floatVal * 0.4f) + (crand () * 0.2f)),
+			0.75f + (crand () * 0.1f),		-1.0f / (2.0f + (cg.smokeLingerScale * 3.0f) + (crand () * 0.2f)),
 			(40 + (crand () * 5)) * scale,	(100 + (crand () * 10)) * scale,
 			pRandSmoke (),					PF_SHADE,
 			pSmokeThink,					qTrue,
@@ -1524,7 +1526,7 @@ void CG_ExplosionParticles (vec3_t org, float scale, qBool exploOnly, qBool inWa
 			normal[0] * -32 * distScale,	normal[1] * -32 * distScale,	(normal[2] * -32 * distScale) + 5 + (frand () * 6),
 			rnum,							rnum,							rnum,
 			rnum2,							rnum2,							rnum2,
-			0.75f + (crand () * 0.1f),		-1.0f / (1.5f + (cg_particleSmokeLinger->floatVal * 0.1f) + (crand () * 0.2f)),
+			0.75f + (crand () * 0.1f),		-1.0f / (1.5f + cg.smokeLingerScale + (crand () * 0.2f)),
 			(30 + (crand () * 5)) * scale,	(100 + (crand () * 10)) * scale,
 			pRandSmoke (),					PF_SHADE,
 			pSmokeThink,					qTrue,
@@ -1566,7 +1568,7 @@ void CG_ExplosionParticles (vec3_t org, float scale, qBool exploOnly, qBool inWa
 	// Only do these for small effects
 	if (scale <= 2.0f) {
 		VecToAngleRolled (normal, 180, angle);
-		rnum = Vec3DistFast (org, endPos);
+		rnum = Vec3Dist (org, endPos);
 		if (rnum < 50.0f) {
 			// Wave
 			CG_SpawnParticle (
@@ -1595,7 +1597,7 @@ void CG_ExplosionParticles (vec3_t org, float scale, qBool exploOnly, qBool inWa
 				0,									0,									0,
 				rnum,								rnum,								rnum,
 				rnum2,								rnum2,								rnum2,
-				0.6f + (crand () * 0.1f),			-1.0f / (1.65f + (cg_particleSmokeLinger->floatVal * 0.5f) + (crand () * 0.2f)),
+				0.6f + (crand () * 0.1f),			-1.0f / (1.65f + (cg.smokeLingerScale * 5.0f) + (crand () * 0.2f)),
 				(60 + (crand () * 5)) * scale,		(80 + (crand () * 10)) * scale,
 				pRandSmoke (),						PF_SHADE,
 				pSmokeThink,						qTrue,
@@ -1630,7 +1632,7 @@ void CG_ExplosionBFGParticles (vec3_t org)
 			0,								0,								5 + (frand () * 6),
 			rnum,							80 + rnum,						rnum,
 			rnum2,							100+ rnum2,						rnum2,
-			0.75f + (crand () * 0.1f),		-1.0f / (0.25f + (cg_particleSmokeLinger->floatVal * 0.1f) + (crand () * 0.1f)),
+			0.75f + (crand () * 0.1f),		-1.0f / (0.25f + cg.smokeLingerScale + (crand () * 0.1f)),
 			35 + (crand () * 15),			140 + (crand () * 30),
 			pRandGlowSmoke (),				0,
 			pSmokeThink,					qTrue,
@@ -1884,7 +1886,7 @@ void CG_PhalanxTip (vec3_t start, vec3_t end)
 	CG_BubbleEffect (start);
 
 	// Smoke
-	dec = 1 + (cg_particleSmokeLinger->floatVal * 0.2f);
+	dec = 1 + (cg.smokeLingerScale * 2.0f);
 	for (i=0 ; i<dec ; i++) {
 		rnum = (rand () % 5);
 		rnum2 = (rand () % 5);
@@ -1896,7 +1898,7 @@ void CG_PhalanxTip (vec3_t start, vec3_t end)
 			0,									0,									5 + (frand () * 25),
 			palRed (0xe0 + rnum),				palGreen (0xe0 + rnum),				palBlue (0xe0 + rnum),
 			palRed (0xe0 + rnum2),				palGreen (0xe0 + rnum2),			palBlue (0xe0 + rnum2),
-			0.9f + (frand() * 0.1f),			-1.0f / (0.25f + (cg_particleSmokeLinger->floatVal * 0.01f) + (frand() * 0.1f)),
+			0.9f + (frand() * 0.1f),			-1.0f / (0.25f + (cg.smokeLingerScale * 0.1f) + (frand() * 0.1f)),
 			5 + crand (),						16 + (crand () * 8),
 			pRandGlowSmoke (),					PF_ALPHACOLOR,
 			NULL,								qFalse,

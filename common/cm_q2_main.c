@@ -33,9 +33,9 @@ static char				cm_q2_emptyEntityString[1];
 static char				*cm_q2_entityString;
 
 static int				cm_q2_numTexInfo;
-static cQ2MapSurface_t	*cm_q2_surfaces;
+static cBspSurface_t	*cm_q2_surfaces;
 static int				cm_q2_numTexInfoUnique;
-static cQ2MapSurface_t	**cm_q2_surfacesUnique;
+static cBspSurface_t	**cm_q2_surfacesUnique;
 
 int						cm_q2_numNodes;
 cQ2BspNode_t			*cm_q2_nodes;
@@ -56,7 +56,7 @@ cQ2BspBrush_t			*cm_q2_brushes;
 int						cm_q2_numAreas = 1;
 cQ2BspArea_t			*cm_q2_areas;
 
-cQ2MapSurface_t			cm_q2_nullSurface;
+cBspSurface_t			cm_q2_nullSurface;
 
 int						cm_q2_numPlanes;
 cBspPlane_t				*cm_q2_planes;
@@ -86,7 +86,7 @@ CM_Q2BSP_LoadSurfaces
 static void CM_Q2BSP_LoadSurfaces (dQ2BspLump_t *l)
 {
 	dQ2BspTexInfo_t	*in;
-	cQ2MapSurface_t	*out;
+	cBspSurface_t	*out;
 	int				i, j;
 	int				unique;
 
@@ -101,15 +101,15 @@ static void CM_Q2BSP_LoadSurfaces (dQ2BspLump_t *l)
 		Com_Error (ERR_DROP, "CM_Q2BSP_LoadSurfaces: Map with no surfaces");
 	if (cm_q2_numTexInfo > Q2BSP_MAX_TEXINFO)
 		Com_Error (ERR_DROP, "CM_Q2BSP_LoadSurfaces: Map has too many surfaces");
-	cm_q2_surfaces = Mem_PoolAlloc (sizeof(cQ2MapSurface_t) * cm_q2_numTexInfo, com_cmodelSysPool, 0);
+	cm_q2_surfaces = Mem_PoolAlloc (sizeof(cBspSurface_t) * cm_q2_numTexInfo, com_cmodelSysPool, 0);
 
 	// Byte swap
 	out = cm_q2_surfaces;
 	for (i=0 ; i<cm_q2_numTexInfo ; i++, in++, out++) {
-		Q_strncpyz (out->c.name, in->texture, sizeof (out->c.name));
+		Q_strncpyz (out->name, in->texture, sizeof (out->name));
 		Q_strncpyz (out->rname, in->texture, sizeof (out->rname));
-		out->c.flags = LittleLong (in->flags);
-		out->c.value = LittleLong (in->value);
+		out->flags = LittleLong (in->flags);
+		out->value = LittleLong (in->value);
 	}
 
 	// Find the total unique
@@ -128,7 +128,7 @@ static void CM_Q2BSP_LoadSurfaces (dQ2BspLump_t *l)
 		return;
 
 	cm_q2_numTexInfoUnique = unique;
-	cm_q2_surfacesUnique = Mem_PoolAlloc (sizeof(cQ2MapSurface_t *) * cm_q2_numTexInfoUnique, com_cmodelSysPool, 0);
+	cm_q2_surfacesUnique = Mem_PoolAlloc (sizeof(cBspSurface_t *) * cm_q2_numTexInfoUnique, com_cmodelSysPool, 0);
 	for (i=0, unique=0 ; i<cm_q2_numTexInfo ; i++) {
 		for (j=i-1 ; j>=0 ; j--) {
 			if (!Q_stricmp (cm_q2_surfaces[i].rname, cm_q2_surfaces[j].rname))

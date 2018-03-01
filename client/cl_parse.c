@@ -183,7 +183,12 @@ static void CL_ParseDelta (entityState_t *from, entityState_t *to, int number, i
 		to->event = 0;
 
 	if (bits & U_SOLID)
-		to->solid = MSG_ReadShort (&cls.netMessage);
+	{
+		if (cls.protocolMinorVersion >= MINOR_VERSION_R1Q2_32BIT_SOLID)
+			to->solid = MSG_ReadLong (&cls.netMessage);
+		else
+			to->solid = MSG_ReadShort (&cls.netMessage);
+	}
 
 	if (bits & U_VELOCITY && cls.serverProtocol == ENHANCED_PROTOCOL_VERSION)
 		MSG_ReadPos (&cls.netMessage, to->velocity);
@@ -498,7 +503,7 @@ static void CL_ParseFrame (int extraBits)
 {
 	int		cmd, len;
 	uint32	serverFrame;
-	int		extraFlags, i;
+	int		extraFlags;
 	frame_t	*oldFrame;
 
 	memset (&cl.frame, 0, sizeof (cl.frame));
@@ -580,20 +585,6 @@ static void CL_ParseFrame (int extraBits)
 	// Read areaBits
 	len = MSG_ReadByte (&cls.netMessage);
 	MSG_ReadData (&cls.netMessage, &cl.frame.areaBits, len);
-
-	// Check for change
-	if (oldFrame) {
-		cl.frame.areaChanged = qFalse;
-		for (i=0 ; i<MAX_AREA_BITS ; i++) {
-			if (oldFrame->areaBits[i] != cl.frame.areaBits[i]) {
-				cl.frame.areaChanged = qTrue;
-				break;
-			}
-		}
-	}
-	else {
-		cl.frame.areaChanged = qTrue;
-	}
 
 	// Read playerinfo
 	if (cls.serverProtocol != ENHANCED_PROTOCOL_VERSION) {
@@ -712,28 +703,41 @@ static qBool CL_ParseServerData (void)
 		cl.enhancedServer = MSG_ReadByte (&cls.netMessage);
 		newVersion = MSG_ReadShort (&cls.netMessage);
 		if (newVersion != ENHANCED_COMPATIBILITY_NUMBER) {
-			Com_Printf (0, "Protocol 35 version mismatch, falling back to 34.\n");
-			CL_Disconnect (qFalse);
+			if (cl.attractLoop) {
+				if (newVersion < ENHANCED_COMPATIBILITY_NUMBER)
+					Com_Printf(0, "This demo was recorded with an earlier version of the R1Q2 protocol. It may not play back properly.\n");
+				else
+					Com_Printf(0, "This demo was recorded with a later version of the R1Q2 protocol. It may not play back properly. Please update your R1Q2 client.\n");
+			}
+			else {
+				if (newVersion > ENHANCED_COMPATIBILITY_NUMBER)
+					Com_Printf(0, "Server reports a higher R1Q2 protocol number than your client supports. Some features will be unavailable until you update your EGL client.\n");
+				else
+					Com_Printf(0, "Server reports a lower R1Q2 protocol number. The server admin needs to update their server!\n");
+			}
 
-			cls.serverProtocol = ORIGINAL_PROTOCOL_VERSION;
-			CL_Reconnect_f ();
-			return qFalse;
+			// Cap if server is above us just to be safe
+			if (newVersion > ENHANCED_COMPATIBILITY_NUMBER)
+				newVersion = ENHANCED_COMPATIBILITY_NUMBER;
 		}
 
-		if (newVersion >= 1903) {
+		if (newVersion >= MINOR_VERSION_R1Q2_BASE) {
 			/*cl.advancedDeltas = */MSG_ReadByte (&cls.netMessage);
 			cl.strafeHack = MSG_ReadByte (&cls.netMessage);
 		}
 		else
 			cl.strafeHack = qFalse;
+
+		cls.protocolMinorVersion = newVersion;
 	}
 	else {
 		cl.enhancedServer = 0;
+		cls.protocolMinorVersion = 0;
 		cl.strafeHack = qFalse;
 	}
 
-	Com_DevPrintf (0, "Serverdata: protocol=%d, serverCount=%d, attractLoop=%d, playerNum=%d, game=%s, map=%s, enhanced=%d\n",
-		cls.serverProtocol, cl.serverCount, cl.attractLoop, cl.playerNum, cl.gameDir, str, cl.enhancedServer);
+	Com_DevPrintf (0, "Serverdata: protocol=%d(%d), serverCount=%d, attractLoop=%d, playerNum=%d, game=%s, map=%s, enhanced=%d\n",
+		cls.serverProtocol, cls.protocolMinorVersion, cl.serverCount, cl.attractLoop, cl.playerNum, cl.gameDir, str, cl.enhancedServer);
 
 	CL_MediaRestart ();
 
@@ -947,7 +951,7 @@ void CL_ParseServerMessage (void)
 	static int	queryLastTime = 0;
 	static int	lastCmd = -2;
 	int			extraBits;
-	int			oldReadCount;
+	size_t		oldReadCount;
 
 	// If recording demos, copy the message out
 	if (cl_shownet->intVal == 1)

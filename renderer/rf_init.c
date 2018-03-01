@@ -30,7 +30,6 @@ cVar_t	*gl_bitdepth;
 cVar_t	*gl_clear;
 cVar_t	*gl_cull;
 cVar_t	*gl_drawbuffer;
-cVar_t	*gl_driver;
 cVar_t	*gl_dynamic;
 cVar_t	*gl_errorcheck;
 
@@ -130,7 +129,6 @@ cVar_t	*vid_height;
 
 cVar_t	*intensity;
 
-cVar_t	*gl_jpgquality;
 cVar_t	*gl_nobind;
 cVar_t	*gl_picmip;
 cVar_t	*gl_screenshot;
@@ -314,10 +312,10 @@ R_MediaInit
 */
 void R_MediaInit (void)
 {
-	// Chars image/shaders
+	// Chars image/materials
 	R_CheckFont ();
 
-	// World Caustic shaders
+	// World Caustic materials
 	ri.media.worldLavaCaustics = R_RegisterTexture ("egl/lavacaustics", -1);
 	ri.media.worldSlimeCaustics = R_RegisterTexture ("egl/slimecaustics", -1);
 	ri.media.worldWaterCaustics = R_RegisterTexture ("egl/watercaustics", -1);
@@ -590,6 +588,7 @@ static void GL_InitExtensions (void)
 
 				ri.rgbFormatCompressed = GL_COMPRESSED_RGB_ARB;
 				ri.rgbaFormatCompressed = GL_COMPRESSED_RGBA_ARB;
+				ri.greyFormatCompressed = GL_COMPRESSED_LUMINANCE_ARB;
 				break;
 
 			case 2:
@@ -605,6 +604,7 @@ static void GL_InitExtensions (void)
 				ri.config.extTexCompression = qTrue;
 
 				ri.rgbFormatCompressed = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+				ri.greyFormatCompressed = GL_LUMINANCE4; // Not supported, just use 4bit per sample luminance
 				switch (r_ext_textureCompression->intVal) {
 				case 2:
 					ri.rgbaFormatCompressed = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -635,6 +635,7 @@ static void GL_InitExtensions (void)
 
 				ri.rgbFormatCompressed = GL_RGB_S3TC;
 				ri.rgbaFormatCompressed = GL_RGBA_S3TC;
+				ri.greyFormatCompressed = GL_LUMINANCE4; // Not supported, just use 4bit per sample luminance
 				break;
 
 			default:
@@ -1084,7 +1085,7 @@ static void GL_InitExtensions (void)
 	else
 		Com_Printf (0, "...ignoring GL_EXT_stencil_wrap\n");
 
-#ifdef WIN32
+#ifdef _WIN32
 	/*
 	** WGL_3DFX_gamma_control
 	*/
@@ -1122,7 +1123,7 @@ static void GL_InitExtensions (void)
 	}
 	else
 		Com_Printf (0, "...ignoring WGL_EXT_swap_control\n");
-#endif // WIN32
+#endif // _WIN32
 }
 
 
@@ -1145,7 +1146,6 @@ static void R_Register (void)
 	gl_clear			= Cvar_Register ("gl_clear",			"0",			0);
 	gl_cull				= Cvar_Register ("gl_cull",				"1",			0);
 	gl_drawbuffer		= Cvar_Register ("gl_drawbuffer",		"GL_BACK",		0);
-	gl_driver			= Cvar_Register ("gl_driver",			GL_DRIVERNAME,	CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	gl_dynamic			= Cvar_Register ("gl_dynamic",			"1",			0);
 	gl_errorcheck		= Cvar_Register ("gl_errorcheck",		"1",			CVAR_ARCHIVE);
 
@@ -1217,7 +1217,7 @@ static void R_Register (void)
 	r_noVis				= Cvar_Register ("r_noVis",				"0",			0);
 	r_offsetFactor		= Cvar_Register ("r_offsetFactor",		"-1",			CVAR_CHEAT);
 	r_offsetUnits		= Cvar_Register ("r_offsetUnits",		"-2",			CVAR_CHEAT);
-	r_patchDivLevel		= Cvar_Register ("r_patchDivLevel",		"4",			CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
+	r_patchDivLevel		= Cvar_Register ("r_patchDivLevel",		"3",			CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	r_roundImagesDown	= Cvar_Register ("r_roundImagesDown",	"0",			CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	r_skipBackend		= Cvar_Register ("r_skipBackend",		"0",			CVAR_CHEAT);
 	r_speeds			= Cvar_Register ("r_speeds",			"0",			0);
@@ -1243,9 +1243,8 @@ static void R_Register (void)
 	vid_width			= Cvar_Register ("vid_width",			"0",						CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 	vid_height			= Cvar_Register ("vid_height",			"0",						CVAR_ARCHIVE|CVAR_LATCH_VIDEO);
 
-	intensity			= Cvar_Register ("intensity",			"2",						CVAR_ARCHIVE);
+	intensity			= Cvar_Register ("intensity",			"1",						CVAR_ARCHIVE);
 
-	gl_jpgquality		= Cvar_Register ("gl_jpgquality",		"85",						CVAR_ARCHIVE);
 	gl_nobind			= Cvar_Register ("gl_nobind",			"0",						CVAR_CHEAT);
 	gl_picmip			= Cvar_Register ("gl_picmip",			"0",						CVAR_LATCH_VIDEO);
 	gl_screenshot		= Cvar_Register ("gl_screenshot",		"tga",						CVAR_ARCHIVE);
@@ -1337,11 +1336,11 @@ rInit_t R_Init (void)
 	ri.lightSysPool = Mem_CreatePool ("Refresh: Light system");
 	ri.modelSysPool = Mem_CreatePool ("Refresh: Model system");
 	ri.programSysPool = Mem_CreatePool ("Refresh: Program system");
-	ri.shaderSysPool = Mem_CreatePool ("Refresh: Shader system");
+	ri.matSysPool = Mem_CreatePool ("Refresh: Material system");
 
 	// Initialize our QGL dynamic bindings
-	if (!QGL_Init (gl_driver->string)) {
-		Com_Printf (PRNT_ERROR, "...could not load \"%s\"\n", gl_driver->string);
+	if (!QGL_Init (GL_DRIVERNAME)) {
+		Com_Printf (PRNT_ERROR, "...could not load \"%s\"\n", GL_DRIVERNAME);
 		QGL_Shutdown ();
 		return R_INIT_QGL_FAIL;
 	}
@@ -1479,7 +1478,7 @@ rInit_t R_Init (void)
 	// Sub-system init
 	R_ImageInit ();
 	R_ProgramInit ();
-	R_ShaderInit ();
+	R_MaterialInit ();
 	R_FontInit ();
 	R_MediaInit ();
 	R_ModelInit ();
@@ -1519,7 +1518,7 @@ void R_Shutdown (qBool full)
 
 	// Shutdown subsystems
 	R_FontShutdown ();
-	R_ShaderShutdown ();
+	R_MaterialShutdown ();
 	R_ProgramShutdown ();
 	R_ImageShutdown ();
 	R_ModelShutdown ();

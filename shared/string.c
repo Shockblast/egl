@@ -87,9 +87,9 @@ qBool Q_IsColorString (const char *p)
 Q_ColorCharCount
 ===============
 */
-int Q_ColorCharCount (const char *s, int endPos)
+size_t Q_ColorCharCount (const char *s, size_t endPos)
 {
-	int			count;
+	size_t		count;
 	const char	*end;
 
 	end = s + endPos;
@@ -120,7 +120,7 @@ int Q_ColorCharCount (const char *s, int endPos)
 Q_ColorCharOffset
 ===============
 */
-int Q_ColorCharOffset (const char *s, int charCount)
+size_t Q_ColorCharOffset (const char *s, size_t charCount)
 {
 	const char	*start = s;
 	qBool		skipNext = qFalse;
@@ -144,7 +144,7 @@ int Q_ColorCharOffset (const char *s, int charCount)
 Q_ColorStrLastColor
 ===============
 */
-int Q_ColorStrLastColor (char *s, int byteOfs)
+int Q_ColorStrLastColor (char *s, size_t byteOfs)
 {
 	char	*end;
 	int		lastClrIndex = Q_StrColorIndex (COLOR_WHITE);
@@ -178,7 +178,7 @@ int Q_ColorStrLastColor (char *s, int byteOfs)
 Q_ColorStrLastStyle
 ===============
 */
-int Q_ColorStrLastStyle (char *s, int byteOfs)
+int Q_ColorStrLastStyle (char *s, size_t byteOfs)
 {
 	char	*end;
 	int		lastStyle;
@@ -232,6 +232,8 @@ void Q_snprintfz (char *dest, size_t size, const char *fmt, ...)
 		va_end (argptr);
 
 		dest[size-1] = '\0';
+	} else {
+		dest[0] = '\0';
 	}
 }
 
@@ -241,9 +243,9 @@ void Q_snprintfz (char *dest, size_t size, const char *fmt, ...)
 Q_strcatz
 ===============
 */
-void Q_strcatz (char *dst, const char *src, int dstSize)
+void Q_strcatz (char *dst, const char *src, size_t dstSize)
 {
-	int		len;
+	size_t		len;
 
 	len = strlen (dst);
 	if (len >= dstSize) {
@@ -284,38 +286,12 @@ char *Q_strlwr (char *s)
 
 	if (s) {
 		for (p=s ; *s ; s++)
-			*s = Q_tolower (*s);
+			*s = tolower (*s);
 		return p;
 	}
 
 	return NULL;
 }
-
-
-/*
-===============
-Q_tolower
-
-by R1CH
-===============
-*/
-#ifdef id386
-__declspec(naked) int __cdecl Q_tolower (int c)
-{
-	__asm {
-			mov eax, [esp+4]		;get character
-			cmp	eax, 5Ah
-			ja  short finish1
-
-			cmp	eax, 41h
-			jb  short finish1
-
-			or  eax, 00100000b		;to lower (-32)
-		finish1:
-			ret	
-	}
-}
-#endif // id386
 
 // =========================================================================
 

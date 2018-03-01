@@ -101,9 +101,9 @@ void Inv_DrawInventory (void)
 	y = (cg.refConfig.vidHeight - (240 * cg.hudScale[1])) * 0.5f;
 
 	// Draw backsplash image
-	cgi.R_GetImageSize (cgMedia.hudInventoryShader, &w, &h);
+	cgi.R_GetImageSize (cgMedia.hudInventoryMat, &w, &h);
 	cgi.R_DrawPic (
-		cgMedia.hudInventoryShader, 0, x, y + charSize[1],
+		cgMedia.hudInventoryMat, 0, x, y + charSize[1],
 		w * cg.hudScale[0],
 		h * cg.hudScale[1],
 		0, 0, 1, 1, color);
@@ -131,7 +131,7 @@ void Inv_DrawInventory (void)
 
 		Q_snprintfz (string, sizeof (string), "%6s %3i %s", bind, cg.inventory[item], cg.configStrings[CS_ITEMS+item]);
 		if (item == selected) {
-			CG_DrawFill (x, y, 26*charSize[0], charSize[1], selBarColor);
+			cgi.R_DrawFill (x, y, 26*charSize[0], charSize[1], selBarColor);
 
 			// Draw blinky cursors by the selected item
 			if ((cg.frame.serverFrame>>2) & 1) {

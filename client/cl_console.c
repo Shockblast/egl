@@ -119,12 +119,12 @@ If the line width has changed, reformat the buffer.
 */
 static void CL_ResizeConsole (console_t *console)
 {
-	int		width, oldWidth;
-	int		numLines, numChars;
-	int		oldTotalLines;
-	int		i, j;
-	char	tempbuf[CON_TEXTSIZE];
-	vec2_t	charSize;
+	int			width, oldWidth;
+	int			numLines, numChars;
+	int			oldTotalLines;
+	int			i, j;
+	static char	tempbuf[CON_TEXTSIZE];
+	vec2_t		charSize;
 
 	if (cls.refConfig.vidWidth < 1) {
 		// Video hasn't been initialized yet
@@ -584,8 +584,8 @@ static void CL_DrawInput (void)
 	char			*text;
 	int				lastColor, lastStyle;
 	int				colorCursorPos;
-	int				byteOfs;
-	int				byteLen;
+	size_t			byteOfs;
+	size_t			byteLen;
 	vec2_t			charSize;
 
 	if (Key_GetDest () == KD_MENU)
@@ -600,7 +600,7 @@ static void CL_DrawInput (void)
 	text = key_consoleBuffer[key_consoleEditLine];
 
 	// Convert byte offset to visible character count
-	colorCursorPos = Q_ColorCharCount (text, key_consoleCursorPos);
+	colorCursorPos = (int) Q_ColorCharCount (text, key_consoleCursorPos);
 
 	// Prestep if horizontally scrolling
 	if (colorCursorPos >= cl_console.lineWidth + 1) {
@@ -702,10 +702,10 @@ static void CL_DrawNotify (void)
 	// Print messagemode input
 	//
 	if (Key_GetDest () == KD_MESSAGE) {
-		int				skip;
+		size_t			skip;
 		int				lastColor, lastStyle;
 		int				colorCursorPos;
-		int				byteOfs;
+		size_t			byteOfs;
 
 		if (key_chatTeam)
 			skip = R_DrawString (NULL, 4, v, newScale, newScale, 0, "say_team:", Q_colorWhite) + 1;
@@ -715,7 +715,7 @@ static void CL_DrawNotify (void)
 		str = key_chatBuffer[key_chatEditLine];
 
 		// Convert byte offset to visible character count
-		colorCursorPos = Q_ColorCharCount (str, key_chatCursorPos) + skip + 1;
+		colorCursorPos = (int) (Q_ColorCharCount (str, key_chatCursorPos) + skip + 1);
 
 		// Prestep if horizontally scrolling
 		if (colorCursorPos >= (int)(cls.refConfig.vidWidth/charSize[0])) {
@@ -735,9 +735,9 @@ static void CL_DrawNotify (void)
 
 		// Add cursor
 		if ((Sys_UMilliseconds()>>8)&1) {
-			int charCount = Q_ColorCharCount (key_chatBuffer[key_chatEditLine], key_chatCursorPos) + skip;
-			if (charCount > (int)(cls.refConfig.vidWidth/charSize[0]) - 1)
-				charCount = (int)(cls.refConfig.vidWidth/charSize[0]) - 1;
+			size_t charCount = Q_ColorCharCount (key_chatBuffer[key_chatEditLine], key_chatCursorPos) + skip;
+			if (charCount > (size_t)(cls.refConfig.vidWidth/charSize[0]) - 1)
+				charCount = (size_t)(cls.refConfig.vidWidth/charSize[0]) - 1;
 
 			R_DrawChar (NULL, ((charCount - (key_insertOn ? 0.3 : 0)) * charSize[0]), v, newScale, newScale, 0,
 						key_insertOn ? '|' : 11, Q_colorWhite);
@@ -857,7 +857,7 @@ void CL_DrawConsole (void)
 	conColor[1] = Q_colorWhite[1];
 	conColor[2] = Q_colorWhite[2];
 	conColor[3] = con_alpha->floatVal;
-	R_DrawPic (clMedia.consoleShader, 0, 0, -(cls.refConfig.vidHeight - cls.refConfig.vidHeight*frac), cls.refConfig.vidWidth, cls.refConfig.vidHeight, 0, 0, 1, 1, conColor);
+	R_DrawPic (clMedia.consoleMaterial, 0, 0, -(cls.refConfig.vidHeight - cls.refConfig.vidHeight*frac), cls.refConfig.vidWidth, cls.refConfig.vidHeight, 0, 0, 1, 1, conColor);
 
 	// Version
 	Q_snprintfz (version, sizeof (version), "EGL v%s", EGL_VERSTR);

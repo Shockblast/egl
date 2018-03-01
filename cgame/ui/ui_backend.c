@@ -285,7 +285,7 @@ void UI_FinishFramework (uiFrameWork_t *fw, qBool lock)
 		case UITYPE_IMAGE:
 			image = fw->items[i];
 
-			cgi.R_GetImageSize (image->shader, &image->width, &image->height);
+			cgi.R_GetImageSize (image->mat, &image->width, &image->height);
 			break;
 		}
 	}

@@ -90,7 +90,7 @@ static winConsole_t winConsole;
 ConWndProc
 ==================
 */
-static LONG WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static LRESULT WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static qBool	s_timePolarity;
 
@@ -120,7 +120,7 @@ static LONG WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if ((HWND)lParam == winConsole.hwndBuffer) {
 			SetBkColor ((HDC)wParam, BUFF_BGCOLOR);
 			SetTextColor ((HDC)wParam, BUFF_TXTCOLOR);
-			return (long)winConsole.hbrEditBackground;
+			return (LRESULT) winConsole.hbrEditBackground;
 		}
 		else if ((HWND)lParam == winConsole.hwndErrorBox) {
 			if (s_timePolarity & 1) {
@@ -131,7 +131,7 @@ static LONG WINAPI ConWndProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				SetBkColor ((HDC)wParam, ERR_BGCOLOR);
 				SetTextColor ((HDC)wParam, ERR_TXTCOLOR2);
 			}
-			return (long)winConsole.hbrErrorBackground;
+			return (LRESULT) winConsole.hbrErrorBackground;
 		}
 		break;
 
@@ -343,7 +343,7 @@ void Sys_CreateConsole (void)
 												sys_winInfo.hInstance, NULL);
 	SendMessage (winConsole.hwndBuffer, WM_SETFONT, (WPARAM) winConsole.hfBufferFont, 0);
 
-	winConsole.SysInputLineWndProc = (WNDPROC)SetWindowLong (winConsole.hwndInputLine, GWL_WNDPROC, (long)InputLineWndProc);
+	winConsole.SysInputLineWndProc = (WNDPROC)SetWindowLongPtr (winConsole.hwndInputLine, GWLP_WNDPROC, (LONG_PTR)InputLineWndProc);
 	SendMessage (winConsole.hwndInputLine, WM_SETFONT, (WPARAM)winConsole.hfBufferFont, 0);
 
 	ShowWindow (winConsole.hWnd, SW_SHOWDEFAULT);
@@ -435,7 +435,7 @@ void Conbuf_AppendText (const char *pMsg)
 {
 #define CONSOLE_BUFFER_SIZE		16384
 
-	char buffer[CONSOLE_BUFFER_SIZE*2];
+	static char buffer[CONSOLE_BUFFER_SIZE*2];
 	char *b = buffer;
 	const char *msg;
 	int bufLen;

@@ -25,21 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /*
 ================
-CG_DrawFill
-================
-*/
-void CG_DrawFill (float x, float y, int w, int h, vec4_t color)
-{
-	cgi.R_DrawPic (cgMedia.whiteTexture, 0, x, y, w, h, 0, 0, 1, 1, color);
-}
-
-
-/*
-================
 CG_DrawModel
 ================
 */
-void CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct shader_s *skin, vec3_t origin, vec3_t angles)
+void CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct material_s *material, vec3_t origin, vec3_t angles)
 {
 	refDef_t	refDef;
 	refEntity_t	entity;
@@ -65,7 +54,7 @@ void CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct 
 	memset (&entity, 0, sizeof (entity));
 
 	entity.model = model;
-	entity.skin = skin;
+	entity.material = material;
 	entity.scale = 1.0f;
 	entity.flags = RF_FULLBRIGHT | RF_NOSHADOW | RF_FORCENOLOD;
 	Vec3Copy (origin, entity.origin);

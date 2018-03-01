@@ -40,8 +40,8 @@ cVar_t	*cd_nocd;
 cVar_t	*cd_loopcount;
 cVar_t	*cd_looptrack;
 
-UINT	wDeviceID;
-int		cd_LoopCounter;
+MCIDEVICEID	wDeviceID;
+int			cd_LoopCounter;
 
 static void	*cmd_cd;
 
@@ -395,7 +395,7 @@ CDAudio_MessageHandler
 */
 LRESULT CALLBACK CDAudio_MessageHandler (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (lParam != wDeviceID)
+	if (lParam != (LPARAM) wDeviceID)
 		return 1;
 
 	switch (wParam) {

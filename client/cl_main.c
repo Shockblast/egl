@@ -595,6 +595,7 @@ static void CL_ConnectionlessPacket (void)
 		Q_strncpyz (cls.serverMessage, printStr, sizeof (cls.serverMessage));
 	}
 	else {
+		printStr = NULL;
 		isPrint = qFalse;
 	}
 
@@ -637,7 +638,7 @@ CL_ImageMediaInit
 void CL_ImageMediaInit (void)
 {
 	clMedia.cinMaterial			= R_RegisterPic ("***r_cinTexture***");
-	clMedia.consoleShader		= R_RegisterPic ("pics/conback.tga");
+	clMedia.consoleMaterial		= R_RegisterPic ("pics/conback.tga");
 	clMedia.whiteTexture		= R_RegisterPic ("***r_whiteTexture***");
 	clMedia.blackTexture		= R_RegisterPic ("***r_blackTexture***");
 }
@@ -908,7 +909,7 @@ CL_Frame
 ==================
 */
 #define FRAMETIME_MAX 0.5f
-void __fastcall CL_Frame (int msec)
+void CL_Frame (int msec)
 {
 	static int	packetDelta = 0;
 	static int	refreshDelta = 0;
@@ -1565,7 +1566,7 @@ Stop recording a demo
 */
 static void CL_Stop_f (void)
 {
-	int		len;
+	size_t		len;
 
 	if (!cls.demoRecording) {
 		Com_Printf (0, "Not recording a demo.\n");

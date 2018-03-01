@@ -90,10 +90,10 @@ enum {
 	GUITAG_VARS,			// for GUI vars
 };
 
-#define GUI_AllocTag(size,zeroFill,tagNum)	_Mem_Alloc((size),(zeroFill),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
-#define GUI_FreeTag(tagNum)					_Mem_FreeTag(cl_guiSysPool,(tagNum),__FILE__,__LINE__)
-#define GUI_StrDup(in,tagNum)				_Mem_PoolStrDup((in),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
-#define GUI_MemFree(ptr)					_Mem_Free((ptr),__FILE__,__LINE__)
+#define GUI_AllocTag(size,tagNum)		_Mem_Alloc((size),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
+#define GUI_FreeTag(tagNum)				_Mem_FreeTag(cl_guiSysPool,(tagNum),__FILE__,__LINE__)
+#define GUI_StrDup(in,tagNum)			_Mem_PoolStrDup((in),cl_guiSysPool,(tagNum),__FILE__,__LINE__)
+#define GUI_MemFree(ptr)				_Mem_Free((ptr),__FILE__,__LINE__)
 
 /*
 =============================================================================
@@ -135,7 +135,7 @@ typedef struct guiCursorData_s {
 	qBool				visible;
 
 	char				matName[MAX_QPATH];
-	struct shader_s		*matPtr;
+	struct material_s	*matPtr;
 	vec4_t				color;
 
 	qBool				locked;
@@ -353,7 +353,7 @@ typedef struct event_s {
 	char				*named;
 
 	// WEV_TIME
-	uint32				onTime;
+	size_t				onTime;
 } event_t;
 
 /*
@@ -467,10 +467,10 @@ typedef struct checkDef_s {
 	qBool				liveUpdate;
 
 	char				offMatName[MAX_QPATH];
-	struct shader_s		*offMatPtr;
+	struct material_s	*offMatPtr;
 
 	char				onMatName[MAX_QPATH];
-	struct shader_s		*onMatPtr;
+	struct material_s	*onMatPtr;
 
 	char				*values[2];
 
@@ -557,7 +557,7 @@ typedef struct gui_s {
 	guiData_t			s;
 
 	char				matName[MAX_QPATH];
-	struct shader_s		*matShader;
+	struct material_s	*matPtr;
 
 	// Events
 	byte				numEvents;

@@ -44,12 +44,12 @@ static bvec4_t		rb_2DColors[4];
 R_DrawPic
 =============
 */
-void R_DrawPic (shader_t *shader, float shaderTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color)
+void R_DrawPic (material_t *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color)
 {
 	meshFeatures_t	features;
 	int				bColor;
 
-	if (!shader)
+	if (!mat)
 		return;
 
 	// FIXME: Normalize and FloatToByte?
@@ -82,74 +82,27 @@ void R_DrawPic (shader_t *shader, float shaderTime, float x, float y, int w, int
 	rb_2DTexCoords[3][1] = t2;
 	*(int *)rb_2DColors[3] = bColor;
 
-	rb_2DMBuffer.shader = shader;
-	rb_2DMBuffer.shaderTime = shaderTime;
+	rb_2DMBuffer.mat = mat;
+	rb_2DMBuffer.matTime = matTime;
 
-	features = MF_TRIFAN|shader->features;
+	features = MF_TRIFAN|mat->features;
 	if (gl_shownormals->intVal)
 		features |= MF_NORMALS;
-//	if (!(shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
+//	if (!(mat->flags & MAT_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
 		features |= MF_NONBATCHED;
 
 	RB_PushMesh (&rb_2DMesh, features);
 	RB_RenderMeshBuffer (&rb_2DMBuffer, qFalse);
 }
 
-
 /*
 =============
-R_DrawRectangle
+R_DrawFill
 =============
 */
-void R_DrawRectangle (shader_t *shader, float shaderTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color)
+void R_DrawFill(float x, float y, int w, int h, vec4_t color)
 {
-	meshFeatures_t	features;
-	int				bColor;
-
-	if (!shader)
-		return;
-
-	// FIXME: Normalize and FloatToByte?
-	rb_2DColors[0][0] = (color[0] * 255);
-	rb_2DColors[0][1] = (color[1] * 255);
-	rb_2DColors[0][2] = (color[2] * 255);
-	rb_2DColors[0][3] = (color[3] * 255);
-	bColor = *(int *)rb_2DColors[0];
-
-	rb_2DVertices[0][0] = tl[0];
-	rb_2DVertices[0][1] = tl[1];
-	rb_2DTexCoords[0][0] = s1;
-	rb_2DTexCoords[0][1] = t1;
-
-	rb_2DVertices[1][0] = tr[0];
-	rb_2DVertices[1][1] = tr[1];
-	rb_2DTexCoords[1][0] = s2;
-	rb_2DTexCoords[1][1] = t1;
-	*(int *)rb_2DColors[1] = bColor;
-
-	rb_2DVertices[2][0] = br[0];
-	rb_2DVertices[2][1] = br[1];
-	rb_2DTexCoords[2][0] = s2;
-	rb_2DTexCoords[2][1] = t2;
-	*(int *)rb_2DColors[2] = bColor;
-
-	rb_2DVertices[3][0] = bl[0];
-	rb_2DVertices[3][1] = bl[1];
-	rb_2DTexCoords[3][0] = s1;
-	rb_2DTexCoords[3][1] = t2;
-	*(int *)rb_2DColors[3] = bColor;
-
-	rb_2DMBuffer.shader = shader;
-	rb_2DMBuffer.shaderTime = shaderTime;
-
-	features = MF_TRIFAN|shader->features;
-	if (gl_shownormals->intVal)
-		features |= MF_NORMALS;
-//	if (!(shader->flags & SHADER_ENTITY_MERGABLE) || r_debugBatching->intVal == 2)
-		features |= MF_NONBATCHED;
-
-	RB_PushMesh (&rb_2DMesh, features);
-	RB_RenderMeshBuffer (&rb_2DMBuffer, qFalse);
+	R_DrawPic(r_whiteMaterial, 0, x, y, w, h, 0, 0, 1, 1, color);
 }
 
 /*

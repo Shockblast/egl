@@ -143,7 +143,7 @@ static void HUDMenu_Init (void)
 	m_hudMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_hudMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_hudMenu.banner.generic.name		= NULL;
-	m_hudMenu.banner.shader				= uiMedia.banners.options;
+	m_hudMenu.banner.mat				= uiMedia.banners.options;
 
 	m_hudMenu.header.generic.type			= UITYPE_ACTION;
 	m_hudMenu.header.generic.flags			= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

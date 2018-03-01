@@ -65,7 +65,7 @@ static void pClipVelocity (vec3_t in, vec3_t normal, vec3_t out)
 	float	backoff;
 	int		i;
 	
-	backoff = Vec3LengthFast (in) * 0.25f + DotProduct (in, normal) * 3.0f;
+	backoff = Vec3Length (in) * 0.25f + DotProduct (in, normal) * 3.0f;
 
 	for (i=0 ; i<3 ; i++) {
 		out[i] = in[i] - (normal[i] * backoff);
@@ -204,7 +204,7 @@ void pBounceThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t colo
 		Vec3Copy (p->org, org);
 		Vec3Copy (p->org, p->oldOrigin);
 
-		if (tr.plane.normal[2] > 0.6f && Vec3LengthFast(p->vel) < 2) {
+		if (tr.plane.normal[2] > 0.6f && Vec3Length(p->vel) < 2) {
 			if (p->flags & PF_GRAVITY)
 				p->flags &= ~PF_GRAVITY;
 			Vec3Clear (p->vel);
@@ -250,19 +250,19 @@ void pExploAnimThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t c
 	cgi.R_AddLight (org, 375 * ((color[3] / p->color[3]) + (frand () * 0.05f)), 1, 0.8f, 0.6f);
 
 	if (color[3] > (p->color[3] * 0.95))
-		p->shader = cgMedia.particleTable[PT_EXPLO1];
+		p->mat = cgMedia.particleTable[PT_EXPLO1];
 	else if (color[3] > (p->color[3] * 0.9))
-		p->shader = cgMedia.particleTable[PT_EXPLO2];
+		p->mat = cgMedia.particleTable[PT_EXPLO2];
 	else if (color[3] > (p->color[3] * 0.8))
-		p->shader = cgMedia.particleTable[PT_EXPLO3];
+		p->mat = cgMedia.particleTable[PT_EXPLO3];
 	else if (color[3] > (p->color[3] * 0.65))
-		p->shader = cgMedia.particleTable[PT_EXPLO4];
+		p->mat = cgMedia.particleTable[PT_EXPLO4];
 	else if (color[3] > (p->color[3] * 0.3))
-		p->shader = cgMedia.particleTable[PT_EXPLO5];
+		p->mat = cgMedia.particleTable[PT_EXPLO5];
 	else if (color[3] > (p->color[3] * 0.15))
-		p->shader = cgMedia.particleTable[PT_EXPLO6];
+		p->mat = cgMedia.particleTable[PT_EXPLO6];
 	else
-		p->shader = cgMedia.particleTable[PT_EXPLO7];
+		p->mat = cgMedia.particleTable[PT_EXPLO7];
 
 	p->thinkNext = qTrue;
 }
@@ -326,13 +326,55 @@ void pFlareThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color
 {
 	float	dist;
 
-	dist = Vec3DistFast (cg.refDef.viewOrigin, org);
+	dist = Vec3Dist (cg.refDef.viewOrigin, org);
 	*orient = dist * 0.4f;
 
 	if (p->flags & PF_SCALED)
 		*size = clamp (*size * (dist / 1000.0f), *size, *size*10);
 }
 
+
+/*
+===============
+pLight70Think
+===============
+*/
+void pLight70Think(struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time)
+{
+	if (cg_particleShading->intVal) {
+		// Update lighting
+		if (cg.refreshTime >= p->nextLightingTime) {
+			cgi.R_LightPoint(p->org, p->lighting);
+
+			switch(cg_particleShading->intVal) {
+			case 1: p->nextLightingTime = cg.refreshTime + 33.0f; // 30 FPS
+			case 2: p->nextLightingTime = cg.refreshTime + 16.5f; // 60 FPS
+			// Otherwise always update
+			}
+		}
+
+		// Apply lighting
+		float lightest = 0;
+		for (int j=0 ; j<3 ; j++) {
+			color[j] = ((0.7f*p->lighting[j]) + 0.3f) * p->color[j];
+			if (color[j] > lightest)
+				lightest = color[j];
+		}
+
+		// Normalize
+		if (lightest > 255.0)
+		{
+			color[0] *= 255.0f / lightest;
+			color[1] *= 255.0f / lightest;
+			color[2] *= 255.0f / lightest;
+		}
+
+		// FIXME: Always think so that the cached lighting values are applied
+		p->thinkNext = cg.refreshTime;// + THINK_DELAY_EXPENSIVE;
+	}
+
+	p->thinkNext = qTrue;
+}
 
 /*
 ===============

@@ -44,7 +44,7 @@ typedef struct mAliasFrame_s {
 
 typedef struct mAliasSkin_s {
 	char			name[MAX_QPATH];
-	shader_t		*skin;
+	material_t		*material;
 } mAliasSkin_t;
 
 typedef struct mAliasTag_s {
@@ -109,7 +109,7 @@ typedef struct mSpriteFrame_s {
 
 	// texturing
 	char			name[MAX_QPATH];	// name of pcx file
-	shader_t		*skin;
+	material_t		*material;
 } mSpriteFrame_t;
 
 typedef struct mSpriteModel_s {
@@ -148,12 +148,12 @@ typedef struct mQ3BspShaderRef_s
 	char					name[MAX_QPATH];
 	int						flags;
 	int						contents;
-	shader_t				*shader;
+	material_t				*mat;
 } mQ3BspShaderRef_t;
 
 typedef struct mQ3BspFog_s {
 	char					name[MAX_QPATH];
-	shader_t				*shader;
+	material_t				*mat;
 
 	cBspPlane_t				*visiblePlane;
 
@@ -197,7 +197,7 @@ typedef struct mQ2BspEdge_s {
 
 typedef struct mQ2BspTexInfo_s {
 	char					texName[MAX_QPATH];
-	shader_t				*shader;
+	material_t				*mat;
 
 	int						width;
 	int						height;
@@ -247,6 +247,7 @@ typedef struct mBspSurface_s {
 	int						q2_numStyles;
 	byte					q2_styles[Q2BSP_MAX_LIGHTMAPS];
 	float					q2_cachedLight[Q2BSP_MAX_LIGHTMAPS];	// values currently used in lightmap
+	float					*q2_blockLights;
 
 	// Quake3 BSP specific
 	uint32					q3_nodeFrame;		// used so we don't have to recurse EVERY frame
@@ -434,7 +435,7 @@ typedef struct refModel_s {
 	qBool					isBspModel;
 
 	uint32					memTag;		// memory tag
-	uint32					memSize;	// size in memory
+	size_t					memSize;	// size in memory
 
 	uint32					hashValue;
 	struct refModel_s		*hashNext;

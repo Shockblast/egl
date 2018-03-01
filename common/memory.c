@@ -62,8 +62,8 @@ typedef struct memPool_s {
 
 	memBlock_t			*blocks;					// Allocated blocks
 
-	uint32				blockCount;					// Total allocated blocks
-	uint32				byteCount;					// Total allocated bytes
+	size_t				blockCount;					// Total allocated blocks
+	size_t				byteCount;					// Total allocated bytes
 
 	const char			*createFile;				// File this pool was created on
 	int					createLine;					// Line this pool was created on
@@ -155,9 +155,9 @@ memPool_t *_Mem_CreatePool (const char *name, const char *fileName, const int fi
 _Mem_DeletePool
 ========================
 */
-uint32 _Mem_DeletePool (struct memPool_s *pool, const char *fileName, const int fileLine)
+size_t _Mem_DeletePool (struct memPool_s *pool, const char *fileName, const int fileLine)
 {
-	uint32	size;
+	size_t	size;
 
 	if (!pool)
 		return 0;
@@ -186,12 +186,12 @@ uint32 _Mem_DeletePool (struct memPool_s *pool, const char *fileName, const int 
 _Mem_Free
 ========================
 */
-uint32 _Mem_Free (const void *ptr, const char *fileName, const int fileLine)
+size_t _Mem_Free (const void *ptr, const char *fileName, const int fileLine)
 {
 	memBlock_t	*mem;
 	memBlock_t	*search;
 	memBlock_t	**prev;
-	uint32		size;
+	size_t		size;
 
 	assert (ptr);
 	if (!ptr)
@@ -260,10 +260,10 @@ _Mem_FreeTag
 Free memory blocks assigned to a specified tag within a pool
 ========================
 */
-uint32 _Mem_FreeTag (struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine)
+size_t _Mem_FreeTag (struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine)
 {
 	memBlock_t	*mem, *next;
-	uint32		size;
+	size_t		size;
 
 	if (!pool)
 		return 0;
@@ -286,10 +286,10 @@ _Mem_FreePool
 Free all items within a pool
 ========================
 */
-uint32 _Mem_FreePool (struct memPool_s *pool, const char *fileName, const int fileLine)
+size_t _Mem_FreePool (struct memPool_s *pool, const char *fileName, const int fileLine)
 {
 	memBlock_t	*mem, *next;
-	uint32		size;
+	size_t		size;
 
 	if (!pool)
 		return 0;
@@ -313,7 +313,7 @@ _Mem_Alloc
 Optionally returns 0 filled memory allocated in a pool with a tag
 ========================
 */
-void *_Mem_Alloc (size_t size, qBool zeroFill, struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine)
+void *_Mem_Alloc (size_t size, struct memPool_s *pool, const int tagNum, const char *fileName, const int fileLine)
 {
 	memBlock_t	*mem;
 
@@ -331,22 +331,10 @@ void *_Mem_Alloc (size_t size, qBool zeroFill, struct memPool_s *pool, const int
 
 	// Add header and round to cacheline
 	size = (size + sizeof (memBlock_t) + sizeof (memBlockFoot_t) + 31) & ~31;
-#ifdef MEM_USE_CALLOC
-	if (zeroFill)
-		mem = calloc (1, size);
-	else
-		mem = malloc (size);
-#else
-	mem = malloc (size);
-#endif
+	mem = calloc (1, size);
+
 	if (!mem)
 		Com_Error (ERR_FATAL, "Mem_Alloc: failed on allocation of %i bytes\n" "alloc: %s:#%i", size, fileName, fileLine);
-
-#ifndef MEM_USE_CALLOC
-	// Zero fill
-	if (zeroFill)
-		memset (mem, 0, size);
-#endif
 
 	// For integrity checking and stats
 	pool->blockCount++;
@@ -393,7 +381,7 @@ char *_Mem_PoolStrDup (const char *in, struct memPool_s *pool, const int tagNum,
 {
 	char	*out;
 
-	out = _Mem_Alloc ((size_t)(strlen (in) + 1), qTrue, pool, tagNum, fileName, fileLine);
+	out = _Mem_Alloc ((size_t)(strlen (in) + 1), pool, tagNum, fileName, fileLine);
 	strcpy (out, in);
 
 	return out;
@@ -405,7 +393,7 @@ char *_Mem_PoolStrDup (const char *in, struct memPool_s *pool, const int tagNum,
 _Mem_PoolSize
 ================
 */
-uint32 _Mem_PoolSize (struct memPool_s *pool)
+size_t _Mem_PoolSize (struct memPool_s *pool)
 {
 	if (!pool)
 		return 0;
@@ -419,10 +407,10 @@ uint32 _Mem_PoolSize (struct memPool_s *pool)
 _Mem_TagSize
 ================
 */
-uint32 _Mem_TagSize (struct memPool_s *pool, const int tagNum)
+size_t _Mem_TagSize (struct memPool_s *pool, const int tagNum)
 {
 	memBlock_t	*mem;
-	uint32		size;
+	size_t		size;
 
 	if (!pool)
 		return 0;
@@ -442,7 +430,7 @@ uint32 _Mem_TagSize (struct memPool_s *pool, const int tagNum)
 _Mem_ChangeTag
 ========================
 */
-uint32 _Mem_ChangeTag (struct memPool_s *pool, const int tagFrom, const int tagTo)
+size_t _Mem_ChangeTag (struct memPool_s *pool, const int tagFrom, const int tagTo)
 {
 	memBlock_t	*mem;
 	uint32		numChanged;
@@ -470,8 +458,8 @@ _Mem_CheckPoolIntegrity
 void _Mem_CheckPoolIntegrity (struct memPool_s *pool, const char *fileName, const int fileLine)
 {
 	memBlock_t	*mem;
-	uint32		blocks;
-	uint32		size;
+	size_t		blocks;
+	size_t		size;
 
 	assert (pool);
 	if (!pool)
@@ -621,9 +609,9 @@ Mem_Stats_f
 */
 static void Mem_Stats_f (void)
 {
-	uint32		totalBlocks, totalBytes;
+	size_t		totalBlocks, totalBytes;
 	memPool_t	*pool;
-	uint32		poolNum, i;
+	size_t		poolNum, i;
 
 	if (Cmd_Argc () > 1) {
 		memPool_t	*best;

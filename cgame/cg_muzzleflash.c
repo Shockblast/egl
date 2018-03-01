@@ -46,7 +46,7 @@ static void CG_BrassHack (cgEntity_t *pl, leType_t type, int count)
 						(forward[2] * ((frand () * 2.5f) + 0.5f)) + (crand () * 45.0f) + 90,
 						frand () * 360,				frand () * 360,				frand () * 360,
 						crand () * 1000,			crand () * 1000,			crand () * 1000,
-						25 + (crand () * 5),
+						220 + (crand () * 50),
 						0,
 						0,
 						type);
@@ -100,7 +100,7 @@ void CG_ParseMuzzleFlash (void)
 	}
 
 	dl->minlight = 32;
-	dl->die = cg.realTime;
+	dl->die = cg.realTime + 33.3f;
 
 	// Sup hack
 	switch (flashNum) {
@@ -169,7 +169,7 @@ void CG_ParseMuzzleFlash (void)
 	case MZ_CHAINGUN2:
 		Vec3Set (dl->color, 1, 0.5, 0);
 		dl->radius = 225 + (rand()&31);
-		dl->die = cg.realTime + 0.1;	// long delay
+		dl->die = cg.realTime + 66.6f;	// long delay
 
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.machineGunSfx[(rand () % 5)], volume, ATTN_NORM, 0);
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.machineGunSfx[(rand () % 5)], volume, ATTN_NORM, 0.05f);
@@ -179,7 +179,7 @@ void CG_ParseMuzzleFlash (void)
 	case MZ_CHAINGUN3:
 		Vec3Set (dl->color, 1, 1, 0);
 		dl->radius = 250 + (rand()&31);
-		dl->die = cg.realTime  + 0.1;	// long delay
+		dl->die = cg.realTime  + 66.6f;	// long delay
 
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.machineGunSfx[(rand () % 5)], volume, ATTN_NORM, 0);
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.machineGunSfx[(rand () % 5)], volume, ATTN_NORM, 0.033f);
@@ -216,7 +216,7 @@ void CG_ParseMuzzleFlash (void)
 	// MZ_LOGIN
 	case MZ_LOGIN:
 		Vec3Set (dl->color, 0, 1, 0);
-		dl->die = cg.realTime + 1.0;
+		dl->die = cg.realTime + 128.0f;
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.grenadeFireSfx, 1, ATTN_NORM, 0);
 		CG_LogoutEffect (pl->current.origin, flashNum);
 		break;
@@ -224,7 +224,7 @@ void CG_ParseMuzzleFlash (void)
 	// MZ_LOGOUT
 	case MZ_LOGOUT:
 		Vec3Set (dl->color, 1, 0, 0);
-		dl->die = cg.realTime + 1.0;
+		dl->die = cg.realTime + 128.0f;
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.grenadeFireSfx, 1, ATTN_NORM, 0);
 		CG_LogoutEffect (pl->current.origin, flashNum);
 		break;
@@ -232,7 +232,7 @@ void CG_ParseMuzzleFlash (void)
 	// MZ_RESPAWN
 	case MZ_RESPAWN:
 		Vec3Set (dl->color, 1, 1, 0);
-		dl->die = cg.realTime + 1.0;
+		dl->die = cg.realTime + 128.0f;
 		cgi.Snd_StartSound (NULL, entNum, CHAN_WEAPON, cgMedia.sfx.mz.grenadeFireSfx, 1, ATTN_NORM, 0);
 		CG_LogoutEffect (pl->current.origin, flashNum);
 		break;

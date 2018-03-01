@@ -142,7 +142,7 @@ void CG_LoadClientinfo (clientInfo_t *ci, char *skin)
 
 		// Skin
 		Q_snprintfz (skinFilename, sizeof (skinFilename), "players/male/grunt.tga");
-		ci->skin = cgi.R_RegisterSkin (skinFilename);
+		ci->material = cgi.R_RegisterSkin (skinFilename);
 
 		// Icon
 		Q_snprintfz (ci->iconName, sizeof (ci->iconName), "players/male/grunt_i.tga");
@@ -183,10 +183,10 @@ void CG_LoadClientinfo (clientInfo_t *ci, char *skin)
 
 		// Skin file
 		Q_snprintfz (skinFilename, sizeof (skinFilename), "players/%s/%s.tga", modelName, skinName);
-		ci->skin = cgi.R_RegisterSkin (skinFilename);
+		ci->material = cgi.R_RegisterSkin (skinFilename);
 
 		// If we don't have the skin and the model wasn't male, see if the male has it (this is for CTF's skins)
-		if (!ci->skin && Q_stricmp (modelName, "male")) {
+		if (!ci->material && Q_stricmp (modelName, "male")) {
 			// Change model to male
 			Q_strncpyz (modelName, "male", sizeof (modelName));
 			Q_snprintfz (modelFilename, sizeof (modelFilename), "players/male/tris.md2");
@@ -194,14 +194,14 @@ void CG_LoadClientinfo (clientInfo_t *ci, char *skin)
 
 			// See if the skin exists for the male model
 			Q_snprintfz (skinFilename, sizeof (skinFilename), "players/%s/%s.tga", modelName, skinName);
-			ci->skin = cgi.R_RegisterSkin (skinFilename);
+			ci->material = cgi.R_RegisterSkin (skinFilename);
 		}
 
 		// If we still don't have a skin, it means that the male model didn't have it, so default to grunt
-		if (!ci->skin) {
+		if (!ci->material) {
 			// See if the skin exists for the male model
 			Q_snprintfz (skinFilename, sizeof (skinFilename), "players/%s/grunt.tga", modelName, skinName);
-			ci->skin = cgi.R_RegisterSkin (skinFilename);
+			ci->material = cgi.R_RegisterSkin (skinFilename);
 		}
 
 		// Weapon file
@@ -224,8 +224,8 @@ void CG_LoadClientinfo (clientInfo_t *ci, char *skin)
 	}
 
 	// Must have loaded all data types to be valud
-	if (!ci->skin || !ci->icon || !ci->model || !ci->weaponModels[0]) {
-		ci->skin = NULL;
+	if (!ci->material || !ci->icon || !ci->model || !ci->weaponModels[0]) {
+		ci->material = NULL;
 		ci->icon = NULL;
 		ci->model = NULL;
 		ci->weaponModels[0] = NULL;

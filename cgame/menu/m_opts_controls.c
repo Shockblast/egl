@@ -285,7 +285,7 @@ static void KeyBindingFunc (void *self)
 ControlsMenu_AddItems
 =============
 */
-static ControlsMenu_AddItems (void)
+static void ControlsMenu_AddItems (void)
 {
 	// Clear items
 	UI_StartFramework (&m_controlsMenu.frameWork, FWF_CENTERHEIGHT);
@@ -403,7 +403,7 @@ static void ControlsMenu_Init (void)
 	m_controlsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_controlsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_controlsMenu.banner.generic.name		= NULL;
-	m_controlsMenu.banner.shader			= uiMedia.banners.options;
+	m_controlsMenu.banner.mat			= uiMedia.banners.options;
 
 	//
 	// Menu selection

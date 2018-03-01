@@ -1,0 +1,492 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- Cleanup functions with ridiculous stack sizes:
+
+.\win32\win_console.c(434) :		Sys_ConsolePrint :					'32788' bytes of stack
+.\win32\win_main.c(887) :			EGLExceptionHandler :				'67860' bytes of stack
+.\renderer\rf_decal.c(183) :		R_WindingClipFragment :				'16452' bytes of stack
+.\renderer\rf_image.c(1759) :		R_FloodFillSkin :					'32816' bytes of stack
+.\renderer\rf_material.c(3328) :	R_MaterialInit :					'16468' bytes of stack
+.\renderer\rf_model.c(136) :		R_LoadMD2Model :					'147584' bytes of stack
+.\server\sv_ccmds.c(888) :			SV_ServerRecord_f :					'32932' bytes of stack
+.\server\sv_ents.c(568) :			SV_RecordDemoMessage :				'32892' bytes of stack
+.\common\files.c(270) :				FS_CopyFile :						'65556' bytes of stack
+.\common\files.c(567) :				FS_Seek :							'32876' bytes of stack
+.\common\files.c(1409) :			FS_FindFiles :						'262352' bytes of stack
+.\common\cbuf.c(73) :				Cbuf_InsertText :					'65544' bytes of stack
+.\common\cm_q3_main.c(389) :		CM_Q3BSP_CreatePatch :				'65708' bytes of stack
+.\common\cm_q3_main.c(466) :		CM_Q3BSP_CreatePatchesForLeafs :	'524316' bytes of stack
+.\client\cl_console.c(120) :		CL_ResizeConsole :					'65576' bytes of stack
+.\client\cl_download.c(171) :		CL_ParseDownload :					'65680' bytes of stack
+.\client\cl_keys.c(363) :			Key_FileSubComplete :				'262204' bytes of stack
+
+Store off cached results of MD2 remaps, since it's probably one of the slowest parts while loading a map...
+- Store an MD5 hash at the top, and some sanity check values (like vertex/index counts). If ANY of that differs, rebuild the cache.
+
+increase name len limit in gloom
+
+pre-batch world mesh data by visibility set
+
+generate particle emitter bounds to efficiently cull out entire particle systems
+- will probably require the dreaded particle system re-write:
+  * particles are managed in the RENDERER, not CGame. CGame simply loads the script through a refresh function, and tells it when to start/stop an emitter.
+    NOTE: stopping should either kill immediately, or wait for existing particles to die off first (based on function input)
+  * emitters are pre-batched before handing over to be rendered
+  * automagically generate LOD steps with particle counts reduced at set distances
+
+use an FBO or something faster for capturing the emissive scene to texture
+
+pixel shader that makes god/quad/invuln/etc shells only render the closest-to-camera fragments
+
+add support for GLSL, maybe deprecate programs?
+
+hyperblaster particles kill the framerate, lessen the amount and just stretch them horiztonally to fill the gaps, and shorten the length of the trail a bit
+
+why does choke-b render the entire map when you first load it? the instant you move to a new areaBits area, it fixes, but you can't move back and cause it to go back to rendering everything...?
+
+==================================================
+New menu layout concept
+==================================================
+Single
+|- New		[easy/medium/hard]
+|- Load
+|- Save		[hidden when not in-game]
+'- Credits
+
+Multi
+|- Join		[edit or view local/internet/favorites]
+|  |- Edit Masters
+|  '- Edit Favorites
+|- Start
+|  '- Deathmatch Flags
+'- Settings
+
+Options
+|- Audio
+|- Input
+|- Effects
+'- Video
+
+Quit
+
+
+----------------
+Current menu:
+----------------
+Game						[easy/medium/hard; load; save; credits]
+
+Multiplayer
+|- Join Server				[address book/lan servers]
+|  '- Edit Address book
+|- Start Server				[map; dm/coop; time/frag limits; max players; hostname]
+|  '- Deathmatch Flags
+|- Player Configuration		[name; handedness; net rate; player model]
+'- Download Options			[on/off; maps; players; models; sounds]
+
+Options
+|- Controls
+|  |- Attack	[attack; prevweap; nextweap; per-weapon binds]
+|  |- Movement	[run/sprint; walk; backpedal; up/jump; down/crouch; turn left/right; step left/right; look up/down; center view; mouse look; keyboard look]
+|  '- Misc		[chat; team chat; inventory; use/drop/previous/next item; help computer]
+|- Effects		[gore; smoke linger; rail style center/spiral RGB; part cull/light; explo rattle; mfx; decal toggle/lod/life/burn life/max; caustics; r_detailTextures]
+|- Gloom		[advgas; advstingfire; blue sting fire; blob trail type; flpred; flwhite; forced cache; jump pred; class display]
+|- HUD			[fps/ping/maptime display; hud scale/alpha; netgraph toggle/alpha]
+|- Input		[always run; use joystick; uispeed; sensitivity; m_accel; autosensitivity; invert mouse; lookspring/strafe; freelook]
+|- Misc			[shadows; screenshot type; jpg screenshot quality; flashblend]
+|- Screen		[con clock; notify fade/line cnt; large notify; time stamp msgs; console alpha/drop/scroll lines; font scale; crosshair #/rgba/pulse/scale]
+'- Sound		[toggle; volume; cd music; quality; compatibility]
+
+Video
+|- Video Settings	[mini-driver; resolution; bilin/trilinear; bit depth; stencil; disp hz; fullscreen; screen size; brightness; pic gamma; tex quality; gl_finish]
+'- Extensions		[toggle; multitex; multitex combine; cubemaps; edge clamp; mipmap gen; tex compress; anisotropy toggle/max]
+
+Quit
+|- Yes
+|  '- Show credits
+'- No
+
+
+
+
+
+
+artist work:
+- menu
+- fire particles (explosions!)
+- smaller embers to explosions
+- more firey explosion
+
+==================================================
+Generic
+==================================================
+Cleanups
+- pull MAX_QPATH out of places it shouldn't be in
+- Get EGL compiling on the 'Bloodshed' compiler and the FUCKING shitty MinGW compiler
+- cvar_t->string -> cvar_t->strVal
+
+Fixes
+- change skin to female and end a map in single player, and it will reset you to male!
+  * the 'skin' cvar seems to keep it's value, what the fuck?
+
+==================================================
+Engine
+==================================================
+Cleanups
+- Clean up q3bsp cmodel, some vars in there can be in common!
+- KD_MENU->KD_GUI when the new GUI system is completed?
+- Q_color blah stuff should really be part of the font system I think
+
+Features
+- cl_async, toggle asynchronous renderer/network
+- international keyboard support?
+- dinput for mouse/keyboard
+- LSHIFT RSHIFT LCTRL RCTRL LALT RALT
+- change dedicated server window title on server start; hostname (ip:port)
+- cl_autoDemo -- will record a demo automatically at map start when enabled. mapname-yyyy.mm.dd.hr.mn.dm2 (HELLllloo long name).
+
+Fixes
+- Pasting into console/messages doesn't paste where cursor is, just to end of line...
+- mouse speed increase outside of q2 when you close it/alt-tab?
+  * need dinput to resolve this I bet
+  * actually only seems to happen on a crash
+- bind a say "@L@L@L@L@L@L@L@L@L@L@L@L@L@L@L" and hold the key down, crash! somehow console->totalLines is getting reset?
+
+Optimizations
+- Make Sys_FindFiles a little lighter on its toes.
+- lessen malloc/free thrashing, especially on areas utilized during map load
+- Quake3 collision model allocates a lot of excessive space.
+
+==================================================
+Renderer
+==================================================
+Cleanups
+- cleanup the seperate texmod paths, to use a function that converts the matrix into the coords if avail
+- ditch the material depthrange function 'hack', just find a way to treat mapfx as flares?
+- sizeBase is so fucking gross, remove the usage of getimagesize :|
+- depthWrite is kinda gross
+- gl_texturemode -> r_textureMode 0 or 1 (bilinear or trilinear).
+
+Features
+- need material IF/ELSE/ENDIF
+- optional realtime depth sorting via sortkeys
+  * will need to pass origins to R_AddMeshToList
+- Finish 3D texture uploading code with missing features, add separate route for optimal cases (nomip/nogamma/nointens/perf dimensions and depth = _Fast)
+- r_showSurfaceInfo CVAR_CHEAT - trace from viewOrigin until a surface is hit and print surf info!
+- clarify gfxinfo extension info etc, ri.config.ext[x]:
+  EXT_BAD			= 3,	// Renderer determined that the extension not properly supported
+  EXT_NOTFOUND		= 2,	// Simply not found
+  EXT_DISABLED		= 1,	// Found and disabled
+  EXT_ENABLED		= 0,	// Found and enabled
+- caustic texture that animates
+- BModel decals
+- Alias model decals
+- Vertex light trans surfaces with dlights.
+- roq
+- GLSL
+- Finish MD5
+- average normals between neighboring normals in dlight shading so its not so abrupt
+- lod models
+  * RF_FORCENOLOD consideration
+- evnshot command
+- Skydomes
+- map-specific material scripts?
+- font system
+  * per-character widths? will have to compensate EVERYWHERE text is rendered -- no more fixed sizes!
+- custom material tables
+- Generate light grids for Q2BSP maps on first map load (and write to file for loading later) ? (trace in 6 dirs for color, average for each trace that hits a surf)
+
+Fixes
+- GL_CheckForError call in GLimp_EndFrame spits out 'out of memory' when you alt tab in fullscreen now?
+- Moving transparent surfaces and garena-b -- gloom dll's fault?
+- some jpeg images make everything ELSE dark when they upload, only on the bq detail texture so far though
+- sky broke after long period of time, etombed for example
+- test RF_TRANSLUCENT on bmodels and view weapon
+- Vis portals in doors don't always act right (see Q3DM12)
+- stretching window keeps aspect
+- fix going outside of the map in q3bsp making the map dissapear sometimes
+- Sky rendering in q3bsp
+- The str[0] == '}' or '{' nonsense in material parsing needs to be done away with, because str could be "}a" etc.
+- when a material error is thrown, dump the material
+  * add scratch/keep tags just like with the GUI system
+- use a temporary slot for model/program/image/etc loading so that if an ERR is thrown during load the list isn't "damaged"
+
+Optimizations
+- update q3bsp dlight marking code
+- don't recreate the window unecessarily after a vid_restart
+- rgbGen firstExactVertex firstVertex alphaGen firstVertex
+- direct data format for images/models that will basically be a straight copy to upload32/memory?
+- Clean out some of the Q3BSP checks
+- In the backend, when current mesh == last, just simply flush vertex data (and possibly bind a different lm texnum if it's different too)?
+- cull in groups
+- batch surfaces on map load? store groups of surfaces in single mesh arrays if they're in the same visibility set...
+- check all ColorNormalizef/b usages
+- unsigned char for colors to lessen memory usage
+- deprecate rf_main.c for rf_scene.c...
+
+==================================================
+Audio
+==================================================
+Features
+- ogg
+- sound shaders
+- "playlists" -- dump ogg files into a directory and it plays them!
+- add RDF_ flags for different EAX environments
+
+Fixes
+- dont completely stop sounds in DMA mode? just keep clearing buffers (so like the ending music continues after you come back, but isnt really loud etc)
+- OpenAL NaN sanitization like icculusq3 does
+- reverb, low pass filter
+  * interpolation between reverb effects
+  * scripts to specify effect 'volumes' in maps?
+
+==================================================
+CGame
+==================================================
+Cleanups
+- Move sexed sound shit out of the sound system and into CGame
+
+Effects
+- decal fade start time, stays at full alpha until xyz
+- make rail trail beam have * effect
+- alien infrared
+- underwater explosion water plume
+- sustained smoke spawning at explosion spots etc
+- smoke from explosions that plumes upward, orange at first fading to grey
+- use secondary think functions for lighting/shading/culling/etc?
+- scriptable effects?
+- HL2's bleed effect is nice...
+- server gravity needs to affect bouncing particles and generic particle gravity
+- bouncy explo/ricochet sparks, spark image style sorta like ut2k4 (glow around outsides)
+- fucking finish client-side entities
+  * explosion debris pls
+  * ejecting brass
+- better slash decals, solid black scratches that don't blend at the edges = suck
+- mfx corona that has two l-shaped parts of the flare that rotate in the opposite direction with distance
+  (just like SW BF)
+- smoke detects collision and stops/makes smoke on wall
+- BFG decal could use more noise.
+- rail and blaster needs a glow decal like bfg (glows strong at edges, needs to orient the same?)
+- Don't trace MapFX flares, use visibility test in refresh. Clip brushes OWN the trace tests...
+- Optimize MapFX culling...
+
+Features
+- Blob shadow option.
+  * make smaller for hatchies, bigger for stalkers? get model radii to generate size
+- 3d hud stuff! -- hud model rendering
+- average FPS
+- Surface material scripting system, specify texture types for special effects, for example:
+  * footstep noises
+  * decal types (ie: glass bullet/explosion decals)
+  * surface specific particle effects
+- MD3 tag controls
+- view weapon scale option? (dumb :/)
+- client-side changeclass and login menu for gloom; client-side build menu for gloom
+  * will need to detect weither a class is available to go, or structure is available to build
+  * will need to know if im a builder (gloom class pred?)
+
+Fixes
+- Railtrail hit-wall effect should NOT be showing when you shoot the sky.
+- cg.realtime -> cg.time for particles/decals? so they sync to a pause
+- remove hl2 step sounds
+- Prediction can be very sloppy with a high ping, due to framerate decoupling?
+- Deprecate strtok usages for Com_Parse' beauty.
+
+Optimizations
+- Why does "Client #%i" take the longest during map load time?
+  * It's loading models, model materials, and sounds. Choptimize!
+- clean up overly called getimagesize funcs by storing values, since they dont fucking change
+
+==================================================
+GUI system
+==================================================
+Fixes
+- Binds don't work while it's open, when they should for surface-based GUIs.
+- WEV_INIT won't be fired if the defineFloat/guivar value changes to 1.
+- WEV_ACTION needs to affect checkboxes. In fact a whole new system for item-specific events needs to be done.
+- onKeyDown/onKeyUp events, to deprecated onESC and so that certain actions can be taken for key presses.
+- cvar groups?
+- Only allow defines in base guiDef?
+- defaultFont option in base guiDef, which all textDef windows default to
+
+==================================================
+Menu
+==================================================
+Fixes
+- limit name lenghts for game/map in join menu so text doesn't overlap
+- show users on server on loading screen while connecting? (what about during vid_restart? :E)
+
+Features
+- brand EGL with tRxN logo
+- use Cvar_Reset for 'defaults' in menus
+- abilitity to put color codes into name from menu (assume ^r at the end too)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rcon causes cpu lag, is it trying to parse a server again? :|
+fragmentMap needs to be handled.
+Add "emissiveToo" option or something, duplicate a pass in the emissive chain to save copying.
+Materials need if's or fragment/vertex binding should just be ignored instead of error-prone.
+Framebuffer distortions on explosions.
+Dynamic lightmap issues.
+HTTPDL.
+Surface prebatching and better lightmap packing.
+Adaptive vsync.
+Allow shadows in emissive, once shadow maps are done. Probably expensive. Awesome.
+Shadow maps.
+Finish emission.
+
+[19:53] <emperphis> Echon r_hudscale <1 makes cl_show* disappear
+[19:53] <emperphis> :(
+
+Cvar to disable color codes client-side.
+
+DDay bugs:
+* Players don't collide with eachother in Quake3 maps.
+* Ladder bug.
+* Player models darker? Do they rely on intensity?
+* Memory errors with their game DLLs.
+* Maps with problems: bdday1, bdday2, bdday3, bdday4, bdday5, hdlberg, wake.
+* Add support for Q3BSP v47.
+* Re-write Quake2 BSP surface mesh generation so that the "invalid surface mesh" crap can't happen, and so that it's faster.
+
+Any chance u can add a setting "only lights for the flag" in ctf and have them turned off for everything else, rockets, blaster, hyper, etc?
+try city1 and city64?
+make the window inactive, let some other source fire vid_restart, and after it finishes the cursor is stuck -- likely due to in_mActive being set wrong
+store points inside nodes for mapfx culling
+determine if it truly is more efficient to use marksurfaces for q2bsp decal recursion, tally up the total number of surfaces/nodes/leafs touched
+trace for bmodels with brass, which meens re-clipping every frame
+lightmap gamma? desaturation?
+store lastScale in the refEntity_t struct? Interpolate the scale!
+* will also need to interpolate where the orientation is transformed into a matrix
+decrease blood decal resolution, really slaughters my laptop's 32MB video card
+r_whiteLighting
+net_main.c?
+HTTPDL PLS ^^??la
+#define the CG_SpawnParticle function? Save on stack slamming perhaps...
+fix muzzleflash brash ejecting on the cluster grenade in lox's explosion
+that begin/end loading plaque shit in cl_screen.c is gross...
+k so shells dont exactly line up on angled surfaces...
+sort config file by group?
+Load a demo made in a different 'game' and it wont change game until after the demo finishes? the fuck?
+
+Kots bugs:
+* bind reconnect doesnt always work? when in the middle of connecting?
+* connect to another server using the kotsmenu and it sits sometimes
+
+q2_polys will have to come back into use for subdivided surfaces that overflow the backend... yay!@#$
+* better yet, just re-work surface generation entirely. batch surfaces in identical nodes on map load,
+  only making separate surfaces if a given surface exceeds the backend maximums. Will need to break single
+  "brushes" up into multiple ones if they already have too many verts (like subdivided surfaces). Then put
+  the default subdivide size BACK to 64. Whew.
+
+Combine some of the batching loops where necessary...
+Linked list of 'cvar modified' functions in cVar_t.
+Store allocations made during a texture load in a tag then batch free the tag after it's uploaded?
+* Something will have to be done in the event an ERR_DROP is thrown (to stop memory leaks).
+R_DiffuseLightVertexes (verts, &colors); <- for smoke!
+technically impossible to ever hit the decal max due to meshList_t constraints!
+sstatuslocal doesn't seem to work...
+
+poly flags
+* spherecull, behind-camera cull, surface cull (decals)
+* nofog
+
+Memory hogs:
+* Particle/decal stack spaces
+
+test phalanx tip
+
+Change rf_model.c Q3BSP entity string parsing to use Com_Parse, it doesn't need the complexity at all.
+
+FIXME/TODO/ORLY TAKEDOWN TKO NAMSAYN
+
+centerprint console command
+
+Timer console command.
+Syntax: timer <delay in ms> <times> "console command"
+Desc: Will execute "console command" every <delay> for <times> times, duh.
+* Mem_StrDup the commands so there is no command length limit? tho limit to like 512
+
+Test currentCol with the updated parser.
+
+get qf cvs, easier for lookin at
+only lookup .wal files in rf_image.c for world textures somehow...
+light smoke like player models, so that explosions and fire will light them up nicely
+
+
+Known Q3BSP problems/not yet supported features:
+- Sky rendering not complete
+- Portals, mirrors
+- Light point (for particle shading)
+- Jump pads (oh fuck off)
+- Not as fast as Quake3 (YET)
+- Static bmodels (func_static)
+- Q3DM8 and Q3DM12: Vis portals
+- Q3DM14: guy on wall is black? material misinterpretation?
+
+New QuakeDev.com stuff
+- Descriptions for all hosted users, including pictures/screenshots
+- Need error pages
+- Email myself 404/etc errors

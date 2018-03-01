@@ -53,8 +53,8 @@ typedef struct rbData_batch_s {
 } rbData_batch_t;
 
 typedef struct rbData_s {
-	// Batch buffers are used for SHADER_ENTITY_MERGABLE shaders and for
-	// storage to pass to the backend on non-SHADER_ENTITY_MERGABLE shaders.
+	// Batch buffers are used for MAT_ENTITY_MERGABLE materials and for
+	// storage to pass to the backend on non-MAT_ENTITY_MERGABLE materials.
 	rbData_batch_t			batch;
 
 	// Input data pointers for rendering a mesh buffer
@@ -82,7 +82,7 @@ typedef struct rbData_s {
 	struct refModel_s		*curModel;
 	uint32					curPatchWidth;
 	uint32					curPatchHeight;
-	shader_t				*curShader;
+	material_t				*curMat;
 
 	struct mQ3BspFog_s		*curColorFog;
 	struct mQ3BspFog_s		*curTexFog;

@@ -449,11 +449,11 @@ static void GUI_DrawWindows (gui_t *gui)
 
 	// Fill
 	if (gui->flags & WFL_FILL_COLOR)
-		CL_DrawFill (gui->rect[0], gui->rect[1], gui->rect[2], gui->rect[3], VRVALUE (gui, VR_FILL_COLOR));
+		R_DrawFill (gui->rect[0], gui->rect[1], gui->rect[2], gui->rect[3], VRVALUE (gui, VR_FILL_COLOR));
 
 	// Material
-	if (gui->flags & WFL_MATERIAL && gui->matShader)
-		R_DrawPic (gui->matShader, 0,
+	if (gui->flags & WFL_MATERIAL && gui->matPtr)
+		R_DrawPic (gui->matPtr, 0,
 			gui->rect[0], gui->rect[1], gui->rect[2], gui->rect[3],
 			0, 0,
 			FRVALUE (gui, FR_MAT_SCALE_X),

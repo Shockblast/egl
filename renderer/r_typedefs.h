@@ -37,26 +37,26 @@ typedef uint16			meshFeatures_t;
 // Image subsystem
 //
 typedef char			texUnit_t;
-typedef uint16			texFlags_t;
+typedef uint32			texFlags_t;
 
 //
-// Shader subsystem
+// Material subsystem
 //
-typedef uint16			shBaseFlags_t;
-typedef char			shSortKey_t;
-typedef char			shCullType_t;
-typedef char			shDeformvType_t;
-typedef char			shPathType_t;
-typedef char			shRegType_t;
-typedef int				shSurfParams_t;
-typedef char			shTableFunc_t;
+typedef uint16			matBaseFlags_t;
+typedef char			matSortKey_t;
+typedef char			matCullType_t;
+typedef char			matDeformvType_t;
+typedef char			matPathType_t;
+typedef char			matRegType_t;
+typedef int				matSurfParams_t;
+typedef char			matTableFunc_t;
 
-typedef char			shPassAlphaFunc_t;
-typedef char			shPassAlphaGen_t;
-typedef uint16			shPassFlags_t;
-typedef char			shPassRGBGen_t;
-typedef char			shPassTcGen_t;
-typedef char			shPassTcMod_t;
+typedef char			matPassAlphaFunc_t;
+typedef char			matPassAlphaGen_t;
+typedef uint16			matPassFlags_t;
+typedef char			matPassRGBGen_t;
+typedef char			matPassTcGen_t;
+typedef char			matPassTcMod_t;
 
 //
 // Model subsystem

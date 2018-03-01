@@ -39,14 +39,9 @@ typedef struct cQ2BspLeaf_s {
 	uint16			numLeafBrushes;
 } cQ2BspLeaf_t;
 
-typedef struct cQ2MapSurface_s {		// used internally due to name len probs - ZOID
-	cBspSurface_t	c;
-	char			rname[32];
-} cQ2MapSurface_t;
-
 typedef struct cQ2BspBrushSide_s {
 	cBspPlane_t		*plane;
-	cQ2MapSurface_t	*surface;
+	cBspSurface_t	*surface;
 } cQ2BspBrushSide_t;
 
 typedef struct cQ2BspBrush_s {
@@ -84,7 +79,7 @@ extern cQ2BspBrush_t		*cm_q2_brushes;
 extern int					cm_q2_numAreas;
 extern cQ2BspArea_t			*cm_q2_areas;
 
-extern cQ2MapSurface_t		cm_q2_nullSurface;
+extern cBspSurface_t		cm_q2_nullSurface;
 
 extern int					cm_q2_numPlanes;
 extern cBspPlane_t			*cm_q2_planes;

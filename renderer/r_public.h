@@ -120,21 +120,21 @@ typedef struct cinematic_s {
 // rf_2d.c
 //
 
-void		R_DrawPic (struct shader_s *shader, float shaderTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
-void		R_DrawRectangle (struct shader_s *shader, float shaderTime, vec2_t tl, vec2_t tr, vec2_t br, vec2_t bl, float s1, float t1, float s2, float t2, vec4_t color);
-
+void		R_DrawPic (struct material_s *mat, float matTime, float x, float y, int w, int h, float s1, float t1, float s2, float t2, vec4_t color);
+void		R_DrawFill(float x, float y, int w, int h, vec4_t color);
 //
 // rf_cull.c
 //
 
 qBool		R_CullBox (vec3_t mins, vec3_t maxs, int clipFlags);
 qBool		R_CullSphere (const vec3_t origin, const float radius, int clipFlags);
+qBool		R_PointOccluded (const vec3_t origin);
 
 //
 // rf_decal.c
 //
 
-qBool		R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle, float size);
+qBool		R_CreateDecal (refDecal_t *d, struct material_s *material, vec4_t subUVs, vec3_t origin, vec3_t direction, float angle, float size);
 qBool		R_FreeDecal (refDecal_t *d);
 
 //
@@ -145,15 +145,15 @@ struct font_s *R_RegisterFont (char *name);
 void		R_GetFontDimensions (struct font_s *font, float xScale, float yScale, uint32 flags, vec2_t dest);
 
 void		R_DrawChar (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, int num, vec4_t color);
-int			R_DrawString (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
-int			R_DrawStringLen (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, int len, vec4_t color);
+size_t		R_DrawString (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color);
+size_t		R_DrawStringLen (struct font_s *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color);
 
 //
 // rf_image.c
 //
 
 qBool		R_UpdateTexture (char *name, byte *data, int width, int height);
-void		R_GetImageSize (struct shader_s *shader, int *width, int *height);
+void		R_GetImageSize (struct material_s *mat, int *width, int *height);
 
 //
 // rf_init.c
@@ -186,7 +186,7 @@ void		R_EndFrame (void);
 
 void		R_ClearScene (void);
 
-void		R_AddDecal (refDecal_t *decal, bvec4_t color, struct shader_s *material, float materialTime);
+void		R_AddDecal (refDecal_t *decal, bvec4_t color, float materialTime);
 void		R_AddEntity (refEntity_t *ent);
 void		R_AddPoly (refPoly_t *poly);
 void		R_AddLight (vec3_t org, float intensity, float r, float g, float b);
@@ -208,12 +208,12 @@ struct refModel_s *R_RegisterModel (char *name);
 void		R_ModelBounds (struct refModel_s *model, vec3_t mins, vec3_t maxs);
 
 //
-// rf_shader.c
+// rf_material.c
 //
 
-struct shader_s *R_RegisterPic (char *name);
-struct shader_s *R_RegisterPoly (char *name);
-struct shader_s *R_RegisterSkin (char *name);
+struct material_s *R_RegisterPic (char *name);
+struct material_s *R_RegisterPoly (char *name);
+struct material_s *R_RegisterSkin (char *name);
 
 //
 // rf_sky.c

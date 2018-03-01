@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define MAX_PLAYERSKINS		512
 
 typedef struct modelInfo_s {
-	int		numSkins;
+	size_t	numSkins;
 	char	**skinDisplayNames;
 
 	char	displayName[16];
@@ -48,7 +48,7 @@ typedef struct m_playerConfigMenu_s {
 
 	modelInfo_t			modelInfo[MAX_PLAYERMODELS];
 	char				*modelNames[MAX_PLAYERMODELS];
-	int					numPlayerModels;
+	size_t				numPlayerModels;
 
 	// Menu items
 	uiFrameWork_t		frameWork;
@@ -89,8 +89,8 @@ static void RateCallback (void *unused)
 
 static void ModelCallback (void *unused)
 {
-	if (m_playerConfigMenu.modelList.curValue >= m_playerConfigMenu.numPlayerModels)
-		m_playerConfigMenu.modelList.curValue = m_playerConfigMenu.numPlayerModels-1;
+	if (m_playerConfigMenu.modelList.curValue >= (int) m_playerConfigMenu.numPlayerModels)
+		m_playerConfigMenu.modelList.curValue = (int) m_playerConfigMenu.numPlayerModels-1;
 
 	m_playerConfigMenu.skinList.itemNames = m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].skinDisplayNames;
 	m_playerConfigMenu.skinList.curValue = 0;
@@ -110,10 +110,10 @@ static qBool PlayerConfig_ScanDirectories (void)
 	char	**modelSkins;
 	char	scratch[1024];
 	char	directory[1024];
-	int		numModels;
-	int		numSkins;
-	int		numModelSkins;
-	int		i, j, k;
+	size_t	numModels;
+	size_t	numSkins;
+	size_t	numModelSkins;
+	size_t	i, j, k;
 	char	*p;
 
 	m_playerConfigMenu.numPlayerModels = 0;
@@ -173,7 +173,7 @@ static qBool PlayerConfig_ScanDirectories (void)
 			continue;
 
 		// Copy valid skins to list
-		modelSkins = CG_AllocTag (sizeof (char *) * (numModelSkins + 1), qTrue, CGTAG_MENU);
+		modelSkins = CG_AllocTag (sizeof (char *) * (numModelSkins + 1), CGTAG_MENU);
 
 		for (j=0, numModelSkins=0 ; j<numSkins ; j++) {
 			if (strstr (skinList[j], "_i.pcx"))
@@ -261,10 +261,10 @@ static int pmicmpfnc (const void *_a, const void *_b)
 static void PlayerConfigMenu_Init (void)
 {
 	char	currentDirectory[1024];
-	int		currentDirectoryIndex;
+	size_t	currentDirectoryIndex;
 	char	currentSkin[1024];
-	int		currentSkinIndex;
-	int		i, j;
+	size_t	currentSkinIndex;
+	size_t	i, j;
 
 	static char *rateNames[] = {
 		"28.8 Modem",
@@ -329,7 +329,7 @@ static void PlayerConfigMenu_Init (void)
 	m_playerConfigMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_playerConfigMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_playerConfigMenu.banner.generic.name		= NULL;
-	m_playerConfigMenu.banner.shader			= uiMedia.banners.multiplayer;
+	m_playerConfigMenu.banner.mat			= uiMedia.banners.multiplayer;
 
 	m_playerConfigMenu.header.generic.type		= UITYPE_ACTION;
 	m_playerConfigMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;
@@ -347,13 +347,13 @@ static void PlayerConfigMenu_Init (void)
 		m_playerConfigMenu.modelList.generic.type		= UITYPE_SPINCONTROL;
 		m_playerConfigMenu.modelList.generic.name		= "Model";
 		m_playerConfigMenu.modelList.generic.callBack	= ModelCallback;
-		m_playerConfigMenu.modelList.curValue			= currentDirectoryIndex;
+		m_playerConfigMenu.modelList.curValue			= (int) currentDirectoryIndex;
 		m_playerConfigMenu.modelList.itemNames			= m_playerConfigMenu.modelNames;
 
 		m_playerConfigMenu.skinList.generic.type		= UITYPE_SPINCONTROL;
 		m_playerConfigMenu.skinList.generic.name		= "Skin";
 		m_playerConfigMenu.skinList.generic.callBack	= 0;
-		m_playerConfigMenu.skinList.curValue			= currentSkinIndex;
+		m_playerConfigMenu.skinList.curValue			= (int) currentSkinIndex;
 		m_playerConfigMenu.skinList.itemNames			= m_playerConfigMenu.modelInfo[currentDirectoryIndex].skinDisplayNames;
 	}
 
@@ -370,7 +370,7 @@ static void PlayerConfigMenu_Init (void)
 	m_playerConfigMenu.rateList.generic.type		= UITYPE_SPINCONTROL;
 	m_playerConfigMenu.rateList.generic.name		= "Speed";
 	m_playerConfigMenu.rateList.generic.callBack	= RateCallback;
-	m_playerConfigMenu.rateList.curValue			= i;
+	m_playerConfigMenu.rateList.curValue			= (int) i;
 	m_playerConfigMenu.rateList.itemNames			= rateNames;
 
 	m_playerConfigMenu.backAction.generic.type		= UITYPE_ACTION;
@@ -405,7 +405,7 @@ PlayerConfigMenu_Close
 */
 struct sfx_s *PlayerConfigMenu_Close (void)
 {
-	int		i, j;
+	size_t	i, j;
 
 	// Set name
 	cgi.Cvar_Set ("name", m_playerConfigMenu.nameField.buffer, qFalse);
@@ -452,7 +452,7 @@ void PlayerConfigMenu_Draw (void)
 	refEntity_t	entity[2];
 	refDef_t	refDef;
 	vec3_t		angles;
-	struct		shader_s *icon;
+	struct		material_s *icon;
 	float		y, xoffset;
 
 	// Initialize if necessary
@@ -530,11 +530,11 @@ void PlayerConfigMenu_Draw (void)
 	entity[0].model = cgi.R_RegisterModel (Q_VarArgs ("players/%s/tris.md2",
 		m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].directory));
 	if (entity[0].model) {
-		entity[0].skin = cgi.R_RegisterSkin (Q_VarArgs ("players/%s/%s.pcx",
+		entity[0].material = cgi.R_RegisterSkin (Q_VarArgs ("players/%s/%s.pcx",
 			m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].directory,
 			m_playerConfigMenu.modelInfo[m_playerConfigMenu.modelList.curValue].skinDisplayNames[m_playerConfigMenu.skinList.curValue]));
 
-		if (entity[0].skin) {
+		if (entity[0].material) {
 			entity[0].origin[0] = entity[0].oldOrigin[0] = refDef.x;
 			entity[0].origin[1] = entity[0].oldOrigin[1] = 0;
 			entity[0].origin[2] = entity[0].oldOrigin[2] = 0;
@@ -587,7 +587,7 @@ void PlayerConfigMenu_Draw (void)
 
 	// Clear the scene and add the entities
 	cgi.R_ClearScene ();
-	if (entity[0].skin) {
+	if (entity[0].material) {
 		cgi.R_AddEntity (&entity[0]);
 		if (entity[1].model)
 			cgi.R_AddEntity (&entity[1]);

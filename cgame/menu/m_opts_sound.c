@@ -228,7 +228,7 @@ static void SoundMenu_Init (void)
 	m_soundMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_soundMenu.banner.generic.flags	= UIF_NOSELECT|UIF_CENTERED;
 	m_soundMenu.banner.generic.name		= NULL;
-	m_soundMenu.banner.shader			= uiMedia.banners.options;
+	m_soundMenu.banner.mat			= uiMedia.banners.options;
 
 	m_soundMenu.header.generic.type		= UITYPE_ACTION;
 	m_soundMenu.header.generic.flags	= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

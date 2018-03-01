@@ -41,12 +41,12 @@ static void V_TileRect (int x, int y, int w, int h)
 	if (w == 0 || h == 0)
 		return;	// Prevents div by zero (should never happen)
 
-	if (cgMedia.tileBackShader)
-		cgi.R_DrawPic (cgMedia.tileBackShader, 0,
+	if (cgMedia.tileBackMat)
+		cgi.R_DrawPic (cgMedia.tileBackMat, 0,
 		(float)x, (float)y, (float)w, (float)h,
 		x/64.0f, y/64.0f, (x+w)/64.0f, (y+h)/64.0f, Q_colorWhite);
 	else
-		CG_DrawFill ((float)x, (float)y, (float)w, (float)h, Q_colorBlack);
+		cgi.R_DrawFill ((float)x, (float)y, (float)w, (float)h, Q_colorBlack);
 }
 static void V_TileClear (void)
 {
@@ -144,7 +144,7 @@ V_TestParticles
 static cgParticle_t v_testParticleList[PT_PICTOTAL];
 static void V_TestParticles (void)
 {
-	int				i;
+	int				i, type;
 	float			d, r, u;
 	vec3_t			origin;
 	float			scale;
@@ -160,6 +160,8 @@ static void V_TestParticles (void)
 		r = 3*((i&7)-3.5f);
 		u = 3*(((i>>3)&7)-3.5f);
 
+		type = (cg.realTime / 1000) % PT_PICTOTAL ;//i;
+
 		// Center
 		origin[0] = cg.refDef.viewOrigin[0] + cg.refDef.viewAxis[0][0]*d - cg.refDef.viewAxis[1][0]*r + cg.refDef.viewAxis[2][0]*u;
 		origin[1] = cg.refDef.viewOrigin[1] + cg.refDef.viewAxis[0][1]*d - cg.refDef.viewAxis[1][1]*r + cg.refDef.viewAxis[2][1]*u;
@@ -167,28 +169,28 @@ static void V_TestParticles (void)
 
 		// Top left
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[0], 0, 0);
+		Vec2Set (v_testParticleList[i].outCoords[0], cgMedia.particleCoords[type][0], cgMedia.particleCoords[type][1]);
 		Vec3Set (v_testParticleList[i].outVertices[0],	origin[0] + cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 														origin[1] + cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 														origin[2] + cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 		// Bottom left
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[1], 0, 1);
+		Vec2Set (v_testParticleList[i].outCoords[1], cgMedia.particleCoords[type][0], cgMedia.particleCoords[type][3]);
 		Vec3Set (v_testParticleList[i].outVertices[1],	origin[0] - cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 														origin[1] - cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 														origin[2] - cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 		// Bottom right
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[2], 1, 1);
+		Vec2Set (v_testParticleList[i].outCoords[2], cgMedia.particleCoords[type][2], cgMedia.particleCoords[type][3]);
 		Vec3Set (v_testParticleList[i].outVertices[2],	origin[0] - cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 														origin[1] - cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 														origin[2] - cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);
 
 		// Top right
 		*(int *)v_testParticleList[i].outColor[0] = *(int *)outColor;
-		Vec2Set (v_testParticleList[i].outCoords[3], 1, 0);
+		Vec2Set (v_testParticleList[i].outCoords[3], cgMedia.particleCoords[type][2], cgMedia.particleCoords[type][1]);
 		Vec3Set (v_testParticleList[i].outVertices[3],	origin[0] + cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 														origin[1] + cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 														origin[2] + cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);
@@ -198,8 +200,8 @@ static void V_TestParticles (void)
 		p->outPoly.colors = v_testParticleList[i].outColor;
 		p->outPoly.texCoords = v_testParticleList[i].outCoords;
 		p->outPoly.vertices = v_testParticleList[i].outVertices;
-		p->outPoly.shader = cgMedia.particleTable[i % PT_PICTOTAL];
-		p->outPoly.shaderTime = 0;
+		p->outPoly.mat = cgMedia.particleTable[i % PT_PICTOTAL];
+		p->outPoly.matTime = 0;
 
 		cgi.R_AddPoly (&p->outPoly);
 	}
@@ -230,7 +232,7 @@ static void V_TestEntities (void)
 		Matrix3_Identity (ent.axis);
 
 		ent.model = cg.baseClientInfo.model;
-		ent.skin = cg.baseClientInfo.skin;
+		ent.material = cg.baseClientInfo.material;
 		ent.skinNum = 0;
 
 		ent.flags = 0;
@@ -319,8 +321,8 @@ static void V_CalcThirdPersonView (void)
 
 	// Trig stuff
 	angle = M_PI * (cg_thirdPersonAngle->floatVal / 180.0f);
-	upDist = cg_thirdPersonDist->floatVal * sin (angle);
-	backDist = cg_thirdPersonDist->floatVal * cos (angle);
+	upDist = (cg_thirdPersonDist->floatVal + 1.0f) * sin (angle);
+	backDist = (cg_thirdPersonDist->floatVal + 1.0f) * cos (angle);
 
 	// Move up
 	Vec3MA (cg.refDef.viewOrigin, -backDist, cg.refDef.viewAxis[0], end);
@@ -330,7 +332,7 @@ static void V_CalcThirdPersonView (void)
 	ClipCam (cg.refDef.viewOrigin, end, camPosition);
 
 	// Adjust player transparency
-	cg.cameraTrans = Vec3DistFast (cg.refDef.viewOrigin, camPosition);
+	cg.cameraTrans = Vec3Dist (cg.refDef.viewOrigin, camPosition);
 	if (cg.cameraTrans < cg_thirdPersonDist->floatVal) {
 		cg.cameraTrans = (cg.cameraTrans / cg_thirdPersonDist->floatVal) * 255;
 
@@ -472,7 +474,7 @@ V_RenderView
 void V_RenderView (int realTime, float netFrameTime, float refreshFrameTime, float stereoSeparation, qBool refreshPrepped)
 {
 	// Check cvar sanity
-	CG_UpdateCvars ();
+	CG_UpdateCvars (qFalse);
 
 	// Calculate screen dimensions and clear the background
 	V_CalcVrect ();
@@ -570,10 +572,13 @@ void V_RenderView (int realTime, float netFrameTime, float refreshFrameTime, flo
 
 		cg.refDef.time			= cg.refreshTime * 0.001f;
 
-		cg.refDef.areaChanged	= cg.frame.areaChanged;
 		cg.refDef.areaBits		= cg.frame.areaBits;
-
 		cg.refDef.rdFlags		= cg.frame.playerState.rdFlags;
+
+		if (cg.oldAreaBits)
+			cg.refDef.rdFlags |= RDF_OLDAREABITS;
+		else
+			cg.oldAreaBits = qTrue;
 	}
 
 	// Render the frame

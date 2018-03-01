@@ -88,7 +88,7 @@ void R_AddDecalsToList (void)
 			continue;
 
 		// Add to the list
-		R_AddMeshToList (d->poly.shader, d->poly.shaderTime, NULL, fog, MBT_DECAL, d);
+		R_AddMeshToList (d->poly.mat, d->poly.matTime, NULL, fog, MBT_DECAL, d);
 		ri.scn.drawnDecals++;
 	}
 }
@@ -400,14 +400,15 @@ the input winding by six fragment planes.
 */
 static void R_Q3BSP_WindingClipFragment (vec3_t *wVerts, int numVerts, refFragment_t *fr)
 {
-	int			i, j;
-	int			stage, newc, numv;
-	cBspPlane_t	*plane;
-	qBool		front;
-	float		*v, *nextv, d;
-	float		dists[MAX_DECAL_VERTS+1];
-	int			sides[MAX_DECAL_VERTS+1];
-	vec3_t		*verts, *newverts, newv[2][MAX_DECAL_VERTS];
+	int				i, j;
+	int				stage, newc, numv;
+	cBspPlane_t		*plane;
+	qBool			front;
+	float			*v, *nextv, d;
+	static float	dists[MAX_DECAL_VERTS+1];
+	static int		sides[MAX_DECAL_VERTS+1];
+	vec3_t			*verts, *newverts;
+	static vec3_t	newv[2][MAX_DECAL_VERTS];
 
 	numv = numVerts;
 	verts = wVerts;
@@ -600,11 +601,12 @@ R_Q3BSP_FragmentNode
 */
 static void R_Q3BSP_FragmentNode (void)
 {
-	int				stackdepth = 0;
-	float			dist;
-	mBspNode_t		*node, *localStack[2048];
-	mBspLeaf_t		*leaf;
-	mBspSurface_t	*surf, **mark;
+	int					stackdepth = 0;
+	float				dist;
+	mBspNode_t			*node;
+	static mBspNode_t	*localStack[2048];
+	mBspLeaf_t			*leaf;
+	mBspSurface_t		*surf, **mark;
 
 	node = ri.scn.worldModel->bspModel.nodes;
 	for (stackdepth=0 ; ; ) {
@@ -713,7 +715,7 @@ static uint32 R_GetClippedFragments (vec3_t origin, float radius, vec3_t axis[3]
 R_CreateDecal
 ===============
 */
-qBool R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle, float size)
+qBool R_CreateDecal (refDecal_t *d, struct material_s *material, vec4_t subUVs, vec3_t origin, vec3_t direction, float angle, float size)
 {
 	vec3_t			*clipNormals, *clipVerts;
 	refFragment_t	*fr, *clipFragments;
@@ -771,16 +773,18 @@ qBool R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle
 		if (fr->surf) {
 			for (k=i+1 ; k<numFragments ; k++) {
 				if (clipFragments[k].surf == fr->surf)
-					clipFragments[k].surf = NULL;
+					fr->surf = NULL;
 			}
 
-			totalSurfaces++;
+			if (fr->surf)
+				totalSurfaces++;
 		}
 	}
 	assert (totalIndexes && totalVerts);
 
 	// Store values
 	Vec3Copy (origin, d->origin);
+	d->poly.mat = material;
 	d->numIndexes = totalIndexes;
 	d->poly.numVerts = totalVerts;
 	d->numSurfaces = totalSurfaces;
@@ -852,6 +856,10 @@ qBool R_CreateDecal (refDecal_t *d, vec3_t origin, vec3_t direction, float angle
 			Vec3Subtract (outVerts, origin, temp);
 			outCoords[0] = DotProduct (temp, axis[1]) + 0.5f;
 			outCoords[1] = DotProduct (temp, axis[2]) + 0.5f;
+
+			// Sub coords
+			outCoords[0] = subUVs[0] + (outCoords[0] * (subUVs[2]-subUVs[0]));
+			outCoords[1] = subUVs[1] + (outCoords[1] * (subUVs[3]-subUVs[1]));
 
 			outVerts += 3;
 			outNormals += 3;

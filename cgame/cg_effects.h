@@ -56,7 +56,7 @@ void	CG_RunDLights (void);
 void	CG_AddDLights (void);
 
 void	CG_Flashlight (int ent, vec3_t pos);
-void	__fastcall CG_ColorFlash (vec3_t pos, int ent, float intensity, float r, float g, float b);
+void	CG_ColorFlash (vec3_t pos, int ent, float intensity, float time, float r, float g, float b);
 void	CG_WeldingSparkFlash (vec3_t pos);
 
 /*
@@ -66,6 +66,9 @@ void	CG_WeldingSparkFlash (vec3_t pos);
 
 =============================================================================
 */
+
+#define THINK_DELAY_DEFAULT		16.5f // 60 FPS
+#define THINK_DELAY_EXPENSIVE	33.0f // 30 FPS
 
 enum {
 	// ----------- PARTICLES ----------
@@ -99,19 +102,23 @@ enum {
 	PT_EMBERS2,
 	PT_EMBERS3,
 
-	PT_BLOOD,
-	PT_BLOOD2,
-	PT_BLOOD3,
-	PT_BLOOD4,
-	PT_BLOOD5,
-	PT_BLOOD6,
+	PT_BLOODTRAIL,
+	PT_BLOODTRAIL2,
+	PT_BLOODTRAIL3,
+	PT_BLOODTRAIL4,
+	PT_BLOODTRAIL5,
+	PT_BLOODTRAIL6,
+	PT_BLOODTRAIL7,
+	PT_BLOODTRAIL8,
 
-	PT_GRNBLOOD,
-	PT_GRNBLOOD2,
-	PT_GRNBLOOD3,
-	PT_GRNBLOOD4,
-	PT_GRNBLOOD5,
-	PT_GRNBLOOD6,
+	PT_GRNBLOODTRAIL,
+	PT_GRNBLOODTRAIL2,
+	PT_GRNBLOODTRAIL3,
+	PT_GRNBLOODTRAIL4,
+	PT_GRNBLOODTRAIL5,
+	PT_GRNBLOODTRAIL6,
+	PT_GRNBLOODTRAIL7,
+	PT_GRNBLOODTRAIL8,
 
 	PT_BLDDRIP01,
 	PT_BLDDRIP02,
@@ -119,6 +126,8 @@ enum {
 	PT_BLDDRIP02_GRN,
 	PT_BLDSPURT,
 	PT_BLDSPURT2,
+	PT_BLDSPURT_GREEN,
+	PT_BLDSPURT_GREEN2,
 
 	PT_BEAM,
 
@@ -272,7 +281,6 @@ typedef struct cgDecal_s {
 
 	float				lifeTime;
 
-	struct				shader_s *shader;
 	uint32				flags;
 
 	void				(*think)(struct cgDecal_s *d, vec4_t color, int *type, uint32 *flags);
@@ -348,6 +356,7 @@ typedef struct cgParticle_s {
 	struct cgParticle_s	*prev;
 	struct cgParticle_s	*next;
 
+	int					type;
 	float				time;
 
 	vec3_t				org;
@@ -363,7 +372,7 @@ typedef struct cgParticle_s {
 	float				size;
 	float				sizeVel;
 
-	struct				shader_s *shader;
+	struct				material_s *mat;
 	byte				style;
 	uint32				flags;
 
@@ -371,6 +380,10 @@ typedef struct cgParticle_s {
 
 	void				(*think)(struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 	qBool				thinkNext;
+
+	// For the lighting think functions
+	vec3_t				lighting;
+	float				nextLightingTime;
 
 	// Passed to refresh
 	refPoly_t			outPoly;
@@ -405,8 +418,8 @@ void	CG_SpawnParticle (float org0,					float org1,					float org2,
 // random texturing
 int		pRandBloodDrip (void);
 int		pRandGrnBloodDrip (void);
-int		pRandBloodMark (void);
-int		pRandGrnBloodMark (void);
+int		pRandBloodTrail (void);
+int		pRandGrnBloodTrail (void);
 int		pRandSmoke (void);
 int		pRandGlowSmoke (void);
 int		pRandEmbers (void);
@@ -428,21 +441,21 @@ void	CG_BleedEffect (vec3_t org, vec3_t dir, int count);
 void	CG_BleedGreenEffect (vec3_t org, vec3_t dir, int count);
 void	CG_BubbleEffect (vec3_t origin);
 void	CG_ExplosionBFGEffect (vec3_t org);
-void	__fastcall CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel);
+void	CG_FlareEffect (vec3_t origin, int type, float orient, float size, float sizevel, int color, int colorvel, float alpha, float alphavel);
 void	CG_ItemRespawnEffect (vec3_t org);
 void	CG_LogoutEffect (vec3_t org, int type);
 
-void	__fastcall CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void	__fastcall CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
-void	__fastcall CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count);
-void	__fastcall CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void	__fastcall CG_RicochetEffect (vec3_t org, vec3_t dir, int count);
+void	CG_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
+void	CG_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
+void	CG_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count);
+void	CG_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
+void	CG_RicochetEffect (vec3_t org, vec3_t dir, int count);
 
 void	CG_RocketFireParticles (vec3_t org, vec3_t dir);
 
-void	__fastcall CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale);
-void	__fastcall CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow);
-void	__fastcall CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count);
+void	CG_SparkEffect (vec3_t org, vec3_t dir, int color, int colorvel, int count, float smokeScale, float lifeScale);
+void	CG_SplashParticles (vec3_t org, vec3_t dir, int color, int count, qBool glow);
+void	CG_SplashEffect (vec3_t org, vec3_t dir, int color, int count);
 
 void	CG_BigTeleportParticles (vec3_t org);
 void	CG_BlasterTip (vec3_t start, vec3_t end);
@@ -475,7 +488,7 @@ void	CG_GloomStingerFire (vec3_t start, vec3_t end, float size, qBool light);
 // SUSTAINED EFFECTS
 //
 
-void	__fastcall CG_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
+void	CG_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
 
 void	CG_ParseNuke (void);
 void	CG_ParseSteam (void);
@@ -488,7 +501,7 @@ void	CG_AddSustains (void);
 // TRAIL EFFECTS
 //
 
-void	__fastcall CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel);
+void	CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel);
 void	CG_BfgTrail (refEntity_t *ent);
 void	CG_BlasterGoldTrail (vec3_t start, vec3_t end);
 void	CG_BlasterGreenTrail (vec3_t start, vec3_t end);
@@ -519,6 +532,7 @@ void	pFastSmokeThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t c
 void	pFireThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pFireTrailThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pFlareThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
+void	pLight70Think (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pRailSpiralThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pRicochetSparkThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);
 void	pSlowFireThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time);

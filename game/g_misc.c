@@ -1577,7 +1577,7 @@ void SP_target_character (edict_t *self)
 void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t *e;
-	int		n, l;
+	size_t	l, n;
 	char	c;
 
 	l = strlen(self->message);
@@ -1585,7 +1585,7 @@ void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		if (!e->count)
 			continue;
-		n = e->count - 1;
+		n = (size_t) e->count - 1;
 		if (n > l)
 		{
 			e->s.frame = 12;

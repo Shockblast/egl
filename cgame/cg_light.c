@@ -205,8 +205,9 @@ void CG_RunDLights (void)
 		
 		if (dl->die < cg.realTime) {
 			dl->radius = 0;
-			return;
+			continue;
 		}
+
 		dl->radius -= cg.refreshFrameTime*dl->decay;
 		if (dl->radius < 0)
 			dl->radius = 0;
@@ -267,7 +268,7 @@ CG_ColorFlash
 flash of light
 ===============
 */
-void __fastcall CG_ColorFlash (vec3_t pos, int ent, float intensity, float r, float g, float b)
+void CG_ColorFlash (vec3_t pos, int ent, float intensity, float time, float r, float g, float b)
 {
 	cgDLight_t	*dl;
 
@@ -275,7 +276,8 @@ void __fastcall CG_ColorFlash (vec3_t pos, int ent, float intensity, float r, fl
 	Vec3Copy (pos, dl->origin);
 	dl->radius = intensity;
 	dl->minlight = 250;
-	dl->die = (float)cg.realTime + 100.0f;
+	dl->die = cg.realTime + time;
+	dl->decay = intensity / (time / 1000);
 	dl->color[0] = r;
 	dl->color[1] = g;
 	dl->color[2] = b;
@@ -291,7 +293,7 @@ void CG_WeldingSparkFlash (vec3_t pos)
 {
 	cgDLight_t	*dl;
 
-	dl = CG_AllocDLight ((int)((pos[0]+pos[1]+pos[3]) / 3.0));
+	dl = CG_AllocDLight (0);
 
 	Vec3Copy (pos, dl->origin);
 	Vec3Set (dl->color, 1, 1, 0.3f);

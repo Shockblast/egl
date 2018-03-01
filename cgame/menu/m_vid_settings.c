@@ -23,11 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #include "m_local.h"
 
-#define REF_OPENGL	0
-#define REF_3DFX	1
-#define REF_POWERVR	2
-#define REF_VERITE	3
-
 /*
 ====================================================================
 
@@ -43,7 +38,6 @@ typedef struct m_vidSettingsMenu_s {
 	uiImage_t			banner;
 	uiAction_t			header;
 
-	uiList_t			ref_list;
 	uiList_t			mode_list;
 
 	uiList_t			tm_list;
@@ -88,13 +82,6 @@ VIDSettingsMenu_ApplyValues
 static void VIDSettingsMenu_ApplyValues (void *unused)
 {
 	float	gamma;
-
-	switch (m_vidSettingsMenu.ref_list.curValue) {
-	case REF_OPENGL:		cgi.Cvar_Set ("gl_driver", GL_DRIVERNAME, qTrue);	break;
-	case REF_3DFX:			cgi.Cvar_Set ("gl_driver", "3dfxgl", qTrue);		break;
-	case REF_POWERVR:		cgi.Cvar_Set ("gl_driver", "pvrgl", qTrue);			break;
-	case REF_VERITE:		cgi.Cvar_Set ("gl_driver", "veritegl", qTrue);		break;
-	}
 
 	if (m_vidSettingsMenu.mode_list.curValue != 0) {
 		cgi.Cvar_SetValue ("gl_mode",			m_vidSettingsMenu.mode_list.curValue-1, qTrue);
@@ -151,10 +138,6 @@ VIDSettingsMenu_SetValues
 */
 static void VIDSettingsMenu_SetValues (void)
 {
-	if (Q_stricmp (cgi.Cvar_GetStringValue ("gl_driver"), "3dfxgl") == 0)		m_vidSettingsMenu.ref_list.curValue = REF_3DFX;
-	else if (Q_stricmp (cgi.Cvar_GetStringValue ("gl_driver"), "pvrgl") == 0)	m_vidSettingsMenu.ref_list.curValue = REF_POWERVR;
-	else																		m_vidSettingsMenu.ref_list.curValue = REF_OPENGL;
-
 	cgi.Cvar_SetValue ("gl_mode",		clamp (cgi.Cvar_GetIntegerValue ("gl_mode"), 0, 12), qTrue);
 	if (cgi.Cvar_GetIntegerValue ("vid_width") && cgi.Cvar_GetIntegerValue ("vid_height"))
 		m_vidSettingsMenu.mode_list.curValue	= 0;
@@ -287,16 +270,11 @@ static void VIDSettingsMenu_Init (void)
 	m_vidSettingsMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_vidSettingsMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_vidSettingsMenu.banner.generic.name		= NULL;
-	m_vidSettingsMenu.banner.shader				= uiMedia.banners.video;
+	m_vidSettingsMenu.banner.mat				= uiMedia.banners.video;
 
 	m_vidSettingsMenu.header.generic.type		= UITYPE_ACTION;
 	m_vidSettingsMenu.header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;
 	m_vidSettingsMenu.header.generic.name		= "Video Settings";
-
-	m_vidSettingsMenu.ref_list.generic.type			= UITYPE_SPINCONTROL;
-	m_vidSettingsMenu.ref_list.generic.name			= "Mini-Driver";
-	m_vidSettingsMenu.ref_list.itemNames			= refs;
-	m_vidSettingsMenu.ref_list.generic.statusBar	= "Renderer-Specific MiniDriver";
 
 	m_vidSettingsMenu.mode_list.generic.type		= UITYPE_SPINCONTROL;
 	m_vidSettingsMenu.mode_list.generic.name		= "Resolution";
@@ -379,7 +357,6 @@ static void VIDSettingsMenu_Init (void)
 	UI_AddItem (&m_vidSettingsMenu.frameWork,		&m_vidSettingsMenu.banner);
 	UI_AddItem (&m_vidSettingsMenu.frameWork,		&m_vidSettingsMenu.header);
 
-	UI_AddItem (&m_vidSettingsMenu.frameWork,		&m_vidSettingsMenu.ref_list);
 	UI_AddItem (&m_vidSettingsMenu.frameWork,		&m_vidSettingsMenu.mode_list);
 
 	UI_AddItem (&m_vidSettingsMenu.frameWork,		&m_vidSettingsMenu.tm_list);
@@ -437,8 +414,6 @@ static void VIDSettingsMenu_Draw (void)
 
 	m_vidSettingsMenu.header.generic.x				= 0;
 	m_vidSettingsMenu.header.generic.y				= y += UIFT_SIZEINC;
-	m_vidSettingsMenu.ref_list.generic.x			= 0;
-	m_vidSettingsMenu.ref_list.generic.y			= y += UIFT_SIZEINC + UIFT_SIZEINCMED;
 	m_vidSettingsMenu.mode_list.generic.x			= 0;
 	m_vidSettingsMenu.mode_list.generic.y			= y += UIFT_SIZEINC;
 	m_vidSettingsMenu.tm_list.generic.x				= 0;

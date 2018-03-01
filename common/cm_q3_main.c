@@ -388,11 +388,11 @@ CM_Q3BSP_CreatePatch
 */
 static void CM_Q3BSP_CreatePatch (cpatch_t *patch, int numverts, vec4_t *verts, int *patch_cp)
 {
-    int			step[2], size[2], flat[2], i, u, v;
-	vec4_t		points[MAX_Q3BSP_CM_PATCH_VERTS];
-	vec3_t		tverts[4], tverts2[4];
-	cbrush_t	*brush;
-	cBspPlane_t	mainplane;
+    int				step[2], size[2], flat[2], i, u, v;
+	static vec4_t	points[MAX_Q3BSP_CM_PATCH_VERTS];
+	vec3_t			tverts[4], tverts2[4];
+	cbrush_t		*brush;
+	cBspPlane_t		mainplane;
 
 	// Find the degree of subdivision in the u and v directions
 	Patch_GetFlatness2 (CM_SUBDIVLEVEL, verts, patch_cp, flat);
@@ -470,7 +470,7 @@ static void CM_Q3BSP_CreatePatchesForLeafs (void)
 	cface_t			*face;
 	cBspSurface_t	*surf;
 	cpatch_t		*patch;
-	int				checkout[MAX_Q3BSP_CM_FACES];
+	static int		checkout[MAX_Q3BSP_CM_FACES];
 
 	memset (checkout, -1, sizeof(int)*MAX_Q3BSP_CM_FACES);
 
@@ -556,7 +556,7 @@ static void CM_Q3BSP_LoadVertexes (dQ3BspLump_t *l)
 	cm_q3_numVertexes = l->fileLen / sizeof (*in);
 	if (cm_q3_numVertexes > MAX_Q3BSP_CM_VERTEXES)
 		Com_Error (ERR_DROP, "CM_Q3BSP_LoadVertexes: Map has too many vertexes");
-	cm_q3_mapVerts = out = Mem_AllocExt (cm_q3_numVertexes * sizeof (*out), qFalse);
+	cm_q3_mapVerts = out = Mem_Alloc (cm_q3_numVertexes * sizeof (*out));
 
 	// Byte swap
 	for (i=0 ; i<cm_q3_numVertexes ; i++, in++) {
@@ -587,7 +587,7 @@ static void CM_Q3BSP_LoadFaces (dQ3BspLump_t *l)
 	cm_q3_numFaces = l->fileLen / sizeof (*in);
 	if (cm_q3_numFaces > MAX_Q3BSP_CM_FACES)
 		Com_Error (ERR_DROP, "CM_Q3BSP_LoadFaces: Map has too many faces");
-	cm_q3_mapFaces = out = Mem_AllocExt (cm_q3_numFaces * sizeof (*out), qFalse);
+	cm_q3_mapFaces = out = Mem_Alloc (cm_q3_numFaces * sizeof (*out));
 
 	// Byte swap
 	for (i=0 ; i<cm_q3_numFaces ; i++, in++, out++) {
@@ -623,7 +623,7 @@ static void CM_Q3BSP_LoadLeafFaces (dQ3BspLump_t *l)
 	cm_q3_numLeafFaces = l->fileLen / sizeof(*in);
 	if (cm_q3_numLeafFaces > MAX_Q3BSP_CM_LEAFFACES) 
 		Com_Error (ERR_DROP, "CM_Q3BSP_LoadLeafFaces: Map has too many leaffaces"); 
-	cm_q3_leafFaces = out = Mem_AllocExt (cm_q3_numLeafFaces*sizeof(*out), qFalse);
+	cm_q3_leafFaces = out = Mem_Alloc (cm_q3_numLeafFaces*sizeof(*out));
 
 	// Byte swap
 	for (i=0 ; i<cm_q3_numLeafFaces ; i++) {
@@ -721,6 +721,8 @@ static void CM_Q3BSP_LoadSurfaces (dQ3BspLump_t *l)
 	// Byte swap
 	out = cm_q3_surfaces;
 	for (i=0 ; i<cm_q3_numShaderRefs ; i++, in++, out++) {
+		Q_strncpyz (out->rname, in->name, sizeof (out->rname));
+		Q_strncpyz (out->name, in->name, sizeof (out->name));
 		out->flags = LittleLong (in->flags);
 		out->contents = LittleLong (in->contents);
 	}
@@ -841,7 +843,7 @@ static void CM_Q3BSP_LoadLeafs (dQ3BspLump_t *l)
 		if (out->area >= cm_q3_numAreas)
 			cm_q3_numAreas = out->area + 1;
 
-		if (!out->contents)
+		if (!out->contents && cm_q3_emptyLeaf == -1)
 			cm_q3_emptyLeaf = i;
 	}
 
@@ -1091,7 +1093,7 @@ cBspModel_t *CM_Q3BSP_LoadMap (uint32 *buffer)
 	cm_q3_leafBrushes = Mem_PoolAlloc (sizeof(int) * (MAX_Q3BSP_CM_LEAFBRUSHES+1), com_cmodelSysPool, 0);			// extra for box hull
 	cm_q3_leafPatches = Mem_PoolAlloc (sizeof(int) * MAX_Q3BSP_CM_LEAFFACES, com_cmodelSysPool, 0);
 	cm_q3_leafs = Mem_PoolAlloc (sizeof(cleaf_t) * MAX_Q3BSP_CM_LEAFS, com_cmodelSysPool, 0);
-	cm_q3_nullRow = Mem_PoolAllocExt (sizeof(byte) * (MAX_Q3BSP_CM_LEAFS / 8), qFalse, com_cmodelSysPool, 0);
+	cm_q3_nullRow = Mem_PoolAlloc (sizeof(byte) * (MAX_Q3BSP_CM_LEAFS / 8), com_cmodelSysPool, 0);
 	cm_q3_patches = Mem_PoolAlloc (sizeof(cpatch_t) * MAX_Q3BSP_CM_PATCHES, com_cmodelSysPool, 0);
 	cm_q3_visData = Mem_PoolAlloc (sizeof(byte) * MAX_Q3BSP_CM_VISIBILITY, com_cmodelSysPool, 0);
 

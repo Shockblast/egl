@@ -174,6 +174,22 @@ qBool R_CullSphere (const vec3_t origin, const float radius, int clipFlags)
 }
 
 /*
+=================
+R_PointOccluded
+
+Returns qTrue if the origin is not visible via trace
+=================
+*/
+qBool R_PointOccluded (const vec3_t origin)
+{
+	trace_t tr;
+	
+	tr = CM_Trace(ri.def.viewOrigin, (float *) origin, 1, CONTENTS_SOLID);
+
+	return tr.fraction < 1.0;
+}
+
+/*
 =============================================================================
 
 	MAP VISIBILITY CULLING

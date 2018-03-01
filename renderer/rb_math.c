@@ -39,15 +39,15 @@ float RB_FastSin (float t)
 RB_TableForFunc
 ==============
 */
-float *RB_TableForFunc (shTableFunc_t func)
+float *RB_TableForFunc (matTableFunc_t func)
 {
 	switch (func) {
-	case SHADER_FUNC_SIN:				return rb_sinTable;
-	case SHADER_FUNC_TRIANGLE:			return rb_triangleTable;
-	case SHADER_FUNC_SQUARE:			return rb_squareTable;
-	case SHADER_FUNC_SAWTOOTH:			return rb_sawtoothTable;
-	case SHADER_FUNC_INVERSESAWTOOTH:	return rb_inverseSawtoothTable;
-	case SHADER_FUNC_NOISE:				return rb_noiseTable;
+	case MAT_FUNC_SIN:				return rb_sinTable;
+	case MAT_FUNC_TRIANGLE:			return rb_triangleTable;
+	case MAT_FUNC_SQUARE:			return rb_squareTable;
+	case MAT_FUNC_SAWTOOTH:			return rb_sawtoothTable;
+	case MAT_FUNC_INVERSESAWTOOTH:	return rb_inverseSawtoothTable;
+	case MAT_FUNC_NOISE:				return rb_noiseTable;
 	}
 
 	// Assume error

@@ -61,7 +61,7 @@ typedef struct mPack_s {
 	unzFile					*pkz;
 
 	// Information
-	int						numFiles;
+	size_t					numFiles;
 	mPackFile_t				*files;
 
 	struct mPackFile_s		*fileHashTree[FS_MAX_HASHSIZE];
@@ -78,7 +78,7 @@ typedef struct mPack_s {
 typedef struct fsLink_s {
 	struct fsLink_s			*next;
 	char					*from;
-	int						fromLength;
+	size_t					fromLength;
 	char					*to;
 } fsLink_t;
 
@@ -96,7 +96,7 @@ static fsLink_t	*fs_fileLinks;
 
 static fsPath_t	*fs_searchPaths;
 static fsPath_t	**fs_invSearchPaths;
-static int		fs_numInvSearchPaths;
+static size_t	fs_numInvSearchPaths;
 static fsPath_t	*fs_baseSearchPath;		// Without gamedirs
 
 /*
@@ -269,9 +269,9 @@ FS_CopyFile
 */
 void FS_CopyFile (char *src, char *dst)
 {
-	FILE	*f1, *f2;
-	int		l;
-	byte	buffer[65536];
+	FILE		*f1, *f2;
+	size_t		l;
+	static byte	buffer[65536];
 
 	if (fs_developer->intVal)
 		Com_Printf (0, "FS_CopyFile (%s, %s)\n", src, dst);
@@ -337,7 +337,7 @@ static fsHandleIndex_t *FS_GetHandle (fileHandle_t fileNum)
 {
 	fsHandleIndex_t *hIndex;
 
-	if (fileNum < 0 || fileNum > FS_MAX_FILEINDICES)
+	if (fileNum == 0 || fileNum > FS_MAX_FILEINDICES)
 		Com_Error (ERR_FATAL, "FS_GetHandle: invalid file number");
 
 	hIndex = &fs_fileIndices[fileNum-1];
@@ -356,7 +356,7 @@ Returns the TOTAL file size, not the position.
 Make sure to move the position back after moving to the beginning of the file for the size lookup.
 ============
 */
-int FS_FileLength (fileHandle_t fileNum)
+size_t FS_FileLength (fileHandle_t fileNum)
 {
 	fsHandleIndex_t		*handle;
 
@@ -366,12 +366,12 @@ int FS_FileLength (fileHandle_t fileNum)
 	}
 	else if (handle->pkzFile) {
 		// FIXME
-		return -1;
+		return 0;
 	}
 
 	// Shouldn't happen...
 	assert (0);
-	return -1;
+	return 0;
 }
 
 
@@ -382,7 +382,7 @@ FS_Tell
 Returns the current file position.
 ============
 */
-int FS_Tell (fileHandle_t fileNum)
+size_t FS_Tell (fileHandle_t fileNum)
 {
 	fsHandleIndex_t	*handle;
 
@@ -406,11 +406,10 @@ Properly handles partial reads
 =================
 */
 void CDAudio_Stop (void);
-int FS_Read (void *buffer, int len, fileHandle_t fileNum)
+size_t FS_Read (void *buffer, size_t len, fileHandle_t fileNum)
 {
 	fsHandleIndex_t	*handle;
-	int				remaining;
-	int				read;
+	size_t			remaining;
 	byte			*buf;
 	qBool			tried;
 
@@ -426,7 +425,7 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 	if (handle->regFile) {
 		// File
 		while (remaining) {
-			read = fread (buf, 1, remaining, handle->regFile);
+			size_t read = fread (buf, 1, remaining, handle->regFile);
 			switch (read) {
 			case 0:
 				// We might have been trying to read from a CD
@@ -443,10 +442,6 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 					return len - remaining;
 				}
 				break;
-
-			case -1:
-				Com_Error (ERR_FATAL, "FS_Read: -1 bytes read from \"%s\"", handle->name);
-				break;
 			}
 
 			// Do some progress bar thing here
@@ -459,7 +454,7 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 	else if (handle->pkzFile) {
 		// Zip file
 		while (remaining) {
-			read = unzReadCurrentFile (handle->pkzFile, buf, remaining);
+			int read = unzReadCurrentFile (handle->pkzFile, buf, (uint32) remaining);
 			switch (read) {
 			case 0:
 				// We might have been trying to read from a CD
@@ -501,11 +496,11 @@ int FS_Read (void *buffer, int len, fileHandle_t fileNum)
 FS_Write
 =================
 */
-int FS_Write (void *buffer, int size, fileHandle_t fileNum)
+size_t FS_Write (void *buffer, size_t size, fileHandle_t fileNum)
 {
 	fsHandleIndex_t	*handle;
-	int				remaining;
-	int				write;
+	size_t			remaining;
+	size_t			write;
 	byte			*buf;
 
 	handle = FS_GetHandle (fileNum);
@@ -519,8 +514,8 @@ int FS_Write (void *buffer, int size, fileHandle_t fileNum)
 		Com_Error (ERR_FATAL, "FS_Write: %s: was no opened in append/write mode", handle->name);
 		break;
 	}
-	if (size < 0)
-		Com_Error (ERR_FATAL, "FS_Write: size < 0");
+	if (size == 0)
+		Com_Error (ERR_FATAL, "FS_Write: size == 0");
 
 	// Write
 	remaining = size;
@@ -536,10 +531,6 @@ int FS_Write (void *buffer, int size, fileHandle_t fileNum)
 				if (fs_developer->intVal)
 					Com_Printf (PRNT_ERROR, "FS_Write: 0 bytes written to %s\n", handle->name);
 				return size - remaining;
-
-			case -1:
-				Com_Error (ERR_FATAL, "FS_Write: -1 bytes written to %s", handle->name);
-				break;
 			}
 
 			remaining -= write;
@@ -564,12 +555,12 @@ int FS_Write (void *buffer, int size, fileHandle_t fileNum)
 FS_Seek
 =================
 */
-void FS_Seek (fileHandle_t fileNum, int offset, fsSeekOrigin_t seekOrigin)
+void FS_Seek (fileHandle_t fileNum, long offset, fsSeekOrigin_t seekOrigin)
 {
 	fsHandleIndex_t	*handle;
 	unz_file_info	info;
-	int				remaining, r, len;
-	byte			dummy[0x8000];
+	int				remaining = 0, r, len;
+	static byte		dummy[0x8000];
 
 	handle = FS_GetHandle (fileNum);
 	if (handle->regFile) {
@@ -819,7 +810,7 @@ FS_OpenFile
 int FS_OpenFile (char *fileName, fileHandle_t *fileNum, fsOpenMode_t openMode)
 {
 	fsHandleIndex_t	*handle;
-	int				fileSize;
+	int				fileSize = -1;
 
 	*fileNum = FS_GetFreeHandle (&handle);
 
@@ -908,7 +899,7 @@ int FS_LoadFile (char *path, void **buffer, char *terminate)
 	byte			*buf;
 	int				fileLen;
 	fileHandle_t	fileNum;
-	uint32			termLen;
+	size_t			termLen;
 
 	// Look for it in the filesystem or pack files
 	fileLen = FS_OpenFile (path, &fileNum, FS_MODE_READ_BINARY);
@@ -944,7 +935,7 @@ int FS_LoadFile (char *path, void **buffer, char *terminate)
 	// Terminate if desired
 	if (termLen)
 		strncpy ((char *)buf+fileLen, terminate, termLen);
-	return fileLen+termLen;
+	return (int) ((size_t) fileLen + termLen);
 }
 
 
@@ -1004,13 +995,13 @@ of the list so they override previous pack files.
 */
 mPack_t *FS_LoadPAK (char *fileName, qBool complain)
 {
-	dPackHeader_t	header;
-	mPackFile_t		*outPackFile;
-	mPack_t			*outPack;
-	FILE			*handle;
-	dPackFile_t		info[PAK_MAX_FILES];
-	int				i, numFiles;
-	uint32			hashValue;
+	dPackHeader_t		header;
+	mPackFile_t			*outPackFile;
+	mPack_t				*outPack;
+	FILE				*handle;
+	static dPackFile_t	info[PAK_MAX_FILES];
+	size_t				i, numFiles;
+	uint32				hashValue;
 
 	// Open
 	handle = fopen (fileName, "rb");
@@ -1036,7 +1027,7 @@ mPack_t *FS_LoadPAK (char *fileName, qBool complain)
 		fclose (handle);
 		Com_Error (ERR_FATAL, "FS_LoadPAK: \"%s\" has too many files (%i > %i)", fileName, numFiles, PAK_MAX_FILES);
 	}
-	if (numFiles <= 0) {
+	if (numFiles == 0) {
 		fclose (handle);
 		Com_Error (ERR_FATAL, "FS_LoadPAK: \"%s\" is empty", fileName);
 	}
@@ -1235,6 +1226,23 @@ static void FS_AddGameDirectory (char *dir, char *gamePath)
 	}
 
 	FS_FreeFileList (packFiles, numPacks);
+
+	// Load *.pk3 files
+	numPacks = Sys_FindFiles (dir, "*/*.pk3", packFiles, FS_MAX_PAKS, 0, qFalse, qTrue, qFalse);
+
+	for (i=0 ; i<numPacks ; i++) {
+		pkz = FS_LoadPKZ (packFiles[i], qTrue);
+		if (!pkz)
+			continue;
+		search = Mem_PoolAlloc (sizeof (fsPath_t), com_fileSysPool, 0);
+		Q_strncpyz (search->pathName, dir, sizeof (search->pathName));
+		Q_strncpyz (search->gamePath, gamePath, sizeof (search->gamePath));
+		search->package = pkz;
+		search->next = fs_searchPaths;
+		fs_searchPaths = search;
+	}
+
+	FS_FreeFileList (packFiles, numPacks);
 }
 
 /*
@@ -1271,7 +1279,7 @@ void FS_SetGamedir (char *dir, qBool firstTime)
 	fsPath_t	*next;
 	mPack_t		*package;
 	uint32		initTime;
-	int			i;
+	size_t		i;
 
 	// Make sure it's not a path
 	if (strstr (dir, "..") || strchr (dir, '/') || strchr (dir, '\\') || strchr (dir, ':')) {
@@ -1323,8 +1331,15 @@ void FS_SetGamedir (char *dir, qBool firstTime)
 	// Store a copy of the search paths inverted for FS_FindFiles
 	for (fs_numInvSearchPaths=0, next=fs_searchPaths ; next ; next=next->next, fs_numInvSearchPaths++);
 	fs_invSearchPaths = Mem_PoolAlloc (sizeof (fsPath_t) * fs_numInvSearchPaths, com_fileSysPool, 0);
-	for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; i>=0 ; next=next->next, i--)
+	for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; ; next=next->next)
+	{
 		fs_invSearchPaths[i] = next;
+
+		if (i == 0)
+			break;
+
+		i--;
+	}
 
 	if (!firstTime) {
 		Com_Printf (0, "----------------------------------------\n");
@@ -1382,17 +1397,17 @@ void FS_ExecAutoexec (void)
 FS_FindFiles
 ================
 */
-int FS_FindFiles (char *path, char *filter, char *extension, char **fileList, int maxFiles, qBool addGameDir, qBool recurse)
+size_t FS_FindFiles (char *path, char *filter, char *extension, char **fileList, size_t maxFiles, qBool addGameDir, qBool recurse)
 {
 	fsPath_t	*search;
 	mPackFile_t	*packFile;
 	mPack_t		*pack;
-	int			fileCount;
+	size_t		fileCount;
 	char		*name;
 	char		dir[MAX_OSPATH];
 	char		ext[MAX_QEXT];
-	char		*dirFiles[FS_MAX_FINDFILES];
-	int			dirCount, i, j, k;
+	static char	*dirFiles[FS_MAX_FINDFILES];
+	size_t		dirCount, i, j, k;
 
 	// Sanity check
 	if (maxFiles > FS_MAX_FINDFILES) {
@@ -1511,9 +1526,9 @@ int FS_FindFiles (char *path, char *filter, char *extension, char **fileList, in
 _FS_FreeFileList
 =============
 */
-void _FS_FreeFileList (char **list, int num, const char *fileName, const int fileLine)
+void _FS_FreeFileList (char **list, size_t num, const char *fileName, const int fileLine)
 {
-	int		i;
+	size_t		i;
 
 	for (i=0 ; i<num ; i++) {
 		if (!list[i])
@@ -1676,7 +1691,7 @@ void FS_Init (void)
 {
 	uint32		initTime;
 	fsPath_t	*next;
-	int			i;
+	size_t		i;
 
 	initTime = Sys_UMilliseconds ();
 	Com_Printf (0, "\n------- Filesystem Initialization ------\n");
@@ -1709,8 +1724,15 @@ void FS_Init (void)
 		// Store a copy of the search paths inverted for FS_FindFiles
 		for (fs_numInvSearchPaths=0, next=fs_searchPaths ; next ; next=next->next, fs_numInvSearchPaths++);
 		fs_invSearchPaths = Mem_PoolAlloc (sizeof (fsPath_t) * fs_numInvSearchPaths, com_fileSysPool, 0);
-		for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; i>=0 ; next=next->next, i--)
+		for (i=fs_numInvSearchPaths-1, next=fs_searchPaths ; ; next=next->next)
+		{
 			fs_invSearchPaths[i] = next;
+
+			if (i == 0)
+				break;
+
+			i--;
+		}
 	}
 
 	Com_Printf (0, "----------------------------------------\n");

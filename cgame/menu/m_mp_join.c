@@ -734,7 +734,7 @@ static void JoinServerMenu_Init (qBool sort)
 	m_joinServerMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_joinServerMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_joinServerMenu.banner.generic.name		= NULL;
-	m_joinServerMenu.banner.shader				= uiMedia.banners.joinServer;
+	m_joinServerMenu.banner.mat				= uiMedia.banners.joinServer;
 
 	m_joinServerMenu.addressBookAction.generic.type			= UITYPE_ACTION;
 	m_joinServerMenu.addressBookAction.generic.name			= "Edit Addresses";

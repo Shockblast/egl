@@ -107,7 +107,7 @@ Netchan_OutOfBand
 Sends an out-of-band datagram
 ================
 */
-void Netchan_OutOfBand (netSrc_t netSocket, netAdr_t *adr, int length, byte *data)
+void Netchan_OutOfBand (netSrc_t netSocket, netAdr_t *adr, size_t length, byte *data)
 {
 	netMsg_t	send;
 	byte		sendBuf[MAX_CL_MSGLEN];
@@ -217,7 +217,7 @@ transmition / retransmition of the reliable messages.
 A 0 length will still generate a packet and deal with the reliable messages.
 ================
 */
-int Netchan_Transmit (netChan_t *chan, int length, byte *data)
+int Netchan_Transmit (netChan_t *chan, size_t length, byte *data)
 {
 	netMsg_t	send;
 	byte		sendBuf[MAX_CL_MSGLEN];

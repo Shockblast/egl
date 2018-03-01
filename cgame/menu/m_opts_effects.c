@@ -88,13 +88,13 @@ typedef struct m_effectsMenu_s {
 	uiAction_t		dec_max_amount;
 
 	//
-	// shaders
+	// materials
 	//
 
-	uiAction_t		shader_header;
+	uiAction_t		material_header;
 
-	uiList_t		shader_caustics_toggle;
-	uiList_t		shader_detail_toggle;
+	uiList_t		material_caustics_toggle;
+	uiList_t		material_detail_toggle;
 
 	//
 	// misc
@@ -219,16 +219,16 @@ static void DecalMaxFunc (void *unused)
 }
 
 //
-// shaders
+// materials
 //
 
 static void CausticsFunc (void *unused)
 {
-	cgi.Cvar_SetValue ("r_caustics", m_effectsMenu.shader_caustics_toggle.curValue, qFalse);
+	cgi.Cvar_SetValue ("r_caustics", m_effectsMenu.material_caustics_toggle.curValue, qFalse);
 }
-static void ShaderDetailFunc (void *unused)
+static void MaterialDetailFunc (void *unused)
 {
-	cgi.Cvar_SetValue ("r_detailTextures", m_effectsMenu.shader_detail_toggle.curValue, qFalse);
+	cgi.Cvar_SetValue ("r_detailTextures", m_effectsMenu.material_detail_toggle.curValue, qFalse);
 }
 
 /*
@@ -300,14 +300,14 @@ static void EffectsMenu_SetValues (void)
 	m_effectsMenu.dec_max_amount.generic.name	= cgi.Cvar_GetStringValue ("cg_decalMax");
 
 	//
-	// shaders
+	// materials
 	//
 
 	cgi.Cvar_SetValue ("r_caustics",				clamp (cgi.Cvar_GetIntegerValue ("r_caustics"), 0, 1), qFalse);
-	m_effectsMenu.shader_caustics_toggle.curValue	= cgi.Cvar_GetIntegerValue ("r_caustics");
+	m_effectsMenu.material_caustics_toggle.curValue	= cgi.Cvar_GetIntegerValue ("r_caustics");
 
 	cgi.Cvar_SetValue ("r_detailTextures",			clamp (cgi.Cvar_GetIntegerValue ("r_detailTextures"), 0, 1), qFalse);
-	m_effectsMenu.shader_detail_toggle.curValue	= cgi.Cvar_GetIntegerValue ("r_detailTextures");
+	m_effectsMenu.material_detail_toggle.curValue	= cgi.Cvar_GetIntegerValue ("r_detailTextures");
 }
 
 
@@ -356,7 +356,7 @@ static void EffectsMenu_Init (void)
 	m_effectsMenu.banner.generic.type	= UITYPE_IMAGE;
 	m_effectsMenu.banner.generic.flags	= UIF_NOSELECT|UIF_CENTERED;
 	m_effectsMenu.banner.generic.name	= NULL;
-	m_effectsMenu.banner.shader			= uiMedia.banners.options;
+	m_effectsMenu.banner.mat			= uiMedia.banners.options;
 
 	//
 	// particles
@@ -522,24 +522,24 @@ static void EffectsMenu_Init (void)
 	m_effectsMenu.dec_max_amount.generic.flags		= UIF_LEFT_JUSTIFY|UIF_NOSELECT;
 
 	//
-	// shaders
+	// materials
 	//
 
-	m_effectsMenu.shader_header.generic.type		= UITYPE_ACTION;
-	m_effectsMenu.shader_header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;
-	m_effectsMenu.shader_header.generic.name		= "Shader Settings";
+	m_effectsMenu.material_header.generic.type		= UITYPE_ACTION;
+	m_effectsMenu.material_header.generic.flags		= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;
+	m_effectsMenu.material_header.generic.name		= "Material Settings";
 
-	m_effectsMenu.shader_caustics_toggle.generic.type		= UITYPE_SPINCONTROL;
-	m_effectsMenu.shader_caustics_toggle.generic.name		= "Caustics";
-	m_effectsMenu.shader_caustics_toggle.generic.callBack	= CausticsFunc;
-	m_effectsMenu.shader_caustics_toggle.itemNames			= onoff_names;
-	m_effectsMenu.shader_caustics_toggle.generic.statusBar	= "Shader-based underwater/lava/slime surface caustics";
+	m_effectsMenu.material_caustics_toggle.generic.type			= UITYPE_SPINCONTROL;
+	m_effectsMenu.material_caustics_toggle.generic.name			= "Caustics";
+	m_effectsMenu.material_caustics_toggle.generic.callBack		= CausticsFunc;
+	m_effectsMenu.material_caustics_toggle.itemNames			= onoff_names;
+	m_effectsMenu.material_caustics_toggle.generic.statusBar	= "Material-based underwater/lava/slime surface caustics";
 
-	m_effectsMenu.shader_detail_toggle.generic.type			= UITYPE_SPINCONTROL;
-	m_effectsMenu.shader_detail_toggle.generic.name			= "Detail Textures";
-	m_effectsMenu.shader_detail_toggle.generic.callBack		= ShaderDetailFunc;
-	m_effectsMenu.shader_detail_toggle.itemNames			= onoff_names;
-	m_effectsMenu.shader_detail_toggle.generic.statusBar	= "Toggle shader passes marked as 'detail'";
+	m_effectsMenu.material_detail_toggle.generic.type			= UITYPE_SPINCONTROL;
+	m_effectsMenu.material_detail_toggle.generic.name			= "Detail Textures";
+	m_effectsMenu.material_detail_toggle.generic.callBack		= MaterialDetailFunc;
+	m_effectsMenu.material_detail_toggle.itemNames				= onoff_names;
+	m_effectsMenu.material_detail_toggle.generic.statusBar		= "Toggle material passes marked as 'detail'";
 
 	//
 	// misc
@@ -606,13 +606,13 @@ static void EffectsMenu_Init (void)
 	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.dec_max_amount);
 
 	//
-	// shaders
+	// materials
 	//
 
-	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.shader_header);
+	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.material_header);
 
-	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.shader_caustics_toggle);
-	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.shader_detail_toggle);
+	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.material_caustics_toggle);
+	UI_AddItem (&m_effectsMenu.frameWork,		&m_effectsMenu.material_detail_toggle);
 
 	//
 	// misc
@@ -730,14 +730,14 @@ static void EffectsMenu_Draw (void)
 	m_effectsMenu.dec_max_amount.generic.y			= y;
 
 	//
-	// shaders
+	// materials
 	//
-	m_effectsMenu.shader_header.generic.x			= 0;
-	m_effectsMenu.shader_header.generic.y			= y += UIFT_SIZEINC*2;
-	m_effectsMenu.shader_caustics_toggle.generic.x	= 0;
-	m_effectsMenu.shader_caustics_toggle.generic.y	= y += UIFT_SIZEINC;
-	m_effectsMenu.shader_detail_toggle.generic.x	= 0;
-	m_effectsMenu.shader_detail_toggle.generic.y	= y += UIFT_SIZEINC;
+	m_effectsMenu.material_header.generic.x			= 0;
+	m_effectsMenu.material_header.generic.y			= y += UIFT_SIZEINC*2;
+	m_effectsMenu.material_caustics_toggle.generic.x	= 0;
+	m_effectsMenu.material_caustics_toggle.generic.y	= y += UIFT_SIZEINC;
+	m_effectsMenu.material_detail_toggle.generic.x	= 0;
+	m_effectsMenu.material_detail_toggle.generic.y	= y += UIFT_SIZEINC;
 
 	//
 	// misc

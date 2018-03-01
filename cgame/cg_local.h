@@ -46,13 +46,13 @@ enum {
 };
 
 // Generic memory allocation
-#define CG_MemAlloc(size,zeroFill)		cgi.Mem_Alloc((size),(zeroFill),CGTAG_ANY,__FILE__,__LINE__)
+#define CG_MemAlloc(size)				cgi.Mem_Alloc((size),CGTAG_ANY,__FILE__,__LINE__)
 #define CG_MemFree(ptr)					cgi.Mem_Free((ptr),__FILE__,__LINE__)
 #define CG_StrDup(in)					cgi.Mem_StrDup((in),CGTAG_ANY,__FILE__,__LINE__)
 
 // Allocates to a tagged location
 // Useful for releasing entire blocks of memory at a time
-#define CG_AllocTag(size,zeroFill,tag)	cgi.Mem_Alloc((size),(zeroFill),(tag),__FILE__,__LINE__)
+#define CG_AllocTag(size,tag)			cgi.Mem_Alloc((size),(tag),__FILE__,__LINE__)
 #define CG_FreeTag(tag)					cgi.Mem_FreeTag((tag),__FILE__,__LINE__)
 #define CG_TagStrDup(in,tag)			cgi.Mem_StrDup((in),(tag),__FILE__,__LINE__)
 #define CG_MemTagSize(tag)				cgi.Mem_TagSize((tag))
@@ -83,8 +83,8 @@ enum {
 typedef struct clientInfo_s {
 	char				name[MAX_CFGSTRLEN];
 	char				cInfo[MAX_CFGSTRLEN];
-	struct shader_s		*skin;
-	struct shader_s		*icon;
+	struct material_s		*material;
+	struct material_s		*icon;
 	char				iconName[MAX_QPATH];
 	struct refModel_s	*model;
 	struct refModel_s	*weaponModels[MAX_CLIENTWEAPONMODELS];
@@ -113,16 +113,18 @@ typedef struct cgDownloadInfo_s {
 typedef struct cgState_s {
 	byte				currGameMod;
 
-	// Time
-	int					netTime;
-	float				netFrameTime;
+	// Times
+	// Note: there's a net and refresh time because they run asynchronously
+	int					netTime;			// Net time
+	float				netFrameTime;		// Network frame delta (scaled by timescale)
 
-	int					refreshTime;
-	float				refreshFrameTime;
+	int					refreshTime;		// Refresh time
+	float				refreshFrameTime;	// Refresh frame delta (scaled by timescale)
 
-	int					realTime;
+	int					realTime;			// System time
 
 	// View settings
+	qBool				oldAreaBits;
 	refDef_t			refDef;
 	vec4_t				viewBlend;
 
@@ -164,6 +166,7 @@ typedef struct cgState_s {
 	char				*serverMessage;
 	char				*serverName;
 	int					serverProtocol;
+	int					protocolMinorVersion;
 	int					connectCount;
 
 	cgDownloadInfo_t	download;
@@ -172,7 +175,7 @@ typedef struct cgState_s {
 	// Config strings
 	//
 	char				configStrings[MAX_CFGSTRINGS][MAX_CFGSTRLEN];
-	struct shader_s		*imageCfgStrings[MAX_CS_IMAGES];
+	struct material_s		*imageCfgStrings[MAX_CS_IMAGES];
 	struct refModel_s	*modelCfgDraw[MAX_CS_MODELS];
 	struct cBspModel_s	*modelCfgClip[MAX_CS_MODELS];
 	struct sfx_s		*soundCfgStrings[MAX_CS_SOUNDS];
@@ -211,6 +214,12 @@ typedef struct cgState_s {
 	// Enhanced protocol support
 	//
 	qBool				strafeHack;
+	
+	//
+	// Effects
+	//
+	float				goreScale; // 0.0-1.0
+	float				smokeLingerScale; // 0.0-1.0
 } cgState_t;
 
 extern cgState_t	cg;
@@ -276,7 +285,7 @@ void	CG_PredictMovement (void);
 // cg_screen.c
 //
 
-struct shader_s	*CG_RegisterPic (char *name);
+struct material_s	*CG_RegisterPic (char *name);
 
 float	palRed (int index);
 float	palGreen (int index);
@@ -469,9 +478,7 @@ extern cVar_t	*gl_polyblend;
 // cg_draw.c
 //
 
-void		CG_DrawFill (float x, float y, int w, int h, vec4_t color);
-
-void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct shader_s *shader, vec3_t origin, vec3_t angles);
+void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct material_s *mat, vec3_t origin, vec3_t angles);
 
 //
 // cg_main.c
@@ -479,9 +486,9 @@ void		CG_DrawModel (int x, int y, int w, int h, struct refModel_s *model, struct
 
 void		CG_SetRefConfig (refConfig_t *inConfig);
 
-void		CG_UpdateCvars (void);
+void		CG_UpdateCvars (qBool forceUpdate);
 
-void		CG_LoadMap (int playerNum, int serverProtocol, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig);
+void		CG_LoadMap (int playerNum, int serverProtocol, int protocolMinorVersion, qBool attractLoop, qBool strafeHack, refConfig_t *inConfig);
 
 void		CG_Init (void);
 void		CG_Shutdown (void);

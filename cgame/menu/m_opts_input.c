@@ -179,7 +179,7 @@ static void InputMenu_Init (void)
 	m_inputMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_inputMenu.banner.generic.flags	= UIF_NOSELECT|UIF_CENTERED;
 	m_inputMenu.banner.generic.name		= NULL;
-	m_inputMenu.banner.shader			= uiMedia.banners.options;
+	m_inputMenu.banner.mat			= uiMedia.banners.options;
 
 	m_inputMenu.header.generic.type		= UITYPE_ACTION;
 	m_inputMenu.header.generic.flags	= UIF_NOSELECT|UIF_CENTERED|UIF_MEDIUM|UIF_SHADOW;

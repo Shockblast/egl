@@ -29,6 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #define MAPFX_MAXFX		512
 
+typedef struct mapEffect_s mapEffect_t;
+typedef void (*CG_MaxFXFunction_t) (mapEffect_t *);
+
 typedef struct mapEffect_s {
 	vec3_t		origin;
 
@@ -46,7 +49,7 @@ typedef struct mapEffect_s {
 
 	float		delay; // necessary? FIXME
 
-	void		(*function) (struct mapEffect_s *effect);
+	CG_MaxFXFunction_t	function;
 } mapEffect_t;
 
 // <org0 org1 org2> <vel0 vel1 vel2> <accel0 accel1 accel2>
@@ -101,7 +104,7 @@ static void flareThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t
 	}
 
 	// Calculate orientation
-	dist = Vec3DistFast (cg.refDef.viewOrigin, org);
+	dist = Vec3Dist (cg.refDef.viewOrigin, org);
 	*orient = dist * 0.1f;
 
 	// Scale
@@ -125,7 +128,6 @@ static void mfxFlareEntThink (struct cgParticle_s *p, vec3_t org, vec3_t angle, 
 {
 	flareThink (p, org, angle, color, size, orient, time, qTrue);
 }
-
 
 /*
 ==================
@@ -226,22 +228,20 @@ void CG_AddMapFXToList (void)
 	}
 }
 
-
 /*
 ==================
 CG_MapFXFunction
 ==================
 */
-static void *CG_MapFXFunction (int type)
+static CG_MaxFXFunction_t CG_MapFXFunction (int type)
 {
 	switch (type) {
 	case 0:		return &CG_GenericOrigin;		break;
 	case 1:		return &CG_CoronaEffectOne;		break;
 	case 2:		return &CG_CoronaEffectTwo;		break;
-	default:	return &CG_GenericOrigin;		break;
 	}
 
-	return NULL;
+	return &CG_GenericOrigin;
 }
 
 /*

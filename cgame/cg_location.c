@@ -116,7 +116,7 @@ void CG_LoadLocations (char *mapName)
 			break;
 
 		// Allocate
-		loc = CG_AllocTag (sizeof (cg_location_t), qTrue, CGTAG_LOCATION);
+		loc = CG_AllocTag (sizeof (cg_location_t), CGTAG_LOCATION);
 		loc->name = CG_TagStrDup (token, CGTAG_LOCATION);
 		Vec3Copy (location, loc->location);
 
@@ -183,7 +183,8 @@ void CG_Say_Preprocessor (void)
 {
 	char	*locName, *p;
 	char	*sayText;
-	int		locLen, cmdLen, c;
+	size_t	locLen, cmdLen;
+	int		c;
 	trace_t	tr;
 	vec3_t	end;
 
@@ -192,7 +193,7 @@ void CG_Say_Preprocessor (void)
 
 		while (*sayText && *(sayText+1)) {
 			if (sayText[0] == '@') {
-				c = Q_tolower (sayText[1]);
+				c = tolower (sayText[1]);
 
 				locName = NULL;
 				switch (c) {

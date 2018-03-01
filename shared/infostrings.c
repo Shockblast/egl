@@ -38,10 +38,10 @@ Info_Print
 */
 void Info_Print (char *s)
 {
-	char	key[512];
-	char	value[512];
-	char	*o;
-	int		l;
+	char		key[512];
+	char		value[512];
+	char		*o;
+	ptrdiff_t	l;
 
 	if (*s == '\\')
 		s++;

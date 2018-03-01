@@ -30,13 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 typedef struct loopMsg_s {
 	byte		data[MAX_CL_MSGLEN];
-	int			dataLen;
+	size_t		dataLen;
 } loopMsg_t;
 
 typedef struct loopBack_s {
 	loopMsg_t	msgs[MAX_LOOPBACK];
-	int			get;
-	int			send;
+	size_t		get;
+	size_t		send;
 } loopBack_t;
 
 static loopBack_t	net_loopBacks[NS_MAX];
@@ -296,7 +296,7 @@ static qBool NET_GetLoopPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *mes
 NET_SendLoopPacket
 ===================
 */
-static void NET_SendLoopPacket (netSrc_t sock, int length, void *data)
+static void NET_SendLoopPacket (netSrc_t sock, size_t length, void *data)
 {
 	int			i;
 	loopBack_t	*loop;
@@ -339,7 +339,7 @@ qBool NET_GetPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *message)
 		return qFalse;
 
 	fromLen = sizeof (fromSockAddr);
-	ret = recvfrom (netSocket, (char *)message->data, message->maxSize, 0, (struct sockaddr *)&fromSockAddr, &fromLen);
+	ret = recvfrom (netSocket, (char *)message->data, (int) message->maxSize, 0, (struct sockaddr *)&fromSockAddr, &fromLen);
 
 	NET_SockAdrToNetAdr (&fromSockAddr, fromAddr);
 
@@ -372,7 +372,7 @@ qBool NET_GetPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *message)
 	netStats.sizeIn += ret;
 	netStats.packetsIn++;
 
-	if (ret == message->maxSize) {
+	if ((size_t) ret == message->maxSize) {
 		Com_Printf (PRNT_WARNING, "NET_GetPacket: Oversize packet from %s\n", NET_AdrToString (fromAddr));
 		return qFalse;
 	}
@@ -387,7 +387,7 @@ qBool NET_GetPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *message)
 NET_SendPacket
 ===================
 */
-int NET_SendPacket (netSrc_t sock, int length, void *data, netAdr_t *to)
+int NET_SendPacket (netSrc_t sock, size_t length, void *data, netAdr_t *to)
 {
 	int				ret;
 	struct sockaddr	addr;
@@ -419,7 +419,7 @@ int NET_SendPacket (netSrc_t sock, int length, void *data, netAdr_t *to)
 
 	NET_NetAdrToSockAdr (to, &addr);
 
-	ret = sendto (netSocket, data, length, 0, &addr, sizeof (addr));
+	ret = sendto (netSocket, data, (int) length, 0, &addr, sizeof (addr));
 	if (ret == -1) {
 		int error = WSAGetLastError ();
 

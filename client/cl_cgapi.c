@@ -67,7 +67,7 @@ void CL_CGModule_LoadMap (void)
 	SCR_UpdateScreen ();
 
 	// Load the map and media in CGame
-	cge->LoadMap (cl.playerNum, cls.serverProtocol, cl.attractLoop, cl.strafeHack, &cls.refConfig);
+	cge->LoadMap (cl.playerNum, cls.serverProtocol, cls.protocolMinorVersion, cl.attractLoop, cl.strafeHack, &cls.refConfig);
 
 	// Touch before registration ends
 	R_MediaInit ();
@@ -543,9 +543,9 @@ static void CGI_R_RenderScene (refDef_t *rd)
 CGI_Alloc
 ===============
 */
-static void *CGI_Alloc (size_t size, qBool zeroFill, const int tagNum, const char *fileName, const int fileLine)
+static void *CGI_Alloc (size_t size, const int tagNum, const char *fileName, const int fileLine)
 {
-	return _Mem_Alloc (size, zeroFill, cl_cGameSysPool, tagNum, fileName, fileLine);
+	return _Mem_Alloc (size, cl_cGameSysPool, tagNum, fileName, fileLine);
 }
 
 
@@ -554,7 +554,7 @@ static void *CGI_Alloc (size_t size, qBool zeroFill, const int tagNum, const cha
 CGI_ChangeTag
 ===============
 */
-uint32 CGI_ChangeTag (const int tagFrom, const int tagTo)
+size_t CGI_ChangeTag (const int tagFrom, const int tagTo)
 {
 	return _Mem_ChangeTag (cl_cGameSysPool, tagFrom, tagTo);
 }
@@ -565,7 +565,7 @@ uint32 CGI_ChangeTag (const int tagFrom, const int tagTo)
 CGI_Free
 ===============
 */
-static uint32 CGI_Free (const void *ptr, const char *fileName, const int fileLine)
+static size_t CGI_Free (const void *ptr, const char *fileName, const int fileLine)
 {
 	return _Mem_Free (ptr, fileName, fileLine);
 }
@@ -576,7 +576,7 @@ static uint32 CGI_Free (const void *ptr, const char *fileName, const int fileLin
 CGI_FreeTag
 ===============
 */
-static uint32 CGI_FreeTag (const int tagNum, const char *fileName, const int fileLine)
+static size_t CGI_FreeTag (const int tagNum, const char *fileName, const int fileLine)
 {
 	return _Mem_FreeTag (cl_cGameSysPool, tagNum, fileName, fileLine);
 }
@@ -598,7 +598,7 @@ static char *CGI_StrDup (const char *in, const int tagNum, const char *fileName,
 CGI_TagSize
 ===============
 */
-static uint32 CGI_TagSize (const int tagNum)
+static size_t CGI_TagSize (const int tagNum)
 {
 	return _Mem_TagSize (cl_cGameSysPool, tagNum);
 }
@@ -750,7 +750,7 @@ void CL_CGameAPI_Init (void)
 	cgi.R_DrawStringLen				= R_DrawStringLen;
 
 	cgi.R_DrawPic					= R_DrawPic;
-	cgi.R_DrawRectangle				= R_DrawRectangle;
+	cgi.R_DrawFill					= R_DrawFill;
 
 	cgi.R_GetRefConfig				= R_GetRefConfig;
 	cgi.R_GetImageSize				= R_GetImageSize;
@@ -823,7 +823,7 @@ CL_CGameAPI_Shutdown
 */
 void CL_CGameAPI_Shutdown (void)
 {
-	uint32	size;
+	size_t	size;
 
 	if (!cge)
 		return;

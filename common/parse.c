@@ -333,7 +333,7 @@ PS_ConvertEscape
 */
 static qBool PS_ConvertEscape (parse_t *ps, uint32 flags)
 {
-	uint32	len, i;
+	size_t	len, i;
 	char	*source, *scratch;
 
 	// If it's blank then why even try?
@@ -630,7 +630,7 @@ PS_VerifyCharVec
 */
 static qBool PS_VerifyCharVec (char *token, char *target)
 {
-	uint32	len, i;
+	size_t	len, i;
 	int		temp;
 
 	len = strlen (token);
@@ -680,7 +680,7 @@ PS_VerifyByteVec
 */
 static qBool PS_VerifyByteVec (char *token, byte *target)
 {
-	uint32	len, i;
+	size_t	len, i;
 	int		temp;
 
 	len = strlen (token);
@@ -710,7 +710,7 @@ PS_VerifyDoubleVec
 */
 static qBool PS_VerifyDoubleVec (char *token, double *target)
 {
-	uint32	len, i;
+	size_t	len, i;
 	qBool	dot;
 
 	dot = qFalse;
@@ -741,7 +741,7 @@ PS_VerifyFloatVec
 */
 static qBool PS_VerifyFloatVec (char *token, float *target)
 {
-	uint32	len, i;
+	size_t	len, i;
 	qBool	dot;
 
 	dot = qFalse;
@@ -776,7 +776,7 @@ PS_VerifyIntegerVec
 */
 static qBool PS_VerifyIntegerVec (char *token, int *target)
 {
-	uint32	len, i;
+	size_t	len, i;
 
 	len = strlen (token);
 	for (i=0 ; i<len ; i++) {
@@ -801,7 +801,7 @@ PS_VerifyUIntegerVec
 */
 static qBool PS_VerifyUIntegerVec (char *token, uint32 *target)
 {
-	uint32	len, i;
+	size_t	len, i;
 
 	len = strlen (token);
 	for (i=0 ; i<len ; i++) {

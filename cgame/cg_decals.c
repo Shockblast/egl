@@ -30,23 +30,15 @@ static int			cg_numDecals;
 /*
 =============================================================================
 
-	DECAL IMAGING
-
-=============================================================================
-*/
-
-int dRandBloodMark (void)	{ return DT_BLOOD01 + (rand()&15); }
-int dRandGrnBloodMark (void){ return DT_BLOOD01_GRN + (rand()&15); }
-int dRandExploMark (void)	{ return DT_EXPLOMARK + (rand()%3); }
-int dRandSlashMark (void)	{ return DT_SLASH + (rand()%3); }
-
-/*
-=============================================================================
-
 	DECAL MANAGEMENT
 
 =============================================================================
 */
+
+int dRandBloodMark (void) { return DT_BLOOD01 + (rand()&15); }
+int dRandGrnBloodMark (void) { return DT_BLOOD01_GRN + (rand()&15); }
+int dRandExploMark (void) { return DT_EXPLOMARK + (rand()%3); }
+int dRandSlashMark (void) { return DT_SLASH + (rand()%3); }
 
 /*
 ===============
@@ -138,7 +130,7 @@ cgDecal_t *CG_SpawnDecal (float org0,				float org1,					float org2,
 
 	// Create the decal
 	d = CG_AllocDecal ();
-	if (!cgi.R_CreateDecal (&d->refDecal, origin, dir, angle, size)) {
+	if (!cgi.R_CreateDecal (&d->refDecal, cgMedia.decalTable[type%DT_PICTOTAL], cgMedia.decalCoords[type%DT_PICTOTAL], origin, dir, angle, size)) {
 		CG_FreeDecal (d);
 		return NULL;
 	}
@@ -152,7 +144,6 @@ cgDecal_t *CG_SpawnDecal (float org0,				float org1,					float org2,
 
 	d->size = size;
 
-	d->shader = cgMedia.decalTable[type%DT_PICTOTAL];
 	d->flags = flags;
 
 	d->think = think;
@@ -196,7 +187,8 @@ void CG_AddDecals (void)
 	cgDecal_t	*d, *next, *hNode;
 	float		lifeTime, finalTime;
 	float		fade;
-	int			i, flags, type;
+	int			i, type;
+	uint32		flags;
 	vec4_t		color;
 	vec3_t		temp;
 	bvec4_t		outColor;
@@ -255,7 +247,7 @@ void CG_AddDecals (void)
 
 		// Small decal lod
 		if (cg_decalLOD->intVal && d->size < 12) {
-			Vec3Subtract (cg.refDef.viewOrigin, d->refDecal.origin, temp);
+			Vec3Subtract (cg.refDef.viewOrigin, d->refDecal.poly.origin, temp);
 			if (DotProduct(temp, temp)/15000 > 100*d->size)
 				goto nextDecal;
 		}
@@ -302,7 +294,7 @@ void CG_AddDecals (void)
 		outColor[2] = color[2];
 		outColor[3] = color[3] * 255;
 
-		cgi.R_AddDecal (&d->refDecal, outColor, d->shader, 0);
+		cgi.R_AddDecal (&d->refDecal, outColor, 0);
 
 nextDecal:
 		// Kill if instant

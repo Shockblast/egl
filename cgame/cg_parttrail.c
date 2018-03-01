@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 CG_BeamTrail
 ===============
 */
-void __fastcall CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel)
+void CG_BeamTrail (vec3_t start, vec3_t end, int color, float size, float alpha, float alphaVel)
 {
 	vec3_t		dest, move, vec;
 	float		len, dec;
@@ -131,7 +131,7 @@ void CG_BfgTrail (refEntity_t *ent)
 		org[1] = ent->origin[1] + (m_byteDirs[i][1] * (float)sin (ltime + i) * 64) + (forward[0] * BEAMLENGTH);
 		org[2] = ent->origin[2] + (m_byteDirs[i][2] * (float)sin (ltime + i) * 64) + (forward[0] * BEAMLENGTH);
 
-		dist = Vec3DistFast (org, ent->origin) / 90.0f;
+		dist = Vec3Dist (org, ent->origin) / 90.0f;
 
 		size = (2 - (dist * 2 + 0.1f)) * 12;
 		CG_SpawnParticle (
@@ -508,14 +508,14 @@ void CG_GibTrail (vec3_t start, vec3_t end, int flags)
 					0,								0,								0,
 					1.0f,							-0.5f / (0.4f + (frand () * 0.3f)),
 					7.5f + (crand () * 2),			9 + (crand () * 2),
-					pRandBloodMark (),				partFlags,
+					pRandBloodTrail (),				partFlags,
 					pBloodThink,					qTrue,
 					PART_STYLE_QUAD,
 					frand () * 360);
 			}
 
 			// Drip
-			for (i=0 ; i<(clamp (cg_particleGore->floatVal + 1, 1, 11) / 5.0) ; i++) {
+			for (i=0 ; i<((cg.goreScale+0.1f)*10)*0.2f ; i++) {
 				if (!(rand () & 15)) {
 					partFlags = PF_ALPHACOLOR|PF_GRAVITY;
 					if (rand () & 1)
@@ -562,14 +562,14 @@ void CG_GibTrail (vec3_t start, vec3_t end, int flags)
 					0,								0 + (frand () * 90),			0,
 					0.8f + (frand () * 0.2f),		-1.0f / (0.5f + (frand () * 0.3f)),
 					4 + (crand () * 2),				6 + (crand () * 2),
-					pRandGrnBloodMark (),			partFlags,
+					pRandGrnBloodTrail (),			partFlags,
 					pBloodThink,					qTrue,
 					PART_STYLE_QUAD,
 					frand () * 360);
 			}
 
 			// Drip
-			for (i=0 ; i<(clamp (cg_particleGore->floatVal + 1, 1, 11) / 5.0) ; i++) {
+			for (i=0 ; i<((cg.goreScale+0.1f)*10)*0.2f ; i++) {
 				if (!(rand () & 15)) {
 					partFlags = PF_ALPHACOLOR|PF_GRAVITY|PF_GREENBLOOD;
 					if (rand () & 1)
@@ -596,6 +596,12 @@ void CG_GibTrail (vec3_t start, vec3_t end, int flags)
 	}
 }
 
+// FIXME: implement 0.3.2 particle thunks
+static void pGrenadeSmokeThink(struct cgParticle_s *p, vec3_t org, vec3_t angle, vec4_t color, float *size, float *orient, float *time)
+{
+	pSmokeThink(p, org, angle, color, size, orient, time);
+	pLight70Think(p, org, angle, color, size, orient, time);
+}
 
 /*
 ===============
@@ -621,10 +627,9 @@ void CG_GrenadeTrail (vec3_t start, vec3_t end)
 	CG_BubbleEffect (start);
 
 	// Smoke trail
-	dec = 35;
+	dec = 60;
 	Vec3Scale (vec, dec, vec);
 
-	len++, dec++;
 	for (; len>0 ; Vec3Add (move, vec, move)) {
 		len -= dec;
 
@@ -637,10 +642,10 @@ void CG_GrenadeTrail (vec3_t start, vec3_t end)
 			0,								0,								5,
 			rnum,							rnum,							rnum,
 			rnum2,							rnum2,							rnum2,
-			0.8f + (crand () * 0.1f),		-3.0f / (1.0f + cg_particleSmokeLinger->floatVal + (crand () * 0.1f)),
+			0.8f + (crand () * 0.1f),		-3.5f / (1.0f + (cg.smokeLingerScale*10.0f) + (crand () * 0.15f)),
 			6 + (crand () * 3),				20 + (crand () * 5),
-			pRandSmoke (),					PF_SHADE|PF_NOCLOSECULL,
-			pSmokeThink,					qTrue,
+			pRandSmoke (),					PF_NOCLOSECULL,
+			pGrenadeSmokeThink,				qTrue,
 			PART_STYLE_QUAD,
 			frand () * 360);
 	}
@@ -924,7 +929,7 @@ void CG_RailTrail (vec3_t start, vec3_t end)
 		Vec3Subtract (end, start, vec);
 		len = VectorNormalizeFastf (vec);
 
-		dist = Vec3DistFast (start, end);
+		dist = Vec3Dist (start, end);
 		dist++;
 
 		dec = 4;
@@ -1075,7 +1080,7 @@ void CG_RocketTrail (vec3_t start, vec3_t end)
 			0,								0,								0,
 			35.0f,							30.0f,							230.0f,
 			35.0f,							30.0f,							230.0f,
-			0.66f + (crand () * 0.3f),		PART_INSTANT,
+			0.5f + (crand () * 0.2f),		PART_INSTANT,
 			12 + crand (),					15,
 			PT_FLAREGLOW,					0,
 			0,								qFalse,
@@ -1090,7 +1095,7 @@ void CG_RocketTrail (vec3_t start, vec3_t end)
 			0,								0,								0,
 			255.0f,							170.0f,							100.0f,
 			255.0f,							170.0f,							100.0f,
-			0.66f + (crand () * 0.3f),		PART_INSTANT,
+			0.5f + (crand () * 0.2f),		PART_INSTANT,
 			12 + crand (),					15,
 			PT_FLAREGLOW,					0,
 			0,								qFalse,
@@ -1106,7 +1111,7 @@ void CG_RocketTrail (vec3_t start, vec3_t end)
 		0,								0,								0,
 		255.0f,							255.0f,							255.0f,
 		255.0f,							255.0f,							255.0f,
-		0.66f + (crand () * 0.3f),		PART_INSTANT,
+		0.5f + (crand () * 0.2f),		PART_INSTANT,
 		10 + crand (),					15,
 		PT_FLAREGLOW,					0,
 		0,								qFalse,
@@ -1167,19 +1172,20 @@ void CG_RocketTrail (vec3_t start, vec3_t end)
 				frand () * 360);
 
 			// Dots
-			CG_SpawnParticle (
-				move[0] + crand ()*2,				move[1] + crand ()*2,				move[2] + crand ()*2,
-				0,									0,									0,
-				0,									0,									0,
-				crand () * 128,						crand () * 128,						crand () * 128,
-				225 + (frand () * 30),				225 + (frand () * 30),				35 + (frand () * 100),
-				225 + (frand () * 30),				225 + (frand () * 30),				35 + (frand () * 100),
-				0.9f + (crand () * 0.1f),			-1.0f / (0.25f + (crand () * 0.05f)),
-				1 + (crand () * 0.5f),				0.5f + (crand () * 0.25f),
-				PT_GENERIC,							PF_NOCLOSECULL,
-				pFireThink,							qTrue,
-				PART_STYLE_QUAD,
-				frand () * 360);
+			if (!inWater && !(rand () % 5))
+				CG_SpawnParticle (
+					move[0] + crand ()*2,				move[1] + crand ()*2,				move[2] + crand ()*2,
+					0,									0,									0,
+					0,									0,									0,
+					crand () * 128,						crand () * 128,						crand () * 128,
+					225 + (frand () * 30),				225 + (frand () * 30),				35 + (frand () * 100),
+					225 + (frand () * 30),				225 + (frand () * 30),				35 + (frand () * 100),
+					0.9f + (crand () * 0.1f),			-1.0f / (0.25f + (crand () * 0.05f)),
+					1 + (crand () * 0.5f),				0.5f + (crand () * 0.25f),
+					PT_GENERIC,							PF_NOCLOSECULL,
+					pFireThink,							qTrue,
+					PART_STYLE_QUAD,
+					frand () * 360);
 		}
 	}
 
@@ -1188,10 +1194,9 @@ void CG_RocketTrail (vec3_t start, vec3_t end)
 	Vec3Subtract (start, end, vec);
 	len = VectorNormalizeFastf (vec);
 
-	dec = 60;
+	dec = 50;
 	Vec3Scale (vec, dec, vec);
 
-	len += dec;
 	for (; len>0 ; Vec3Add (move, vec, move)) {
 		len -= dec;
 
@@ -1204,10 +1209,10 @@ void CG_RocketTrail (vec3_t start, vec3_t end)
 			0,									0,									7 + (frand () * 10),
 			rnum,								rnum,								rnum,
 			rnum2,								rnum2,								rnum2,
-			0.5f + (crand () * 0.1f),			-1.5f / (1.0f + cg_particleSmokeLinger->floatVal + (crand () * 0.1f)),
-			9 + (crand () * 4),					45 + (frand () * 20),
-			pRandSmoke (),						PF_SHADE,
-			NULL,								qFalse,
+			0.4f + (crand () * 0.1f),			-1.5f / (1.0f + (cg.smokeLingerScale*10.0f) + (crand () * 0.15f)),
+			9 + (crand () * 4),					40 + (frand () * 20),
+			pRandSmoke (),						0,
+			pLight70Think,						qFalse,
 			PART_STYLE_QUAD,
 			frand () * 360.0f);
 	}

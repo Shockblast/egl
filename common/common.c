@@ -78,7 +78,7 @@ uint32 Com_HashFileName (const char *fileName, const int hashSize)
 		else if (ch == '.')
 			break;
 
-		hashValue = hashValue * 33 + Q_tolower (ch);
+		hashValue = hashValue * 33 + tolower (ch);
 	}
 
 	return (hashValue + (hashValue >> 5)) & (hashSize-1);
@@ -99,7 +99,7 @@ uint32 Com_HashGeneric (const char *name, const int hashSize)
 
 	for (i=0, hashValue=0 ; *name ; i++) {
 		ch = *(name++);
-		hashValue = hashValue * 33 + Q_tolower (ch);
+		hashValue = hashValue * 33 + tolower (ch);
 	}
 
 	return (hashValue + (hashValue >> 5)) & (hashSize-1);
@@ -111,7 +111,7 @@ uint32 Com_HashGeneric (const char *name, const int hashSize)
 Com_HashGenericFast
 
 hashSize MUST be a power of two!
-Same as above except no Q_tolower.
+Same as above except no tolower.
 ================
 */
 uint32 Com_HashGenericFast (const char *name, const int hashSize)
@@ -275,6 +275,9 @@ void Com_DevPrintf (comPrint_t flags, char *fmt, ...)
 	Com_ConPrint (flags, msg);
 }
 
+#ifdef _WIN32
+ #include <Windows.h>
+#endif
 
 /*
 =============
@@ -284,7 +287,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error (comError_t code, char *fmt, ...)
+NO_RETURN void Com_Error (comError_t code, char *fmt, ...)
 {
 	va_list			argptr;
 	static char		msg[MAX_COMPRINT];
@@ -329,6 +332,10 @@ void Com_Error (comError_t code, char *fmt, ...)
 
 	default:
 	case ERR_FATAL:
+#ifdef _WIN32
+		DebugBreak();
+#endif
+
 		SV_ServerShutdown (Q_VarArgs ("Server fatal crashed: %s\n", msg), qFalse, qTrue);
 #ifndef DEDICATED_ONLY
 		if (!dedicated->intVal)
@@ -457,17 +464,17 @@ void Com_SetServerState (ssState_t state)
 
 #define MAX_NUM_ARGVS	51
 
-static int	com_argCount;
-static char	*com_argValues[MAX_NUM_ARGVS];
+static size_t	com_argCount;
+static char		*com_argValues[MAX_NUM_ARGVS];
 
 /*
 ================
 Com_InitArgv
 ================
 */
-static void Com_InitArgv (int argc, char **argv)
+static void Com_InitArgv (size_t argc, char **argv)
 {
-	int		i;
+	size_t		i;
 
 	if (argc >= MAX_NUM_ARGVS)
 		Com_Error (ERR_FATAL, "argc >= MAX_NUM_ARGVS");
@@ -487,9 +494,9 @@ static void Com_InitArgv (int argc, char **argv)
 Com_ClearArgv
 ================
 */
-static void Com_ClearArgv (int arg)
+static void Com_ClearArgv (size_t arg)
 {
-	if (arg < 0 || arg >= com_argCount || !com_argValues[arg])
+	if (arg >= com_argCount || !com_argValues[arg])
 		return;
 
 	com_argValues[arg] = "";
@@ -501,7 +508,7 @@ static void Com_ClearArgv (int arg)
 Com_Argc
 ================
 */
-static int Com_Argc (void)
+static size_t Com_Argc (void)
 {
 	return com_argCount;
 }
@@ -512,9 +519,9 @@ static int Com_Argc (void)
 Com_Argv
 ================
 */
-static char *Com_Argv (int arg)
+static char *Com_Argv (size_t arg)
 {
-	if (arg < 0 || arg >= com_argCount || !com_argValues[arg])
+	if (arg >= com_argCount || !com_argValues[arg])
 		return "";
 
 	return com_argValues[arg];
@@ -536,7 +543,7 @@ Other commands are added late, after all initialization is complete.
 */
 static void Com_AddEarlyCommands (qBool clear)
 {
-	int		i;
+	size_t	i;
 	char	*s;
 
 	for (i=0 ; i<Com_Argc () ; i++) {
@@ -569,10 +576,10 @@ will keep the demoloop from immediately starting
 */
 static qBool Com_AddLateCommands (void)
 {
-	int		i, j;
-	int		s;
+	size_t	i, j;
+	size_t	s;
 	char	*text, *build, c;
-	int		argc;
+	size_t	argc;
 	qBool	ret;
 
 	// Build the combined string to parse from
@@ -659,7 +666,7 @@ void Com_Init (int argc, char **argv)
 	com_genericPool = Mem_CreatePool ("Generic");
 
 	// Prepare enough of the subsystems to handle cvar and command buffer management
-	Com_InitArgv (argc, argv);
+	Com_InitArgv ((size_t) argc, argv);
 
 	Cmd_Init ();
 	Cbuf_Init ();
@@ -789,7 +796,7 @@ void Com_Init (int argc, char **argv)
 Com_Frame
 =================
 */
-void __fastcall Com_Frame (int msec)
+void Com_Frame (int msec)
 {
 	char	*conInput;
 

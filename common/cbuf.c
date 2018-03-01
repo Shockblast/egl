@@ -72,8 +72,8 @@ FIXME: actually change the command buffer to do less copying
 */
 void Cbuf_InsertText (char *text)
 {
-	char	temp[COMMAND_BUFFER_SIZE];
-	int		tempLen;
+	static char	temp[COMMAND_BUFFER_SIZE];
+	size_t		tempLen;
 
 	// Copy off any commands still remaining in the exec buffer
 	tempLen = com_cbufText.curSize;
@@ -125,7 +125,7 @@ void Cbuf_Execute (void)
 {
 	char		*text;
 	char		line[1024];
-	int			i, quotes;
+	size_t		i, quotes;
 
 	com_aliasCount = 0;		// Don't allow infinite alias loops
 

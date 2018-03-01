@@ -36,7 +36,7 @@ typedef struct {
 } MD4_CTX;
 
 void MD4Init (MD4_CTX *);
-void MD4Update (MD4_CTX *, unsigned char *, unsigned int);
+void MD4Update (MD4_CTX *, unsigned char *, size_t);
 void MD4Final (unsigned char [16], MD4_CTX *);
   
 
@@ -113,12 +113,12 @@ context->state[3] = 0x10325476;
 }
 
 /* MD4 block update operation. Continues an MD4 message-digest operation, processing another message block, and updating the context. */
-void MD4Update (MD4_CTX *context, unsigned char *input, unsigned int inputLen)
+void MD4Update (MD4_CTX *context, unsigned char *input, size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	size_t i, index, partLen;
 
 	/* Compute number of bytes mod 64 */
-	index = (unsigned int)((context->count[0] >> 3) & 0x3F);
+	index = (size_t)((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
 	if ((context->count[0] += ((UINT4)inputLen << 3))< ((UINT4)inputLen << 3))
@@ -265,7 +265,7 @@ static void Decode (UINT4 *output, unsigned char *input, unsigned int len)
 
 // ==========================================================================
 
-unsigned int Com_BlockChecksum (void *buffer, int length)
+unsigned int Com_BlockChecksum (void *buffer, size_t length)
 {
 	int				digest[4];
 	unsigned int	val;

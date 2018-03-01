@@ -37,6 +37,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "cl_keys.h"
 #include "gui_public.h"
 
+// FIXME
+#ifdef _WIN32
+ #define putenv _putenv
+#endif
+
 #define CL_ANTICHEAT	1
 
 #ifdef USE_CURL
@@ -125,10 +130,10 @@ typedef struct clMedia_s {
 	struct sfx_s		*talkSfx;
 
 	// images
-	struct shader_s		*cinMaterial;
-	struct shader_s		*consoleShader;
-	struct shader_s		*whiteTexture;
-	struct shader_s		*blackTexture;
+	struct material_s		*cinMaterial;
+	struct material_s		*consoleMaterial;
+	struct material_s		*whiteTexture;
+	struct material_s		*blackTexture;
 } clMedia_t;
 
 extern clMedia_t	clMedia;
@@ -185,6 +190,7 @@ typedef struct clientStatic_s {
 	char				serverName[MAX_OSPATH];		// name of server from original connect
 	char				serverNameLast[MAX_OSPATH];
 	int					serverProtocol;				// in case we are doing some kind of version hack
+	int					protocolMinorVersion;
 
 	netAdr_t			netFrom;
 	netMsg_t			netMessage;
@@ -367,7 +373,7 @@ void		CL_DrawConsole (void);
 
 void		CL_WriteDemoPlayerstate (frame_t *from, frame_t *to, netMsg_t *msg);
 void		CL_WriteDemoPacketEntities (const frame_t *from, frame_t *to, netMsg_t *msg);
-void		CL_WriteDemoMessageChunk (byte *buffer, int length, qBool forceFlush);
+void		CL_WriteDemoMessageChunk (byte *buffer, size_t length, qBool forceFlush);
 void		CL_WriteDemoMessageFull (void);
 
 qBool		CL_StartDemoRecording (char *name);
@@ -431,7 +437,7 @@ void		CL_ClearState (void);
 
 void		CL_Disconnect (qBool openMenu);
 
-void		__fastcall CL_Frame (int msec);
+void		CL_Frame (int msec);
 
 void		CL_ClientInit (void);
 void		CL_ClientShutdown (qBool error);
@@ -447,8 +453,6 @@ void		CL_ParseServerMessage (void);
 //
 // cl_screen.c
 //
-
-void		CL_DrawFill (float x, float y, int w, int h, vec4_t color);
 
 void		SCR_BeginLoadingPlaque (void);
 void		SCR_EndLoadingPlaque (void);

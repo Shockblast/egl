@@ -222,7 +222,7 @@ static void StartServerMenu_Init (void)
 			Com_Error (ERR_DROP, "No maps in maps.lst\n");
 
 		// Build a list
-		m_startServerMenu.mapNames = CG_AllocTag (sizeof (char *) * (m_startServerMenu.numMaps + 1), qTrue, CGTAG_MENU);
+		m_startServerMenu.mapNames = CG_AllocTag (sizeof (char *) * (m_startServerMenu.numMaps + 1), CGTAG_MENU);
 		s = list;
 		for (i=0 ; i<m_startServerMenu.numMaps ; i++) {
 			char	scratch[200];
@@ -249,7 +249,7 @@ static void StartServerMenu_Init (void)
 	m_startServerMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_startServerMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_startServerMenu.banner.generic.name		= NULL;
-	m_startServerMenu.banner.shader				= uiMedia.banners.startServer;
+	m_startServerMenu.banner.mat				= uiMedia.banners.startServer;
 
 	m_startServerMenu.startmap_list.generic.type	= UITYPE_SPINCONTROL;
 	m_startServerMenu.startmap_list.generic.name	= "Initial map";

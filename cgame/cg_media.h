@@ -136,23 +136,23 @@ typedef struct cgMedia_s {
 	struct font_s		*defaultFont;
 
 	// engine generated textures
-	struct shader_s		*noTexture;
-	struct shader_s		*whiteTexture;
-	struct shader_s		*blackTexture;
+	struct material_s		*noTexture;
+	struct material_s		*whiteTexture;
+	struct material_s		*blackTexture;
 
 	// console
-	struct shader_s		*consoleShader;
+	struct material_s		*consoleMaterial;
 
 	// load screen images
-	struct shader_s		*loadSplash;
-	struct shader_s		*loadBarPos;
-	struct shader_s		*loadBarNeg;
-	struct shader_s		*loadNoMapShot;
-	struct shader_s		*loadMapShot;
+	struct material_s		*loadSplash;
+	struct material_s		*loadBarPos;
+	struct material_s		*loadBarNeg;
+	struct material_s		*loadNoMapShot;
+	struct material_s		*loadMapShot;
 
-	// screen shaders
-	struct shader_s		*alienInfraredVision;
-	struct shader_s		*infraredGoggles;
+	// screen materials
+	struct material_s		*alienInfraredVision;
+	struct material_s		*infraredGoggles;
 
 	// sounds
 	cgMediaSounds_t		sfx;
@@ -174,31 +174,34 @@ typedef struct cgMedia_s {
 	struct refModel_s	*cyborgDisguiseModel;
 
 	// skins
-	struct shader_s		*maleDisguiseSkin;
-	struct shader_s		*femaleDisguiseSkin;
-	struct shader_s		*cyborgDisguiseSkin;
+	struct material_s		*maleDisguiseSkin;
+	struct material_s		*femaleDisguiseSkin;
+	struct material_s		*cyborgDisguiseSkin;
 
-	struct shader_s		*modelShellGod;
-	struct shader_s		*modelShellHalfDam;
-	struct shader_s		*modelShellDouble;
-	struct shader_s		*modelShellRed;
-	struct shader_s		*modelShellGreen;
-	struct shader_s		*modelShellBlue;
+	struct material_s		*modelShellGod;
+	struct material_s		*modelShellHalfDam;
+	struct material_s		*modelShellDouble;
+	struct material_s		*modelShellRed;
+	struct material_s		*modelShellGreen;
+	struct material_s		*modelShellBlue;
 
 	// images
-	struct shader_s		*crosshairShader;
+	struct material_s		*crosshairMat;
 
-	struct shader_s		*tileBackShader;
+	struct material_s		*tileBackMat;
 
-	struct shader_s		*hudFieldShader;
-	struct shader_s		*hudInventoryShader;
-	struct shader_s		*hudNetShader;
-	struct shader_s		*hudNumShaders[2][11];
-	struct shader_s		*hudPausedShader;
+	struct material_s		*hudFieldMat;
+	struct material_s		*hudInventoryMat;
+	struct material_s		*hudNetMat;
+	struct material_s		*hudNumMats[2][11];
+	struct material_s		*hudPausedMat;
 
 	// particle/decal media
-	struct shader_s		*decalTable[DT_PICTOTAL];
-	struct shader_s		*particleTable[PT_PICTOTAL];
+	struct material_s		*decalTable[DT_PICTOTAL];
+	vec4_t					decalCoords[DT_PICTOTAL];
+
+	struct material_s		*particleTable[PT_PICTOTAL];
+	vec4_t					particleCoords[PT_PICTOTAL];
 } cgMedia_t;
 
 extern cgMedia_t	cgMedia;
@@ -220,36 +223,36 @@ typedef struct uiSoundMedia_s {
 
 // menu banners
 typedef struct uiBannerMedia_s {
-	struct shader_s	*addressBook;
-	struct shader_s	*multiplayer;
-	struct shader_s	*startServer;
-	struct shader_s	*joinServer;
-	struct shader_s	*options;
-	struct shader_s	*game;
-	struct shader_s	*loadGame;
-	struct shader_s	*saveGame;
-	struct shader_s	*video;
-	struct shader_s	*quit;
+	struct material_s	*addressBook;
+	struct material_s	*multiplayer;
+	struct material_s	*startServer;
+	struct material_s	*joinServer;
+	struct material_s	*options;
+	struct material_s	*game;
+	struct material_s	*loadGame;
+	struct material_s	*saveGame;
+	struct material_s	*video;
+	struct material_s	*quit;
 } uiBannerMedia_t;
 
 // menu media
 #define MAINMENU_CURSOR_NUMFRAMES	15
 typedef struct uiMenuMedia_s {
-	struct shader_s	*mainCursors[MAINMENU_CURSOR_NUMFRAMES];
-	struct shader_s	*mainPlaque;
-	struct shader_s	*mainLogo;
+	struct material_s	*mainCursors[MAINMENU_CURSOR_NUMFRAMES];
+	struct material_s	*mainPlaque;
+	struct material_s	*mainLogo;
 
-	struct shader_s	*mainGame;
-	struct shader_s	*mainMultiplayer;
-	struct shader_s	*mainOptions;
-	struct shader_s	*mainVideo;
-	struct shader_s	*mainQuit;
+	struct material_s	*mainGame;
+	struct material_s	*mainMultiplayer;
+	struct material_s	*mainOptions;
+	struct material_s	*mainVideo;
+	struct material_s	*mainQuit;
 
-	struct shader_s	*mainGameSel;
-	struct shader_s	*mainMultiplayerSel;
-	struct shader_s	*mainOptionsSel;
-	struct shader_s	*mainVideoSel;
-	struct shader_s	*mainQuitSel;
+	struct material_s	*mainGameSel;
+	struct material_s	*mainMultiplayerSel;
+	struct material_s	*mainOptionsSel;
+	struct material_s	*mainVideoSel;
+	struct material_s	*mainQuitSel;
 } uiMenuMedia_t;
 
 // ==========================================================================
@@ -259,11 +262,11 @@ typedef struct uiMedia_s {
 	uiSoundMedia_t		sounds;
 
 	// background images
-	struct shader_s		*bgBig;
+	struct material_s		*bgBig;
 
 	// cursor images
-	struct shader_s		*cursorShader;
-	struct shader_s		*cursorHoverShader;
+	struct material_s		*cursorMat;
+	struct material_s		*cursorHoverMat;
 
 	// menu items
 	uiBannerMedia_t		banners;
@@ -284,4 +287,4 @@ void	CG_MapInit (void);
 void	CG_ShutdownMap (void);
 
 void	CG_SoundMediaInit (void);
-void	CG_CrosshairShaderInit (void);
+void	CG_CrosshairMaterialInit (void);

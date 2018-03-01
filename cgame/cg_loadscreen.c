@@ -78,7 +78,7 @@ static void CG_DrawLoadingScreen (void)
 		return;
 
 	// Fill back with black
-	CG_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, Q_colorBlack);
+	cgi.R_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, Q_colorBlack);
 
 	if (!cgMedia.loadScreenPrepped)
 		CG_PrepLoadScreen ();
@@ -111,7 +111,7 @@ static void CG_DrawLoadingScreen (void)
 	}
 
 	// Map image
-	CG_DrawFill (cg.refConfig.vidWidth - ((18+260)*CG_HSCALE), 18*CG_VSCALE, 260*CG_HSCALE, 260*CG_VSCALE, Q_colorBlack);
+	cgi.R_DrawFill (cg.refConfig.vidWidth - ((18+260)*CG_HSCALE), 18*CG_VSCALE, 260*CG_HSCALE, 260*CG_VSCALE, Q_colorBlack);
 	cgi.R_DrawPic (cgMedia.loadMapShot ? cgMedia.loadMapShot : cgMedia.loadNoMapShot, 0,
 		cg.refConfig.vidWidth - ((20+256)*CG_HSCALE), 20*CG_VSCALE,
 		256*CG_HSCALE, 256*CG_VSCALE,
@@ -244,7 +244,7 @@ void CG_DrawConnectScreen (void)
 
 	// Clear the screen between map changes
 	if (cg.mapLoaded) {
-		CG_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, Q_colorBlack);
+		cgi.R_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, Q_colorBlack);
 		return;
 	}
 
@@ -252,7 +252,7 @@ void CG_DrawConnectScreen (void)
 
 	// Only draw the background if the loading screen isn't up
 	if (!cg.mapLoading)
-		CG_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, Q_colorBlack);
+		cgi.R_DrawFill (0, 0, cg.refConfig.vidWidth, cg.refConfig.vidHeight, Q_colorBlack);
 
 	if (!cg.localServer) {
 		Q_snprintfz (buffer, sizeof (buffer), "Connecting to: %s", cg.serverName);

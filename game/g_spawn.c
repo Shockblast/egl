@@ -326,7 +326,7 @@ ED_NewString
 char *ED_NewString (char *string)
 {
 	char	*newb, *new_p;
-	int		i,l;
+	size_t	i,l;
 	
 	l = strlen(string) + 1;
 
@@ -382,7 +382,8 @@ static void ED_ParseField (char *key, char *value, edict_t *ent)
 				*(char **)(b+f->ofs) = ED_NewString (value);
 				break;
 			case F_VECTOR:
-				sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
+				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3)
+					Com_DevPrintf (PRNT_WARNING, "Couldn't decode vector");
 				((float *)(b+f->ofs))[0] = vec[0];
 				((float *)(b+f->ofs))[1] = vec[1];
 				((float *)(b+f->ofs))[2] = vec[2];
@@ -432,16 +433,16 @@ static char *ED_ParseEdict (char *data, edict_t *ent)
 		if (token[0] == '}')
 			break;
 		if (!data)
-			gi.error ("ED_ParseEntity: EOF without closing brace");
+			Com_Error (ERR_FATAL, "ED_ParseEntity: EOF without closing brace");
 
 		Q_strncpyz (keyName, token, sizeof (keyName));
 		
 		// Parse value	
 		token = Com_Parse (&data);
 		if (!data)
-			gi.error ("ED_ParseEntity: EOF without closing brace");
+			Com_Error (ERR_FATAL, "ED_ParseEntity: EOF without closing brace");
 		if (token[0] == '}')
-			gi.error ("ED_ParseEntity: closing brace without data");
+			Com_Error (ERR_FATAL, "ED_ParseEntity: closing brace without data");
 
 		init = qTrue;	
 
@@ -561,7 +562,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		if (!entities)
 			break;
 		if (token[0] != '{')
-			gi.error ("ED_LoadFromFile: found %s when expecting {", token);
+			Com_Error (ERR_FATAL, "ED_LoadFromFile: found %s when expecting {", token);
 
 		if (!ent)
 			ent = g_edicts;

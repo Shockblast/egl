@@ -53,8 +53,7 @@ void R_ModelBounds (refModel_t *model, vec3_t mins, vec3_t maxs)
 
 // ============================================================================
 
-#define R_ModAllocZero(model,size) _Mem_Alloc ((size),qTrue,ri.modelSysPool,(model)->memTag,__FILE__,__LINE__)
-#define R_ModAlloc(model,size) _Mem_Alloc ((size),qFalse,ri.modelSysPool,(model)->memTag,__FILE__,__LINE__)
+#define R_ModAlloc(model,size) _Mem_Alloc ((size),ri.modelSysPool,(model)->memTag,__FILE__,__LINE__)
 
 /*
 ===============
@@ -131,9 +130,9 @@ static qBool R_LoadMD2Model (refModel_t *model)
 	int				skinWidth, skinHeight;
 	int				numVerts, numIndexes;
 	double			isw, ish;
-	int				indRemap[MD2_MAX_TRIANGLES*3];
-	index_t			tempIndex[MD2_MAX_TRIANGLES*3];
-	index_t			tempSTIndex[MD2_MAX_TRIANGLES*3];
+	static int		indRemap[MD2_MAX_TRIANGLES*3];
+	static index_t	tempIndex[MD2_MAX_TRIANGLES*3];
+	static index_t	tempSTIndex[MD2_MAX_TRIANGLES*3];
 	dMd2Coord_t		*inCoord;
 	dMd2Frame_t		*inFrame;
 	dMd2Header_t	*inModel;
@@ -410,8 +409,8 @@ static qBool R_LoadMD2Model (refModel_t *model)
 			continue;
 
 		Q_strncpyz (outSkins->name, temp, sizeof (outSkins->name));
-		outSkins->skin = R_RegisterSkin (outSkins->name);
-		if (!outSkins->skin)
+		outSkins->material = R_RegisterSkin (outSkins->name);
+		if (!outSkins->material)
 			Com_DevPrintf (PRNT_WARNING, "R_LoadMD2Model: '%s' could not load skin '%s'\n", model->name, outSkins->name);
 	}
 
@@ -435,7 +434,7 @@ R_StripModelLODSuffix
 */
 void R_StripModelLODSuffix (char *name)
 {
-	int		len;
+	size_t	len;
 	int		lodNum;
 
 	len = strlen (name);
@@ -593,7 +592,7 @@ static qBool R_LoadMD3Model (refModel_t *model)
 		Q_strncpyz (outMesh->name, inMesh->meshName, sizeof (outMesh->name));
 		if (strncmp ((const char *)inMesh->ident, MD3_HEADERSTR, 4)) {
 			FS_FreeFile (buffer);
-			Com_Printf (PRNT_ERROR, "R_LoadMD3Model: mesh '%s' in model '%s' has wrong id (%i != %i)", inMesh->meshName, model->name, LittleLong ((int)inMesh->ident), MD3_HEADER);
+			Com_Printf (PRNT_ERROR, "R_LoadMD3Model: mesh '%s' in model '%s' has wrong id (%i != %i)", inMesh->meshName, model->name, LittleLong (*(int* )inMesh->ident), MD3_HEADER);
 			return qFalse;
 		}
 
@@ -657,9 +656,9 @@ static qBool R_LoadMD3Model (refModel_t *model)
 				continue;
 
 			Q_strncpyz (outSkin->name, inSkin->name, sizeof (outSkin->name));
-			outSkin->skin = R_RegisterSkin (outSkin->name);
+			outSkin->material = R_RegisterSkin (outSkin->name);
 
-			if (!outSkin->skin)
+			if (!outSkin->material)
 				Com_DevPrintf (PRNT_WARNING, "R_LoadMD3Model: '%s' could not load skin '%s' on mesh '%s'\n",
 								model->name, outSkin->name, outMesh->name);
 		}
@@ -836,11 +835,11 @@ static qBool R_LoadSP2Model (refModel_t *model)
 		outFrames->radius	= (float)sqrt ((outFrames->width*outFrames->width) + (outFrames->height*outFrames->height));
 		model->radius		= max (model->radius, outFrames->radius);
 
-		// Register the shader
+		// Register the material
 		Q_strncpyz (outFrames->name, inFrames->name, sizeof (outFrames->name));
-		outFrames->skin = R_RegisterPoly (outFrames->name);
+		outFrames->material = R_RegisterPoly (outFrames->name);
 
-		if (!outFrames->skin)
+		if (!outFrames->material)
 			Com_DevPrintf (PRNT_WARNING, "R_LoadSP2Model: '%s' could not load skin '%s'\n", model->name, outFrames->name);
 	}
 
@@ -880,14 +879,14 @@ R_GetImageTCSize
 This is just a duplicate of R_GetImageSize modified to get the texcoord size for Q2BSP surfaces
 ================
 */
-static void R_GetImageTCSize (shader_t *shader, int *tcWidth, int *tcHeight)
+static void R_GetImageTCSize (material_t *mat, int *tcWidth, int *tcHeight)
 {
-	shaderPass_t	*pass;
+	matPass_t	*pass;
 	image_t			*image;
 	int				i;
 	int				passNum;
 
-	if (!shader || !shader->numPasses) {
+	if (!mat || !mat->numPasses) {
 		if (tcWidth)
 			*tcWidth = 64;
 		if (tcHeight)
@@ -897,8 +896,8 @@ static void R_GetImageTCSize (shader_t *shader, int *tcWidth, int *tcHeight)
 
 	image = NULL;
 	passNum = 0;
-	for (i=0, pass=shader->passes ; i<shader->numPasses ; pass++, i++) {
-		if (passNum++ != shader->sizeBase)
+	for (i=0, pass=mat->passes ; i<mat->numPasses ; pass++, i++) {
+		if (passNum++ != mat->sizeBase)
 			continue;
 
 		image = pass->animImages[0];
@@ -995,7 +994,7 @@ static qBool SubdivideQ2Polygon (refModel_t *model, mBspSurface_t *surf, int num
 	}
 
 	// Add a point in the center to help keep warp valid
-	buffer = R_ModAllocZero (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t)));
+	buffer = R_ModAlloc (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t)));
 	poly = (mQ2BspPoly_t *)buffer;
 
 	poly->mesh.numVerts = numVerts+2;
@@ -1175,7 +1174,7 @@ static qBool SubdivideQ2BSPLMSurface_r (refModel_t *model, mBspSurface_t *surf, 
 	}
 
 	// Add a point in the center to help keep warp valid
-	buffer = R_ModAllocZero (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t) * 2));
+	buffer = R_ModAlloc (model, sizeof (mQ2BspPoly_t) + ((numVerts+2) * sizeof (bvec4_t)) + ((numVerts+2) * sizeof (vec3_t) * 2) + ((numVerts+2) * sizeof (vec2_t) * 2));
 	poly = (mQ2BspPoly_t *)buffer;
 
 	poly->mesh.numVerts = numVerts+2;
@@ -1323,14 +1322,14 @@ static qBool R_BuildQ2BSPSurface (refModel_t *model, mBspSurface_t *surf)
 
 	// Allocate space
 	if (ti->flags & (SURF_TEXINFO_SKY|SURF_TEXINFO_WARP)) {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (numVerts * sizeof (vec3_t) * 2)
 			+ (numIndexes * sizeof (index_t))
 			+ (numVerts * sizeof (vec2_t))
 			+ (numVerts * sizeof (bvec4_t)));
 	}
 	else {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (numVerts * sizeof (vec3_t) * 2)
 			+ (numIndexes * sizeof (index_t))
 			+ (numVerts * sizeof (vec2_t) * 2)
@@ -1471,14 +1470,14 @@ static qBool R_ConvertQ2BSPSurface (refModel_t *model, mBspSurface_t *surf)
 
 	// Allocate space
 	if (ti->flags & (SURF_TEXINFO_SKY|SURF_TEXINFO_WARP)) {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (totalVerts * sizeof (vec3_t) * 2)
 			+ (totalIndexes * sizeof (index_t))
 			+ (totalVerts * sizeof (vec2_t))
 			+ (totalVerts * sizeof (bvec4_t)));
 	}
 	else {
-		buffer = R_ModAllocZero (model, sizeof (mesh_t)
+		buffer = R_ModAlloc (model, sizeof (mesh_t)
 			+ (totalVerts * sizeof (vec3_t) * 2)
 			+ (totalIndexes * sizeof (index_t))
 			+ (totalVerts * sizeof (vec2_t) * 2)
@@ -1754,7 +1753,7 @@ static qBool R_LoadQ2BSPVertexes (refModel_t *model, byte *byteBase, const dQ2Bs
 	}
 
 	model->q2BspModel.numVertexes = lump->fileLen / sizeof (*in);
-	model->q2BspModel.vertexes = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numVertexes);
+	model->q2BspModel.vertexes = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numVertexes);
 
 	//
 	// Byte swap
@@ -1787,7 +1786,7 @@ static qBool R_LoadQ2BSPEdges (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->q2BspModel.numEdges = lump->fileLen / sizeof (*in);
-	model->q2BspModel.edges = out = R_ModAllocZero (model, sizeof (*out) * (model->q2BspModel.numEdges + 1));
+	model->q2BspModel.edges = out = R_ModAlloc (model, sizeof (*out) * (model->q2BspModel.numEdges + 1));
 
 	//
 	// Byte swap
@@ -1824,7 +1823,7 @@ static qBool R_LoadQ2BSPSurfEdges (refModel_t *model, byte *byteBase, const dQ2B
 		return qFalse;
 	}
 
-	model->q2BspModel.surfEdges = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numSurfEdges);
+	model->q2BspModel.surfEdges = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numSurfEdges);
 
 	//
 	// Byte swap
@@ -1848,7 +1847,7 @@ static qBool R_LoadQ2BSPLighting (refModel_t *model, byte *byteBase, const dQ2Bs
 		return qTrue;
 	}
 
-	model->q2BspModel.lightData = R_ModAllocZero (model, lump->fileLen);	
+	model->q2BspModel.lightData = R_ModAlloc (model, lump->fileLen);	
 	memcpy (model->q2BspModel.lightData, byteBase + lump->fileOfs, lump->fileLen);
 
 	return qTrue;
@@ -1874,7 +1873,7 @@ static qBool R_LoadQ2BSPPlanes (refModel_t *model, byte *byteBase, const dQ2BspL
 	}
 
 	model->bspModel.numPlanes = lump->fileLen / sizeof (*in);
-	model->bspModel.planes = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numPlanes * 2);
+	model->bspModel.planes = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numPlanes * 2);
 
 	//
 	// Byte swap
@@ -1914,7 +1913,7 @@ static qBool R_LoadQ2BSPTexInfo (refModel_t *model, byte *byteBase, const dQ2Bsp
 	}
 
 	model->q2BspModel.numTexInfo = lump->fileLen / sizeof (*in);
-	model->q2BspModel.texInfo = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numTexInfo);
+	model->q2BspModel.texInfo = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numTexInfo);
 
 	//
 	// Byte swap
@@ -1938,36 +1937,36 @@ static qBool R_LoadQ2BSPTexInfo (refModel_t *model, byte *byteBase, const dQ2Bsp
 		//
 		out->surfParams = 0;
 		if (out->flags & SURF_TEXINFO_TRANS33)
-			out->surfParams |= SHADER_SURF_TRANS33;
+			out->surfParams |= MAT_SURF_TRANS33;
 		if (out->flags & SURF_TEXINFO_TRANS66)
-			out->surfParams |= SHADER_SURF_TRANS66;
+			out->surfParams |= MAT_SURF_TRANS66;
 		if (out->flags & SURF_TEXINFO_WARP)
-			out->surfParams |= SHADER_SURF_WARP;
+			out->surfParams |= MAT_SURF_WARP;
 		if (out->flags & SURF_TEXINFO_FLOWING)
-			out->surfParams |= SHADER_SURF_FLOWING;
+			out->surfParams |= MAT_SURF_FLOWING;
 		if (!(out->flags & SURF_TEXINFO_WARP))
-			out->surfParams |= SHADER_SURF_LIGHTMAP;
+			out->surfParams |= MAT_SURF_LIGHTMAP;
 
 		//
-		// Register textures and shaders
+		// Register textures and materials
 		//
 		if (out->flags & SURF_TEXINFO_SKY) {
-			out->shader = r_noShaderSky;
+			out->mat = r_noMaterialSky;
 		}
 		else {
 			Q_snprintfz (out->texName, sizeof (out->texName), "textures/%s.wal", in->texture);
-			out->shader = R_RegisterTexture (out->texName, out->surfParams);
-			if (!out->shader) {
+			out->mat = R_RegisterTexture (out->texName, out->surfParams);
+			if (!out->mat) {
 				Com_Printf (PRNT_WARNING, "Couldn't load %s\n", out->texName);
 
-				if (out->surfParams & SHADER_SURF_LIGHTMAP)
-					out->shader = r_noShaderLightmap;
+				if (out->surfParams & MAT_SURF_LIGHTMAP)
+					out->mat = r_noMaterialLightmap;
 				else
-					out->shader = r_noShader;
+					out->mat = r_noMaterial;
 			}
 		}
 
-		R_GetImageTCSize (out->shader, &out->width, &out->height);
+		R_GetImageTCSize (out->mat, &out->width, &out->height);
 	}
 
 	//
@@ -2003,7 +2002,7 @@ static qBool R_LoadQ2BSPFaces (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->bspModel.numSurfaces = lump->fileLen / sizeof (*in);
-	model->bspModel.surfaces = out= R_ModAllocZero (model, sizeof (*out) * model->bspModel.numSurfaces);
+	model->bspModel.surfaces = out= R_ModAlloc (model, sizeof (*out) * model->bspModel.numSurfaces);
 
 	R_Q2BSP_BeginBuildingLightmaps ();
 
@@ -2068,8 +2067,8 @@ static qBool R_LoadQ2BSPFaces (refModel_t *model, byte *byteBase, const dQ2BspLu
 			}
 
 			// WARP surfaces have no lightmap
-			if (out->q2_texInfo->shader && out->q2_texInfo->shader->flags & SHADER_SUBDIVIDE) {
-				if (!R_SubdivideQ2BSPSurface (model, out, out->q2_texInfo->shader->subdivide)
+			if (out->q2_texInfo->mat && out->q2_texInfo->mat->flags & MAT_SUBDIVIDE) {
+				if (!R_SubdivideQ2BSPSurface (model, out, out->q2_texInfo->mat->subdivide)
 				|| !R_ConvertQ2BSPSurface (model, out))
 					return qFalse;
 			}
@@ -2080,8 +2079,8 @@ static qBool R_LoadQ2BSPFaces (refModel_t *model, byte *byteBase, const dQ2BspLu
 			// The rest do
 			R_Q2BSP_CreateSurfaceLightmap (out);
 
-			if (out->q2_texInfo->shader && out->q2_texInfo->shader->flags & SHADER_SUBDIVIDE) {
-				if (!R_SubdivideQ2BSPLMSurface (model, out, out->q2_texInfo->shader->subdivide)
+			if (out->q2_texInfo->mat && out->q2_texInfo->mat->flags & MAT_SUBDIVIDE) {
+				if (!R_SubdivideQ2BSPLMSurface (model, out, out->q2_texInfo->mat->subdivide)
 				|| !R_ConvertQ2BSPSurface (model, out))
 					return qFalse;
 			}
@@ -2114,7 +2113,7 @@ static qBool R_LoadQ2BSPMarkSurfaces (refModel_t *model, byte *byteBase, const d
 	}
 
 	model->q2BspModel.numMarkSurfaces = lump->fileLen / sizeof (*in);
-	model->q2BspModel.markSurfaces = out = R_ModAllocZero (model, sizeof (*out) * model->q2BspModel.numMarkSurfaces);
+	model->q2BspModel.markSurfaces = out = R_ModAlloc (model, sizeof (*out) * model->q2BspModel.numMarkSurfaces);
 
 	//
 	// Byte swap
@@ -2146,7 +2145,7 @@ static qBool R_LoadQ2BSPVisibility (refModel_t *model, byte *byteBase, const dQ2
 		return qTrue;
 	}
 
-	model->q2BspModel.vis = R_ModAllocZero (model, lump->fileLen);	
+	model->q2BspModel.vis = R_ModAlloc (model, lump->fileLen);	
 	memcpy (model->q2BspModel.vis, byteBase + lump->fileOfs, lump->fileLen);
 
 	model->q2BspModel.vis->numClusters = LittleLong (model->q2BspModel.vis->numClusters);
@@ -2175,9 +2174,9 @@ static qBool R_Q2BSP_SurfPotentiallyVisible (mBspSurface_t *surf)
 
 	if (!surf->mesh || RB_InvalidMesh (surf->mesh))
 		return qFalse;
-	if (!surf->q2_texInfo->shader)
+	if (!surf->q2_texInfo->mat)
 		return qFalse;
-	if (!surf->q2_texInfo->shader->numPasses)
+	if (!surf->q2_texInfo->mat->numPasses)
 		return qFalse;
 
 	return qTrue;
@@ -2195,7 +2194,7 @@ static qBool R_Q2BSP_SurfPotentiallyFragmented (mBspSurface_t *surf)
 {
 	if (surf->q2_texInfo->flags & SURF_TEXINFO_NODRAW)
 		return qFalse;
-	if (surf->q2_texInfo->shader->flags & SHADER_NOMARK)
+	if (surf->q2_texInfo->mat->flags & MAT_NOMARK)
 		return qFalse;
 
 	return qTrue;
@@ -2217,7 +2216,7 @@ static qBool R_LoadQ2BSPLeafs (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->bspModel.numLeafs = lump->fileLen / sizeof (*in);
-	model->bspModel.leafs = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numLeafs);
+	model->bspModel.leafs = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numLeafs);
 
 	//
 	// Byte swap
@@ -2284,7 +2283,7 @@ static qBool R_LoadQ2BSPLeafs (refModel_t *model, byte *byteBase, const dQ2BspLu
 		if (!numFragSurfaces)
 			out->q2_firstDecalSurface = NULL;
 
-		out->q2_firstDecalSurface = R_ModAllocZero (model, sizeof (mBspSurface_t *) * (numFragSurfaces + 1));
+		out->q2_firstDecalSurface = R_ModAlloc (model, sizeof (mBspSurface_t *) * (numFragSurfaces + 1));
 
 		// Store fragmentable surfaces
 		numFragSurfaces = 0;
@@ -2331,7 +2330,7 @@ static qBool R_LoadQ2BSPNodes (refModel_t *model, byte *byteBase, const dQ2BspLu
 	}
 
 	model->bspModel.numNodes = lump->fileLen / sizeof (*in);
-	model->bspModel.nodes = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numNodes);
+	model->bspModel.nodes = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numNodes);
 
 	//
 	// Byte swap
@@ -2402,7 +2401,7 @@ static qBool R_LoadQ2BSPNodes (refModel_t *model, byte *byteBase, const dQ2BspLu
 		if (numLitSurfs)
 			size += numLitSurfs + 1;
 		size *= sizeof (mBspSurface_t *);
-		buffer = R_ModAllocZero (model, size);
+		buffer = R_ModAlloc (model, size);
 
 		out->q2_firstVisSurface = (mBspSurface_t **)buffer;
 		buffer += sizeof (mBspSurface_t *) * (numVisSurfs + 1);
@@ -2461,8 +2460,8 @@ static qBool R_LoadQ2BSPSubModels (refModel_t *model, byte *byteBase, const dQ2B
 		return qFalse;
 	}
 
-	model->bspModel.subModels = out = R_ModAllocZero (model, sizeof (*out) * model->bspModel.numSubModels);
-	model->bspModel.inlineModels = R_ModAllocZero (model, sizeof (refModel_t) * model->bspModel.numSubModels);
+	model->bspModel.subModels = out = R_ModAlloc (model, sizeof (*out) * model->bspModel.numSubModels);
+	model->bspModel.inlineModels = R_ModAlloc (model, sizeof (refModel_t) * model->bspModel.numSubModels);
 
 	//
 	// Byte swap
@@ -2609,7 +2608,7 @@ mQ3BspFog_t *R_FogForSphere (const vec3_t center, const float radius)
 	defaultFog = NULL;
 	fog = ri.scn.worldModel->q3BspModel.fogs;
 	for (i=0 ; i<ri.scn.worldModel->q3BspModel.numFogs ; i++, fog++) {
-		if (!fog->shader || !fog->name[0])
+		if (!fog->mat || !fog->name[0])
 			continue;
 		if (!fog->visiblePlane) {
 			defaultFog = fog;
@@ -2724,8 +2723,8 @@ qBool R_Q3BSP_SurfPotentiallyLit (mBspSurface_t *surf)
 
 	if (surf->q3_faceType == FACETYPE_FLARE)
 		return qFalse;
-	if (surf->q3_shaderRef->shader
-	&& surf->q3_shaderRef->shader->flags & (SHADER_FLARE|SHADER_SKY))
+	if (surf->q3_shaderRef->mat
+	&& surf->q3_shaderRef->mat->flags & (MAT_FLARE|MAT_SKY))
 		return qFalse;
 
 	return qTrue;
@@ -2744,9 +2743,9 @@ qBool R_Q3BSP_SurfPotentiallyVisible (mBspSurface_t *surf)
 
 	if (!surf->mesh || RB_InvalidMesh (surf->mesh))
 		return qFalse;
-	if (!surf->q3_shaderRef->shader)
+	if (!surf->q3_shaderRef->mat)
 		return qFalse;
-	if (!surf->q3_shaderRef->shader->numPasses)
+	if (!surf->q3_shaderRef->mat->numPasses)
 		return qFalse;
 
 	return qTrue;
@@ -2777,7 +2776,7 @@ static qBool R_LoadQ3BSPLighting (refModel_t *model, byte *byteBase, const dQ3Bs
 		}
 
 		model->q3BspModel.numLightmaps = lightLump->fileLen / Q3LIGHTMAP_SIZE;
-		model->q3BspModel.lightmapRects = R_ModAllocZero (model, model->q3BspModel.numLightmaps * sizeof (*model->q3BspModel.lightmapRects));
+		model->q3BspModel.lightmapRects = R_ModAlloc (model, model->q3BspModel.numLightmaps * sizeof (*model->q3BspModel.lightmapRects));
 	}
 
 	// Load the light grid
@@ -2788,7 +2787,7 @@ static qBool R_LoadQ3BSPLighting (refModel_t *model, byte *byteBase, const dQ3Bs
 
 	inGrid = (void *)(byteBase + gridLump->fileOfs);
 	model->q3BspModel.numLightGridElems = gridLump->fileLen / sizeof (*inGrid);
-	model->q3BspModel.lightGrid = R_ModAllocZero (model, model->q3BspModel.numLightGridElems * sizeof (*model->q3BspModel.lightGrid));
+	model->q3BspModel.lightGrid = R_ModAlloc (model, model->q3BspModel.numLightGridElems * sizeof (*model->q3BspModel.lightGrid));
 
 	memcpy (model->q3BspModel.lightGrid, inGrid, model->q3BspModel.numLightGridElems * sizeof (*model->q3BspModel.lightGrid));
 
@@ -2808,7 +2807,7 @@ static qBool R_LoadQ3BSPVisibility (refModel_t *model, byte *byteBase, const dQ3
 		return qTrue;
 	}
 
-	model->q3BspModel.vis = R_ModAllocZero (model, lump->fileLen);
+	model->q3BspModel.vis = R_ModAlloc (model, lump->fileLen);
 	memcpy (model->q3BspModel.vis, byteBase + lump->fileOfs, lump->fileLen);
 
 	model->q3BspModel.vis->numClusters = LittleLong (model->q3BspModel.vis->numClusters);
@@ -2839,7 +2838,7 @@ static qBool R_LoadQ3BSPVertexes (refModel_t *model, byte *byteBase, const dQ3Bs
 	}
 	count = lump->fileLen / sizeof(*in);
 
-	buffer = R_ModAllocZero (model, (count * sizeof (vec3_t) * 2)
+	buffer = R_ModAlloc (model, (count * sizeof (vec3_t) * 2)
 		+ (count * sizeof (vec2_t) * 2)
 		+ (count * sizeof (bvec4_t)));
 
@@ -2925,8 +2924,8 @@ static qBool R_LoadQ3BSPSubmodels (refModel_t *model, byte *byteBase, const dQ3B
 		return qFalse;
 	}
 
-	model->bspModel.subModels = out = R_ModAllocZero (model, model->bspModel.numSubModels * sizeof (*out));
-	model->bspModel.inlineModels = R_ModAllocZero (model, sizeof (refModel_t) * model->bspModel.numSubModels);
+	model->bspModel.subModels = out = R_ModAlloc (model, model->bspModel.numSubModels * sizeof (*out));
+	model->bspModel.inlineModels = R_ModAlloc (model, sizeof (refModel_t) * model->bspModel.numSubModels);
 
 	for (i=0 ; i<model->bspModel.numSubModels ; i++, in++, out++) {
 		// Spread the mins / maxs by a pixel
@@ -2964,13 +2963,13 @@ static qBool R_LoadQ3BSPShaderRefs (refModel_t *model, byte *byteBase, const dQ3
 	}
 
 	model->q3BspModel.numShaderRefs = lump->fileLen / sizeof (*in);
-	model->q3BspModel.shaderRefs = out = R_ModAllocZero (model, model->q3BspModel.numShaderRefs * sizeof (*out));
+	model->q3BspModel.shaderRefs = out = R_ModAlloc (model, model->q3BspModel.numShaderRefs * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numShaderRefs ; i++, in++, out++) {
 		Q_strncpyz (out->name, in->name, sizeof (out->name));
 		out->flags = LittleLong (in->flags);
 		out->contents = LittleLong (in->contents);
-		out->shader = NULL;
+		out->mat = NULL;
 	}
 
 	return qTrue;
@@ -2994,7 +2993,7 @@ static mesh_t *R_CreateQ3BSPMeshForSurface (refModel_t *model, dQ3BspFace_t *in,
 		{
 			int r, g, b;
 
-			mesh = (mesh_t *)R_ModAllocZero (model, sizeof (mesh_t) + sizeof (vec3_t));
+			mesh = (mesh_t *)R_ModAlloc (model, sizeof (mesh_t) + sizeof (vec3_t));
 			mesh->vertexArray = (vec3_t *)((byte *)mesh + sizeof (mesh_t));
 			mesh->numVerts = 1;
 			mesh->indexArray = (index_t *)1;
@@ -3054,7 +3053,7 @@ static mesh_t *R_CreateQ3BSPMeshForSurface (refModel_t *model, dQ3BspFace_t *in,
 			out->q3_patchWidth = size[0];
 			out->q3_patchHeight = size[1];
 
-			buffer = R_ModAllocZero (model, sizeof (mesh_t)
+			buffer = R_ModAlloc (model, sizeof (mesh_t)
 				+ (numVerts * sizeof (vec2_t) * 2)
 				+ (numVerts * sizeof (vec3_t) * 2)
 				+ (numVerts * sizeof (bvec4_t))
@@ -3113,7 +3112,7 @@ static mesh_t *R_CreateQ3BSPMeshForSurface (refModel_t *model, dQ3BspFace_t *in,
 		{
 			int		firstVert = LittleLong (in->firstVert);
 
-			mesh = (mesh_t *)R_ModAllocZero (model, sizeof (mesh_t));
+			mesh = (mesh_t *)R_ModAlloc (model, sizeof (mesh_t));
 			mesh->numVerts = LittleLong (in->numVerts);
 			mesh->vertexArray = model->q3BspModel.vertexArray + firstVert;
 			mesh->normalsArray = model->q3BspModel.normalsArray + firstVert;
@@ -3139,7 +3138,7 @@ static void R_FixAutosprites (mBspSurface_t *surf)
 	vec2_t		*stArray;
 	index_t		*quad;
 	mesh_t		*mesh;
-	shader_t	*shader;
+	material_t	*mat;
 	int			i, j;
 
 	if ((surf->q3_faceType != FACETYPE_PLANAR && surf->q3_faceType != FACETYPE_TRISURF) || !surf->q3_shaderRef)
@@ -3149,15 +3148,15 @@ static void R_FixAutosprites (mBspSurface_t *surf)
 	if (!mesh || !mesh->numIndexes || mesh->numIndexes % 6)
 		return;
 
-	shader = surf->q3_shaderRef->shader;
-	if (!shader || !shader->numDeforms || !(shader->flags & SHADER_AUTOSPRITE))
+	mat = surf->q3_shaderRef->mat;
+	if (!mat || !mat->numDeforms || !(mat->flags & MAT_AUTOSPRITE))
 		return;
 
-	for (i=0 ; i<shader->numDeforms ; i++)
-		if (shader->deforms[i].type == DEFORMV_AUTOSPRITE)
+	for (i=0 ; i<mat->numDeforms ; i++)
+		if (mat->deforms[i].type == DEFORMV_AUTOSPRITE)
 			break;
 
-	if (i == shader->numDeforms)
+	if (i == mat->numDeforms)
 		return;
 
 	stArray = mesh->coordArray;
@@ -3195,7 +3194,7 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 	}
 
 	model->bspModel.numSurfaces = lump->fileLen / sizeof (*in);
-	model->bspModel.surfaces = out = R_ModAllocZero (model, model->bspModel.numSurfaces * sizeof (*out));
+	model->bspModel.surfaces = out = R_ModAlloc (model, model->bspModel.numSurfaces * sizeof (*out));
 
 	// Fill it in
 	for (surfNum=0 ; surfNum<model->bspModel.numSurfaces ; surfNum++, in++, out++) {
@@ -3227,12 +3226,12 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 		shaderRef = model->q3BspModel.shaderRefs + shaderNum;
 		out->q3_shaderRef = shaderRef;
 
-		if (!shaderRef->shader) {
+		if (!shaderRef->mat) {
 			if (out->q3_faceType == FACETYPE_FLARE) {
-				shaderRef->shader = R_RegisterFlare (shaderRef->name);
-				if (!shaderRef->shader) {
+				shaderRef->mat = R_RegisterFlare (shaderRef->name);
+				if (!shaderRef->mat) {
 					Com_Printf (PRNT_WARNING, "Couldn't load (flare): '%s'\n", shaderRef->name);
-					shaderRef->shader = r_noShader;
+					shaderRef->mat = r_noMaterial;
 				}
 			}
 			else {
@@ -3240,17 +3239,17 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 					if (out->q3_faceType != FACETYPE_TRISURF && !r_vertexLighting->intVal && out->lmTexNum < 0)
 						Com_DevPrintf (PRNT_WARNING, "WARNING: surface '%s' has a lightmap but no lightmap stage!\n", shaderRef->name);
 
-					shaderRef->shader = R_RegisterTextureVertex (shaderRef->name);
-					if (!shaderRef->shader) {
+					shaderRef->mat = R_RegisterTextureVertex (shaderRef->name);
+					if (!shaderRef->mat) {
 						Com_Printf (PRNT_WARNING, "Couldn't load (vertex): '%s'\n", shaderRef->name);
-						shaderRef->shader = r_noShader;
+						shaderRef->mat = r_noMaterial;
 					}
 				}
 				else {
-					shaderRef->shader = R_RegisterTextureLM (shaderRef->name);
-					if (!shaderRef->shader) {
+					shaderRef->mat = R_RegisterTextureLM (shaderRef->name);
+					if (!shaderRef->mat) {
 						Com_Printf (PRNT_WARNING, "Couldn't load (lm): '%s'\n", shaderRef->name);
-						shaderRef->shader = r_noShaderLightmap;
+						shaderRef->mat = r_noMaterialLightmap;
 					}
 				}
 			}
@@ -3260,7 +3259,7 @@ static qBool R_LoadQ3BSPFaces (refModel_t *model, byte *byteBase, const dQ3BspLu
 		fogNum = LittleLong (in->fogNum);
 		if (fogNum != -1 && fogNum < model->q3BspModel.numFogs) {
 			fog = model->q3BspModel.fogs + fogNum;
-			if (fog->numPlanes && fog->shader && fog->name[0])
+			if (fog->numPlanes && fog->mat && fog->name[0])
 				out->q3_fog = fog;
 		}
 
@@ -3307,7 +3306,7 @@ static qBool R_LoadQ3BSPNodes (refModel_t *model, byte *byteBase, const dQ3BspLu
 	}
 
 	model->bspModel.numNodes = lump->fileLen / sizeof(*in);
-	model->bspModel.nodes = out = R_ModAllocZero (model, model->bspModel.numNodes * sizeof (*out));
+	model->bspModel.nodes = out = R_ModAlloc (model, model->bspModel.numNodes * sizeof (*out));
 
 	for (i=0 ; i<model->bspModel.numNodes ; i++, in++, out++) {
 		out->c.plane = model->bspModel.planes + LittleLong (in->planeNum);
@@ -3375,11 +3374,11 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 	if (!model->q3BspModel.numFogs)
 		return qTrue;
 
-	model->q3BspModel.fogs = out = R_ModAllocZero (model, model->q3BspModel.numFogs * sizeof (*out));
+	model->q3BspModel.fogs = out = R_ModAlloc (model, model->q3BspModel.numFogs * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numFogs ; i++, in++, out++) {
-		Q_strncpyz (out->name, in->shader, sizeof (out->name));
-		out->shader = R_RegisterTextureLM (in->shader);
+		Q_strncpyz (out->name, in->mat, sizeof (out->name));
+		out->mat = R_RegisterTextureLM (in->mat);
 
 		p = LittleLong (in->brushNum);
 		if (p == -1)
@@ -3389,7 +3388,7 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 		p = LittleLong (brush->firstSide);
 		if (p == -1) {
 			out->name[0] = '\0';
-			out->shader = NULL;
+			out->mat = NULL;
 			continue;
 		}
 		brushSide = inBrushSides + p;
@@ -3397,12 +3396,12 @@ static qBool R_LoadQ3BSPFogs (refModel_t *model, byte *byteBase, const dQ3BspLum
 		p = LittleLong (in->visibleSide);
 		if (p == -1) {
 			out->name[0] = '\0';
-			out->shader = NULL;
+			out->mat = NULL;
 			continue;
 		}
 
 		out->numPlanes = LittleLong (brush->numSides);
-		out->planes = R_ModAllocZero (model, out->numPlanes * sizeof (cBspPlane_t));
+		out->planes = R_ModAlloc (model, out->numPlanes * sizeof (cBspPlane_t));
 
 		out->visiblePlane = model->bspModel.planes + LittleLong (brushSide[p].planeNum);
 		for (j=0 ; j<out->numPlanes; j++)
@@ -3445,7 +3444,7 @@ static qBool R_LoadQ3BSPLeafs (refModel_t *model, byte *byteBase, const dQ3BspLu
 	}
 
 	model->bspModel.numLeafs = lump->fileLen / sizeof (*in);
-	model->bspModel.leafs = out = R_ModAllocZero (model, model->bspModel.numLeafs * sizeof (*out));
+	model->bspModel.leafs = out = R_ModAlloc (model, model->bspModel.numLeafs * sizeof (*out));
 
 	for (i=0 ; i<model->bspModel.numLeafs ; i++, in++, out++) {
 		badBounds = qFalse;
@@ -3517,7 +3516,7 @@ static qBool R_LoadQ3BSPLeafs (refModel_t *model, byte *byteBase, const dQ3BspLu
 			size += numFragSurfaces + 1;
 		size *= sizeof (mBspSurface_t *);
 
-		buffer = (byte *) R_ModAllocZero (model, size);
+		buffer = (byte *) R_ModAlloc (model, size);
 		out->q3_firstVisSurface = (mBspSurface_t **)buffer;
 		buffer += (numVisSurfaces + 1) * sizeof (mBspSurface_t *);
 		if (numLitSurfaces) {
@@ -3627,7 +3626,7 @@ static qBool R_LoadQ3BSPEntities (refModel_t *model, byte *byteBase, const dQ3Bs
 	if (!total)
 		return qTrue;
 
-	out = R_ModAllocZero (model, total * sizeof (*out));
+	out = R_ModAlloc (model, total * sizeof (*out));
 	model->q3BspModel.worldLights = out;
 	model->q3BspModel.numWorldLights = total;
 
@@ -3713,7 +3712,7 @@ static qBool R_LoadQ3BSPIndexes (refModel_t *model, byte *byteBase, const dQ3Bsp
 	}
 
 	model->q3BspModel.numSurfIndexes = lump->fileLen / sizeof (*in);
-	model->q3BspModel.surfIndexes = out = R_ModAllocZero (model, model->q3BspModel.numSurfIndexes * sizeof (*out));
+	model->q3BspModel.surfIndexes = out = R_ModAlloc (model, model->q3BspModel.numSurfIndexes * sizeof (*out));
 
 	for (i=0 ; i<model->q3BspModel.numSurfIndexes ; i++)
 		out[i] = LittleLong (in[i]);
@@ -3740,7 +3739,7 @@ static qBool R_LoadQ3BSPPlanes (refModel_t *model, byte *byteBase, const dQ3BspL
 	}
 
 	model->bspModel.numPlanes = lump->fileLen / sizeof (*in);
-	model->bspModel.planes = out = R_ModAllocZero (model, model->bspModel.numPlanes * sizeof (*out));
+	model->bspModel.planes = out = R_ModAlloc (model, model->bspModel.numPlanes * sizeof (*out));
 
 	for (i=0 ; i<model->bspModel.numPlanes ; i++, in++, out++) {
 		out->type = PLANE_NON_AXIAL;
@@ -3968,11 +3967,11 @@ static void R_TouchModel (refModel_t *model)
 		for (i=0, aliasMesh=aliasModel->meshes ; i<aliasModel->numMeshes ; aliasMesh++, i++) {
 			for (j=0, aliasSkin=aliasMesh->skins ; j<aliasMesh->numSkins ; aliasSkin++, j++) {
 				if (!aliasSkin->name[0]) {
-					aliasSkin->skin = NULL;
+					aliasSkin->material = NULL;
 					continue;
 				}
 
-				aliasSkin->skin = R_RegisterSkin (aliasSkin->name);
+				aliasSkin->material = R_RegisterSkin (aliasSkin->name);
 			}
 		}
 		break;
@@ -3980,16 +3979,16 @@ static void R_TouchModel (refModel_t *model)
 	case MODEL_Q2BSP:
 		for (i=0, ti=model->q2BspModel.texInfo ; i<model->q2BspModel.numTexInfo ; ti++, i++) {
 			if (ti->flags & SURF_TEXINFO_SKY) {
-				ti->shader = r_noShaderSky;
+				ti->mat = r_noMaterialSky;
 				continue;
 			}
 
-			ti->shader = R_RegisterTexture (ti->texName, ti->surfParams);
-			if (!ti->shader) {
-				if (ti->surfParams & SHADER_SURF_LIGHTMAP)
-					ti->shader = r_noShaderLightmap;
+			ti->mat = R_RegisterTexture (ti->texName, ti->surfParams);
+			if (!ti->mat) {
+				if (ti->surfParams & MAT_SURF_LIGHTMAP)
+					ti->mat = r_noMaterialLightmap;
 				else
-					ti->shader = r_noShader;
+					ti->mat = r_noMaterial;
 			}
 		}
 
@@ -4001,30 +4000,30 @@ static void R_TouchModel (refModel_t *model)
 			shaderref = surf->q3_shaderRef;
 
 			if (surf->q3_faceType == FACETYPE_FLARE) {
-				shaderref->shader = R_RegisterFlare (shaderref->name);
-				if (!shaderref->shader)
-					shaderref->shader = r_noShader;
+				shaderref->mat = R_RegisterFlare (shaderref->name);
+				if (!shaderref->mat)
+					shaderref->mat = r_noMaterial;
 			}
 			else {
 				if (surf->q3_faceType == FACETYPE_TRISURF || r_vertexLighting->intVal || surf->lmTexNum < 0) {
-					shaderref->shader = R_RegisterTextureVertex (shaderref->name);
-					if (!shaderref->shader)
-						shaderref->shader = r_noShader;
+					shaderref->mat = R_RegisterTextureVertex (shaderref->name);
+					if (!shaderref->mat)
+						shaderref->mat = r_noMaterial;
 				}
 				else {
-					shaderref->shader = R_RegisterTextureLM (shaderref->name);
-					if (!shaderref->shader)
-						shaderref->shader = r_noShaderLightmap;
+					shaderref->mat = R_RegisterTextureLM (shaderref->name);
+					if (!shaderref->mat)
+						shaderref->mat = r_noMaterialLightmap;
 				}
 			}
 		}
 
 		for (i=0, fog=model->q3BspModel.fogs ; i<model->q3BspModel.numFogs ; fog++, i++) {
 			if (!fog->name[0]) {
-				fog->shader = NULL;
+				fog->mat = NULL;
 				continue;
 			}
-			fog->shader = R_RegisterTextureLM (fog->name);
+			fog->mat = R_RegisterTextureLM (fog->name);
 		}
 
 		R_TouchLightmaps ();
@@ -4034,11 +4033,11 @@ static void R_TouchModel (refModel_t *model)
 		spriteModel = model->spriteModel;
 		for (i=0, spriteFrame=spriteModel->frames ; i<spriteModel->numFrames ; spriteFrame++, i++) {
 			if (!spriteFrame) {
-				spriteFrame->skin = NULL;
+				spriteFrame->material = NULL;
 				continue;
 			}
 
-			spriteFrame->skin = R_RegisterPoly (spriteFrame->name);
+			spriteFrame->material = R_RegisterPoly (spriteFrame->name);
 		}
 		break;
 	}
@@ -4293,7 +4292,7 @@ refModel_t *R_RegisterModel (char *name)
 {
 	refModel_t	*model;
 	char		bareName[MAX_QPATH];
-	int			len;
+	size_t		len;
 
 	// Check the name
 	if (!name || !name[0])
@@ -4382,8 +4381,8 @@ R_ModelList_f
 static void R_ModelList_f (void)
 {
 	refModel_t	*mod;
-	uint32		totalBytes;
-	uint32		i, total;
+	size_t		totalBytes;
+	size_t		i, total;
 
 	Com_Printf (0, "Loaded models:\n");
 
@@ -4455,7 +4454,7 @@ R_ModelShutdown
 */
 void R_ModelShutdown (void)
 {
-	uint32	size, i;
+	size_t	size, i;
 
 	Com_Printf (0, "Model system shutdown:\n");
 

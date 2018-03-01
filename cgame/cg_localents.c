@@ -33,6 +33,7 @@ typedef struct localEnt_s {
 
 	refEntity_t			refEnt;
 
+	vec3_t				org;
 	vec3_t				angles;
 	vec3_t				avel;
 
@@ -116,7 +117,7 @@ privIntParms[0]: 0 = run, 1-3 = interpolate, 4 = set angle, 5 = rest
 static void LE_BrassThink (localEnt_t *le)
 {
 	trace_t		tr;
-	float		timeSq;
+	float		time, time2;
 	vec3_t		normal, perpNormal;
 	vec3_t		perpPos;
 	vec3_t		angles;
@@ -131,8 +132,8 @@ static void LE_BrassThink (localEnt_t *le)
 	switch (le->privIntParms[0]) {
 	case 0:
 		// Run a frame
-		timeSq = (cg.realTime - le->time) * 0.001f;
-		timeSq *= timeSq;
+		time = (cg.realTime - le->time) * 0.001f;
+		time2 = time * time;
 
 		// Copy origin to old
 		Vec3Copy (le->refEnt.origin, le->refEnt.oldOrigin);
@@ -142,10 +143,9 @@ static void LE_BrassThink (localEnt_t *le)
 		Angles_Matrix3 (le->angles, le->refEnt.axis);
 
 		// Scale velocity and add gravity
-		le->refEnt.origin[0] += le->velocity[0] * cg.refreshFrameTime;
-		le->refEnt.origin[1] += le->velocity[1] * cg.refreshFrameTime;
-		le->refEnt.origin[2] += le->velocity[2] * cg.refreshFrameTime;
-		le->refEnt.origin[2] -= le->pubParms[0] * timeSq;
+		le->refEnt.origin[0] = le->org[0] + le->velocity[0] * time;
+		le->refEnt.origin[1] = le->org[1] + le->velocity[1] * time;
+		le->refEnt.origin[2] = le->org[2] + le->velocity[2] * time - le->pubParms[0] * time2;
 
 		// Check for collision
 		CG_PMTrace (&tr, le->refEnt.oldOrigin, le->mins, le->maxs, le->refEnt.origin, qFalse);
@@ -288,6 +288,7 @@ qBool CG_SpawnLocalEnt (float org0,						float org1,						float org2,
 	// Allocate an entity and store values
 	le = CG_AllocLEnt ();
 	le->time = cg.realTime;
+	Vec3Set (le->org, org0, org1, org2);
 	Vec3Set (le->refEnt.origin, org0, org1, org2);
 	Vec3Set (le->refEnt.oldOrigin, org0, org1, org2);
 	Vec4Set (le->refEnt.color, 255, 255, 255, 255);

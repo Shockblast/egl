@@ -167,8 +167,7 @@ void Com_DevPrintf (comPrint_t flags, char *fmt, ...)
 	gi.dprintf ("%s", text);
 }
 
-// FIXME code is ignored
-void Com_Error (comError_t code, char *fmt, ...)
+NO_RETURN void Com_Error (comError_t code, char *fmt, ...)
 {
 	va_list		argptr;
 	char		text[MAX_COMPRINT];

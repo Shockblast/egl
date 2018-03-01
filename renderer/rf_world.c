@@ -44,28 +44,28 @@ static void R_AddQ2Surface (mBspSurface_t *surf, mQ2BspTexInfo_t *texInfo, refEn
 	surf->visFrame = ri.frameCount;
 
 	// Add to list
-	mb = R_AddMeshToList (texInfo->shader, entity->shaderTime, entity, NULL, MBT_Q2BSP, surf);
+	mb = R_AddMeshToList (texInfo->mat, entity->matTime, entity, NULL, MBT_Q2BSP, surf);
 	if (!mb)
 		return;
 
 	// Caustics
 	if (surf->lmTexNum && r_caustics->intVal && surf->q2_flags & SURF_UNDERWATER) {
 		if (surf->q2_flags & SURF_LAVA && ri.media.worldLavaCaustics)
-			R_AddMeshToList (ri.media.worldLavaCaustics, entity->shaderTime, entity, NULL, MBT_Q2BSP, surf);
+			R_AddMeshToList (ri.media.worldLavaCaustics, entity->matTime, entity, NULL, MBT_Q2BSP, surf);
 		else if (surf->q2_flags & SURF_SLIME && ri.media.worldSlimeCaustics)
-			R_AddMeshToList (ri.media.worldSlimeCaustics, entity->shaderTime, entity, NULL, MBT_Q2BSP, surf);
+			R_AddMeshToList (ri.media.worldSlimeCaustics, entity->matTime, entity, NULL, MBT_Q2BSP, surf);
 		else if (ri.media.worldWaterCaustics)
-			R_AddMeshToList (ri.media.worldWaterCaustics, entity->shaderTime, entity, NULL, MBT_Q2BSP, surf);
+			R_AddMeshToList (ri.media.worldWaterCaustics, entity->matTime, entity, NULL, MBT_Q2BSP, surf);
 	}
 }
 
 
 /*
 ================
-R_Q2SurfShader
+R_Q2SurfMaterial
 ================
 */
-static inline mQ2BspTexInfo_t *R_Q2SurfShader (mBspSurface_t *surf)
+static inline mQ2BspTexInfo_t *R_Q2SurfMaterial (mBspSurface_t *surf)
 {
 	mQ2BspTexInfo_t	*texInfo;
 	int				i;
@@ -88,12 +88,12 @@ static inline mQ2BspTexInfo_t *R_Q2SurfShader (mBspSurface_t *surf)
 R_CullQ2SurfacePlanar
 ================
 */
-static qBool R_CullQ2SurfacePlanar (mBspSurface_t *surf, shader_t *shader, float dist)
+static qBool R_CullQ2SurfacePlanar (mBspSurface_t *surf, material_t *mat, float dist)
 {
 	// Side culling
 	if (r_facePlaneCull->intVal) {
-		switch (shader->cullType) {
-		case SHADER_CULL_BACK:
+		switch (mat->cullType) {
+		case MAT_CULL_BACK:
 			if (surf->q2_flags & SURF_PLANEBACK) {
 				if (dist <= SMALL_EPSILON) {
 					ri.pc.cullPlanar[CULL_PASS]++;
@@ -108,7 +108,7 @@ static qBool R_CullQ2SurfacePlanar (mBspSurface_t *surf, shader_t *shader, float
 			}
 			break;
 
-		case SHADER_CULL_FRONT:
+		case MAT_CULL_FRONT:
 			if (surf->q2_flags & SURF_PLANEBACK) {
 				if (dist >= -SMALL_EPSILON) {
 					ri.pc.cullPlanar[CULL_PASS]++;
@@ -180,11 +180,7 @@ static void R_MarkQ2Leaves (void)
 			viewCluster2 = leaf->cluster;
 	}
 
-	if (ri.def.areaChanged)
-		ri.def.areaChanged = qFalse;
-	else if (ri.scn.oldViewCluster == ri.scn.viewCluster
-	&& oldViewCluster2 == viewCluster2
-	&& !r_noVis->intVal && ri.scn.viewCluster != -1)
+	if (ri.scn.oldViewCluster == ri.scn.viewCluster && oldViewCluster2 == viewCluster2 && (ri.def.rdFlags & RDF_OLDAREABITS) && !r_noVis->intVal && ri.scn.viewCluster != -1)
 		return;
 
 	// Development aid to let you run around and see exactly where the pvs ends
@@ -300,11 +296,11 @@ static void R_RecursiveQ2WorldNode (mBspNode_t *node, int clipFlags)
 			if (surf->visFrame == ri.frameCount)
 				continue;
 
-			// Get the shader
-			texInfo = R_Q2SurfShader (surf);
+			// Get the material
+			texInfo = R_Q2SurfMaterial (surf);
 
 			// Cull
-			if (R_CullQ2SurfacePlanar (surf, texInfo->shader, dist))
+			if (R_CullQ2SurfacePlanar (surf, texInfo->mat, dist))
 				continue;
 			if (R_CullQ2SurfaceBounds (surf, clipFlags))
 				continue;
@@ -395,11 +391,11 @@ void R_AddQ2BrushModel (refEntity_t *ent)
 		// Find which side of the node we are on
 		dist = PlaneDiff (origin, surf->q2_plane);
 
-		// Get the shader
-		texInfo = R_Q2SurfShader (surf);
+		// Get the material
+		texInfo = R_Q2SurfMaterial (surf);
 
 		// Cull
-		if (R_CullQ2SurfacePlanar (surf, texInfo->shader, dist))
+		if (R_CullQ2SurfacePlanar (surf, texInfo->mat, dist))
 			continue;
 
 		// World surface
@@ -429,7 +425,7 @@ R_AddQ3Surface
 static void R_AddQ3Surface (mBspSurface_t *surf, refEntity_t *ent, meshType_t meshType)
 {
 	// Add to list
-	R_AddMeshToList (surf->q3_shaderRef->shader, ent->shaderTime, ent, surf->q3_fog, meshType, surf);
+	R_AddMeshToList (surf->q3_shaderRef->mat, ent->matTime, ent, surf->q3_fog, meshType, surf);
 
 	// Surface is used this frame
 	surf->visFrame = ri.frameCount;
@@ -468,7 +464,7 @@ static qBool R_CullQ3FlareSurface (mBspSurface_t *surf, refEntity_t *ent, int cl
 	ri.pc.cullRadius[CULL_FAIL]++;
 
 	// Radius cull
-	if (clipFlags && R_CullSphere (origin, 1, clipFlags))
+	if (clipFlags && R_CullSphere (origin, r_flareSize->floatVal, clipFlags))
 		return qTrue;
 
 	// Visible
@@ -481,14 +477,14 @@ static qBool R_CullQ3FlareSurface (mBspSurface_t *surf, refEntity_t *ent, int cl
 R_CullQ3SurfacePlanar
 ================
 */
-static qBool R_CullQ3SurfacePlanar (mBspSurface_t *surf, shader_t *shader, vec3_t modelOrigin)
+static qBool R_CullQ3SurfacePlanar (mBspSurface_t *surf, material_t *mat, vec3_t modelOrigin)
 {
 	float	dot;
 
 	// Check if culling is disabled
 	if (!r_facePlaneCull->intVal
 	|| Vec3Compare (surf->q3_origin, vec3Origin)
-	|| shader->cullType == SHADER_CULL_NONE)
+	|| mat->cullType == MAT_CULL_NONE)
 		return qFalse;
 
 	// Plane culling
@@ -503,7 +499,7 @@ static qBool R_CullQ3SurfacePlanar (mBspSurface_t *surf, shader_t *shader, vec3_
 			+ (modelOrigin[1] - surf->mesh->vertexArray[0][1]) * surf->q3_origin[1]
 			+ (modelOrigin[2] - surf->mesh->vertexArray[0][2]) * surf->q3_origin[2];
 
-	if (shader->cullType == SHADER_CULL_FRONT || ri.scn.mirrorView) {
+	if (mat->cullType == MAT_CULL_FRONT || ri.scn.mirrorView) {
 		if (dot <= SMALL_EPSILON) {
 			ri.pc.cullPlanar[CULL_PASS]++;
 			return qTrue;
@@ -570,7 +566,7 @@ static void R_MarkQ3Surfaces (mBspNode_t *node)
 		surf->q3_nodeFrame = ri.scn.visFrameCount;
 
 		// Sky surface
-		if (surf->q3_shaderRef->shader->flags & SHADER_SKY) {
+		if (surf->q3_shaderRef->mat->flags & MAT_SKY) {
 			// See if there's room
 			if (r_q3_numSkySurfs >= Q3BSP_MAX_LEAFFACES) {
 				Com_Printf (PRNT_WARNING, "R_MarkQ3Surfaces: hit max surface count!\n");
@@ -624,11 +620,7 @@ static void R_MarkQ3Leaves (void)
 		ri.scn.viewCluster = leaf->cluster;
 	}
 
-	if (ri.def.areaChanged)
-		ri.def.areaChanged = qFalse;
-	else if (!r_noVis->intVal && !r_q3_visChanged
-	&& ri.scn.viewCluster == ri.scn.oldViewCluster
-	&& ri.scn.viewCluster != -1)
+	if (ri.scn.viewCluster == ri.scn.oldViewCluster && (ri.def.rdFlags & RDF_OLDAREABITS) && !r_noVis->intVal && ri.scn.viewCluster != -1)
 		return;
 
 	// Development aid to let you run around and see exactly where the pvs ends
@@ -713,7 +705,7 @@ static void R_DrawQ3WorldList (qBool cull)
 	// Clip sky surfaces
 	for (i=0 ; i<r_q3_numSkySurfs ; i++) {
 		surf = r_q3_skySurfs[i];
-		if (R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->shader, ri.def.viewOrigin))
+		if (R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->mat, ri.def.viewOrigin))
 			continue;
 		if (R_CullQ3SurfaceBounds (surf, 31))
 			continue;
@@ -733,7 +725,7 @@ static void R_DrawQ3WorldList (qBool cull)
 			break;
 
 		case FACETYPE_PLANAR:
-			if (R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->shader, ri.def.viewOrigin))
+			if (R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->mat, ri.def.viewOrigin))
 				continue;
 			// FALL THROUGH
 		default:
@@ -754,7 +746,7 @@ R_AddQ3WorldToList
 */
 static void R_AddQ3WorldToList (void)
 {
-	uint32	startTime;
+	uint32	startTime = 0;
 
 	if (r_times->intVal)
 		startTime = Sys_UMilliseconds ();
@@ -865,7 +857,7 @@ void R_AddQ3BrushModel (refEntity_t *ent)
 			break;
 
 		case FACETYPE_PLANAR:
-			if (!r_noCull->intVal && R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->shader, origin))
+			if (!r_noCull->intVal && R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->mat, origin))
 				continue;
 			// FALL THROUGH
 		default:
@@ -890,7 +882,7 @@ R_AddWorldToList
 */
 void R_AddWorldToList (void)
 {
-	uint32	startTime;
+	uint32	startTime = 0;
 
 	R_ClearSky ();
 

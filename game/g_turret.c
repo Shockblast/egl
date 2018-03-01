@@ -332,6 +332,9 @@ void turret_driver_think (edict_t *self)
 		}
 	}
 
+	if (!self->enemy)
+		return;
+
 	// let the turret know where we want it to aim
 	Vec3Copy (self->enemy->s.origin, target);
 	target[2] += self->enemy->viewheight;

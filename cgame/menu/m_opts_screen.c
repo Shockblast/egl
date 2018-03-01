@@ -34,8 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define MAX_CROSSHAIRS 512
 
 typedef struct crosshairInfo_s {
-	int				number;
-	struct shader_s	*shader;
+	size_t			number;
+	struct material_s	*mat;
 } crosshairInfo_t;
 
 typedef struct m_screenMenu_s {
@@ -96,7 +96,7 @@ typedef struct m_screenMenu_s {
 
 	crosshairInfo_t	crosshairs[MAX_CROSSHAIRS];
 	char			*crosshairNames[MAX_CROSSHAIRS];
-	int				numCrosshairs;
+	size_t			numCrosshairs;
 } m_screenMenu_t;
 
 static m_screenMenu_t	m_screenMenu;
@@ -161,7 +161,7 @@ static void ConsoleFontScaleFunc (void *unused)
 
 static void CrosshairFunc (void *unused)
 {
-	if (m_screenMenu.ch_number_list.curValue < m_screenMenu.numCrosshairs)
+	if (m_screenMenu.ch_number_list.curValue < (int) m_screenMenu.numCrosshairs)
 		cgi.Cvar_SetValue ("crosshair", m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].number, qFalse);
 }
 
@@ -209,7 +209,7 @@ ScreenMenu_SetValues
 */
 static void ScreenMenu_SetValues (void)
 {
-	int		i;
+	size_t	i;
 
 	//
 	// console
@@ -245,11 +245,11 @@ static void ScreenMenu_SetValues (void)
 
 	m_screenMenu.ch_number_list.curValue		= cgi.Cvar_GetFloatValue ("crosshair");
 	for (i=0 ; i<m_screenMenu.numCrosshairs ; i++) {
-		if (m_screenMenu.crosshairs[i].number != m_screenMenu.ch_number_list.curValue)
+		if (m_screenMenu.crosshairs[i].number != (size_t) m_screenMenu.ch_number_list.curValue)
 			continue;
 		break;
 	}
-	m_screenMenu.ch_number_list.curValue = (i == m_screenMenu.numCrosshairs) ? 0 : i;
+	m_screenMenu.ch_number_list.curValue = (int) ((i == m_screenMenu.numCrosshairs) ? 0 : i);
 	if (m_screenMenu.numCrosshairs)
 		cgi.Cvar_SetValue ("crosshair", m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].number, qTrue);
 	else
@@ -340,10 +340,10 @@ static void ScreenMenu_Init (void)
 	};
 
 	char	*crosshairList[MAX_CROSSHAIRS];
-	int		numCrosshairs;
+	size_t	numCrosshairs;
 	char	scratch[MAX_QPATH];
 	char	*p;
-	int		i, j;
+	size_t	i, j;
 
 	// get crosshair list
 	numCrosshairs = cgi.FS_FindFiles ("pics", "pics/ch*.*", NULL, crosshairList, MAX_CROSSHAIRS, qFalse, qFalse);
@@ -388,7 +388,7 @@ static void ScreenMenu_Init (void)
 
 			// add to list
 			m_screenMenu.crosshairs[m_screenMenu.numCrosshairs].number = j;
-			m_screenMenu.crosshairs[m_screenMenu.numCrosshairs].shader = cgi.R_RegisterPic (crosshairList[i]);
+			m_screenMenu.crosshairs[m_screenMenu.numCrosshairs].mat = cgi.R_RegisterPic (crosshairList[i]);
 			m_screenMenu.crosshairNames[m_screenMenu.numCrosshairs] = CG_TagStrDup (crosshairList[i], CGTAG_MENU);
 			m_screenMenu.numCrosshairs++;
 		}
@@ -405,7 +405,7 @@ static void ScreenMenu_Init (void)
 	m_screenMenu.banner.generic.type		= UITYPE_IMAGE;
 	m_screenMenu.banner.generic.flags		= UIF_NOSELECT|UIF_CENTERED;
 	m_screenMenu.banner.generic.name		= NULL;
-	m_screenMenu.banner.shader				= uiMedia.banners.options;
+	m_screenMenu.banner.mat				= uiMedia.banners.options;
 
 	//
 	// console
@@ -501,7 +501,7 @@ static void ScreenMenu_Init (void)
 
 		m_screenMenu.ch_image.generic.type				= UITYPE_IMAGE;
 		m_screenMenu.ch_image.generic.flags				= UIF_NOSELECT|UIF_NOSELBAR;
-		m_screenMenu.ch_image.shader					= NULL;
+		m_screenMenu.ch_image.mat					= NULL;
 	}
 
 	m_screenMenu.ch_alpha_slider.generic.type		= UITYPE_SLIDER;
@@ -628,7 +628,7 @@ ScreenMenu_Close
 */
 static struct sfx_s *ScreenMenu_Close (void)
 {
-	int		i;
+	size_t	i;
 
 	// Free display names
 	for (i=0 ; i<m_screenMenu.numCrosshairs ; i++)
@@ -645,7 +645,7 @@ ScreenMenu_Draw
 */
 static void ScreenMenu_Draw (void)
 {
-	struct shader_s *chShader;
+	struct material_s *chMat;
 	int		width, height;
 	float	y;
 
@@ -696,12 +696,12 @@ static void ScreenMenu_Draw (void)
 	m_screenMenu.ch_header.generic.x			= 0;
 	m_screenMenu.ch_header.generic.y			= y += UIFT_SIZEINC*2;
 
-	if (m_screenMenu.crosshairsFound && m_screenMenu.ch_number_list.curValue < m_screenMenu.numCrosshairs) {
-		chShader = m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].shader;
-		cgi.R_GetImageSize (chShader, &width, &height);
+	if (m_screenMenu.crosshairsFound && m_screenMenu.ch_number_list.curValue < (int) m_screenMenu.numCrosshairs) {
+		chMat = m_screenMenu.crosshairs[m_screenMenu.ch_number_list.curValue].mat;
+		cgi.R_GetImageSize (chMat, &width, &height);
 	}
 	else {
-		chShader = cgMedia.whiteTexture;
+		chMat = cgMedia.whiteTexture;
 		width = 32;
 		height = 32;
 	}
@@ -713,7 +713,7 @@ static void ScreenMenu_Draw (void)
 		m_screenMenu.ch_image.generic.y				= y += UIFT_SIZEINC*2;
 		m_screenMenu.ch_image.width					= width;
 		m_screenMenu.ch_image.height				= height;
-		m_screenMenu.ch_image.shader				= chShader;
+		m_screenMenu.ch_image.mat					= chMat;
 	}
 	else
 		y += UIFT_SIZEINC;

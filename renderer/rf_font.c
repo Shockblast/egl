@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // - Different materials for different size ranges (like smallMaterial fonts/quake3_sm.tga, mediumMaterial, largeMaterial, etc).
 // - Per-character coords and width/height?
 // - More font styles, italic, bold, etc...
-// - shaderTime passed to font renders?
+// - matTime passed to font renders?
 //	FS_ALIGN_CENTER			= 1 << 0,
 //	FS_ALIGN_RIGHT			= 1 << 1,
 //	FS_ITALIC				= 1 << 2,
@@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 typedef struct fontSize_s {
 	float		minScale;
 	char		matName[MAX_QPATH];
-	shader_t	*matPtr;
+	material_t	*matPtr;
 } fontSize_t;
 
 typedef struct font_s {
@@ -333,15 +333,15 @@ void R_CheckFont (void)
 
 /*
 ================
-R_ShaderForFont
+R_MaterialForFont
 ================
 */
 // FIXME: let format decide based on x/y scale
-static shader_t *R_ShaderForFont (font_t *font, float xScale, float yScale)
+static material_t *R_MaterialForFont (font_t *font, float xScale, float yScale)
 {
 	fontSize_t	*fs;
 	byte		i;
-	shader_t	*bestMat;
+	material_t	*bestMat;
 	float		bestScale;
 
 	assert (font);
@@ -400,16 +400,17 @@ void R_GetFontDimensions (font_t *font, float xScale, float yScale, uint32 flags
 R_DrawString
 ================
 */
-int R_DrawString (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color)
+size_t R_DrawString (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, vec4_t color)
 {
-	int			num, i;
+	int			num;
+	size_t		i;
 	float		frow, fcol;
 	float		startX;
 	vec4_t		strColor;
 	qBool		isShadowed;
 	qBool		skipNext = qFalse;
 	qBool		inColorCode = qFalse;
-	shader_t	*shader;
+	material_t	*mat;
 	vec2_t		ftSize;
 
 	if (!string)
@@ -424,7 +425,7 @@ int R_DrawString (font_t *font, float x, float y, float xScale, float yScale, ui
 		font = ri.media.defaultFont;
 	if (!color)
 		color = Q_colorWhite;
-	shader = R_ShaderForFont (font, xScale, yScale);
+	mat = R_MaterialForFont (font, xScale, yScale);
 
 	Vec4Copy (color, strColor);
 
@@ -500,9 +501,9 @@ int R_DrawString (font_t *font, float x, float y, float xScale, float yScale, ui
 			fcol = (num&15) * (1.0f/16.0f);
 
 			if (isShadowed)
-				R_DrawPic (shader, 0, x+2, y+2, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), r_fontShadowClr);
+				R_DrawPic (mat, 0, x+2, y+2, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), r_fontShadowClr);
 
-			R_DrawPic (shader, 0, x, y, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), strColor);
+			R_DrawPic (mat, 0, x, y, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), strColor);
 		}
 
 		x += ftSize[0];
@@ -519,13 +520,12 @@ int R_DrawString (font_t *font, float x, float y, float xScale, float yScale, ui
 R_DrawStringLen
 ================
 */
-int R_DrawStringLen (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, int len, vec4_t color)
+size_t R_DrawStringLen (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, char *string, size_t len, vec4_t color)
 {
 	char	swap;
-	int		length;
+	size_t	length;
 
-	if (len < 0)
-		return R_DrawString (font, x, y, xScale, yScale, flags, string, color);
+	assert(len);
 
 	swap = string[len];
 	string[len] = 0;
@@ -544,7 +544,7 @@ R_DrawChar
 void R_DrawChar (font_t *font, float x, float y, float xScale, float yScale, uint32 flags, int num, vec4_t color)
 {
 	float		frow, fcol;
-	shader_t	*shader;
+	material_t	*mat;
 	vec2_t		ftSize;
 
 	if (!xScale && !yScale) {
@@ -555,7 +555,7 @@ void R_DrawChar (font_t *font, float x, float y, float xScale, float yScale, uin
 		font = ri.media.defaultFont;
 	if (!color)
 		color = Q_colorWhite;
-	shader = R_ShaderForFont (font, xScale, yScale);
+	mat = R_MaterialForFont (font, xScale, yScale);
 
 	R_GetFontDimensions (font, xScale, yScale, flags, ftSize);
 
@@ -571,10 +571,10 @@ void R_DrawChar (font_t *font, float x, float y, float xScale, float yScale, uin
 
 	if (flags & FS_SHADOW) {
 		r_fontShadowClr[3] = color[3];
-		R_DrawPic (shader, 0, x+2, y+2, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), r_fontShadowClr);
+		R_DrawPic (mat, 0, x+2, y+2, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), r_fontShadowClr);
 	}
 
-	R_DrawPic (shader, 0, x, y, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), color);
+	R_DrawPic (mat, 0, x, y, ftSize[0], ftSize[1], fcol, frow, fcol+(1.0f/16.0f), frow+(1.0f/16.0f), color);
 }
 
 /*
@@ -609,7 +609,7 @@ R_FontShutdown
 void R_FontShutdown (void)
 {
 	font_t	*font;
-	uint32	size, i;
+	size_t	size, i;
 
 	Com_Printf (0, "Font system shutdown:\n");
 	// Release fonts

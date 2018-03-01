@@ -46,18 +46,18 @@ void R_AddSP2ModelToList (refEntity_t *ent)
 {
 	mSpriteModel_t	*spriteModel;
 	mSpriteFrame_t	*spriteFrame;
-	shader_t		*shader;
+	material_t		*mat;
 
 	spriteModel = ent->model->spriteModel;
 	spriteFrame = &spriteModel->frames[ent->frame % spriteModel->numFrames];
-	shader = spriteFrame->skin;
+	mat = spriteFrame->material;
 
-	if (!shader) {
-		Com_DevPrintf (PRNT_WARNING, "R_AddSP2ModelToList: '%s' has a NULL shader\n", ent->model->name);
+	if (!mat) {
+		Com_DevPrintf (PRNT_WARNING, "R_AddSP2ModelToList: '%s' has a NULL material\n", ent->model->name);
 		return;
 	}
 
-	R_AddMeshToList (shader, ent->shaderTime, ent, R_FogForSphere (ent->origin, spriteFrame->radius), MBT_SP2, spriteModel);
+	R_AddMeshToList (mat, ent->matTime, ent, R_FogForSphere (ent->origin, spriteFrame->radius), MBT_SP2, spriteModel);
 }
 
 
@@ -135,7 +135,7 @@ void R_DrawSP2Model (meshBuffer_t *mb)
 	//
 	// Push
 	//
-	features = MF_TRIFAN|MF_NOCULL|MF_NONBATCHED|mb->shader->features;
+	features = MF_TRIFAN|MF_NOCULL|MF_NONBATCHED|mb->mat->features;
 	if (gl_shownormals->intVal)
 		features |= MF_NORMALS;
 
@@ -176,8 +176,8 @@ R_PushFlare
 void R_PushFlare (meshBuffer_t *mb)
 {
 	vec4_t			color;
-	vec3_t			origin, point, v;
-	float			radius = r_flareSize->floatVal, flarescale, depth;
+	vec3_t			origin, point;
+	float			radius = r_flareSize->floatVal, flarescale;
 	float			up = radius, down = -radius, left = -radius, right = radius;
 	mBspSurface_t	*surf = (mBspSurface_t *)mb->mesh;
 	meshFeatures_t	features;
@@ -189,16 +189,9 @@ void R_PushFlare (meshBuffer_t *mb)
 	else {
 		Vec3Copy (surf->q3_origin, origin);
 	}
-	R_TransformToScreen_Vec3 (origin, v);
 
-	if (v[0] < ri.def.x || v[0] > ri.def.x + ri.def.width)
-		return;
-	if (v[1] < ri.def.y || v[1] > ri.def.y + ri.def.height)
-		return;
-
-	qglReadPixels ((int)(v[0]), (int)(v[1]), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	if (depth + 1e-4 < v[2])
-		return;		// Occluded
+	if (R_PointOccluded(origin))
+		return; // Occluded
 
 	Vec3Copy (origin, origin);
 
@@ -227,7 +220,7 @@ void R_PushFlare (meshBuffer_t *mb)
 	r_flareMesh.coordArray = r_flareCoords;
 	r_flareMesh.colorArray = r_flareColors;
 
-	features = MF_NOCULL|MF_TRIFAN|mb->shader->features;
+	features = MF_NOCULL|MF_TRIFAN|mb->mat->features;
 	if (r_debugBatching->intVal == 2)
 		features |= MF_NONBATCHED;
 

@@ -96,13 +96,7 @@ void GLimp_EndFrame (void)
 
 	// Swap buffers
 	if (stricmp (gl_drawbuffer->string, "GL_BACK") == 0) {
-		if (glwState.miniDriver) {
-			if (!qwglSwapBuffers (glwState.hDC))
-				Com_Error (ERR_FATAL, "GLimp_EndFrame: - qwglSwapBuffers failed!\n");
-		}
-		else {
-			SwapBuffers (glwState.hDC);
-		}
+		SwapBuffers (glwState.hDC);
 	}
 
 	// Conserve CPU
@@ -240,46 +234,24 @@ static int GLimp_SetupPFD (PIXELFORMATDESCRIPTOR *pfd, int colorBits, int depthB
 	}
 
 	// Choose a pixel format
-	if (glwState.miniDriver) {
-		iPixelFormat = qwglChoosePixelFormat (glwState.hDC, pfd);
-		if (!iPixelFormat) {
-			Com_Printf (PRNT_ERROR, "...qwglChoosePixelFormat failed\n");
-			return 0;
-		}
-		else {
-			Com_Printf (0, "...qwglChoosePixelFormat succeeded\n");
-		}
-
-		if (qwglSetPixelFormat (glwState.hDC, iPixelFormat, pfd) == qFalse) {
-			Com_Printf (PRNT_ERROR, "...qwglSetPixelFormat failed\n");
-			return 0;
-		}
-		else {
-			Com_Printf (0, "...qwglSetPixelFormat succeeded\n");
-		}
-
-		qwglDescribePixelFormat (glwState.hDC, iPixelFormat, sizeof (PIXELFORMATDESCRIPTOR), pfd);
+	iPixelFormat = ChoosePixelFormat (glwState.hDC, pfd);
+	if (!iPixelFormat) {
+		Com_Printf (PRNT_ERROR, "...ChoosePixelFormat failed\n");
+		return 0;
 	}
 	else {
-		iPixelFormat = ChoosePixelFormat (glwState.hDC, pfd);
-		if (!iPixelFormat) {
-			Com_Printf (PRNT_ERROR, "...ChoosePixelFormat failed\n");
-			return 0;
-		}
-		else {
-			Com_Printf (0, "...ChoosePixelFormat succeeded\n");
-		}
-
-		if (SetPixelFormat (glwState.hDC, iPixelFormat, pfd) == qFalse) {
-			Com_Printf (PRNT_ERROR, "...SetPixelFormat failed\n");
-			return 0;
-		}
-		else {
-			Com_Printf (0, "...SetPixelFormat succeeded\n");
-		}
-
-		DescribePixelFormat (glwState.hDC, iPixelFormat, sizeof (PIXELFORMATDESCRIPTOR), pfd);
+		Com_Printf (0, "...ChoosePixelFormat succeeded\n");
 	}
+
+	if (SetPixelFormat (glwState.hDC, iPixelFormat, pfd) == qFalse) {
+		Com_Printf (PRNT_ERROR, "...SetPixelFormat failed\n");
+		return 0;
+	}
+	else {
+		Com_Printf (0, "...SetPixelFormat succeeded\n");
+	}
+
+	DescribePixelFormat (glwState.hDC, iPixelFormat, sizeof (PIXELFORMATDESCRIPTOR), pfd);
 
 	// Check for hardware acceleration
 	if (pfd->dwFlags & PFD_GENERIC_FORMAT) {
@@ -332,9 +304,6 @@ static qBool GLimp_GLInit (void)
 	else {
 		Com_Printf (0, "...GetDC succeeded\n");
 	}
-
-	// Determine if we're using a minidriver
-	glwState.miniDriver = !(strstr (gl_driver->string, "opengl32") != 0);
 
 	// Alpha bits
 	alphaBits = r_alphabits->intVal;
@@ -654,27 +623,7 @@ this means dealing with the pixelformats and doing the wgl interface stuff.
 #define OSR2_BUILD_NUMBER 1111
 qBool GLimp_Init (void)
 {
-	OSVERSIONINFO	vinfo;
-
-	vinfo.dwOSVersionInfoSize = sizeof (vinfo);
-	glwState.bppChangeAllowed = qFalse;
-
-	if (GetVersionEx (&vinfo)) {
-		if (vinfo.dwMajorVersion > 4)
-			glwState.bppChangeAllowed = qTrue;
-		else if (vinfo.dwMajorVersion == 4) {
-			if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
-				glwState.bppChangeAllowed = qTrue;
-			else if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-				if (LOWORD (vinfo.dwBuildNumber) >= OSR2_BUILD_NUMBER)
-					glwState.bppChangeAllowed = qTrue;
-		}
-	}
-	else {
-		Com_Printf (PRNT_ERROR, "GLimp_Init: - GetVersionEx failed\n");
-		return qFalse;
-	}
-
+	glwState.bppChangeAllowed = qTrue;
 	return qTrue;
 }
 

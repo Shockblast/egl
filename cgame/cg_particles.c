@@ -35,14 +35,14 @@ static int				cg_numParticles;
 =============================================================================
 */
 
-int pRandBloodDrip (void)	{ return PT_BLDDRIP01 + (rand()&1); }
-int pRandGrnBloodDrip (void){ return PT_BLDDRIP01_GRN + (rand()&1); }
-int pRandBloodMark (void)	{ return PT_BLOOD + (rand()%6); }
-int pRandGrnBloodMark (void){ return PT_GRNBLOOD + (rand()%6); }
-int pRandSmoke (void)		{ return PT_SMOKE + (rand()&1); }
-int pRandGlowSmoke (void)	{ return PT_SMOKEGLOW + (rand()&1); }
-int pRandEmbers (void)		{ return PT_EMBERS1 + (rand()%3); }
-int pRandFire (void)		{ return PT_FIRE1 + (rand()&3); }
+int pRandBloodDrip (void)		{ return PT_BLDDRIP01 + (rand()&1); }
+int pRandGrnBloodDrip (void)	{ return PT_BLDDRIP01_GRN + (rand()&1); }
+int pRandBloodTrail (void)		{ return PT_BLOODTRAIL + (rand()%7); }
+int pRandGrnBloodTrail (void)	{ return PT_GRNBLOODTRAIL + (rand()%7); }
+int pRandSmoke (void)			{ return PT_SMOKE + (rand()&1); }
+int pRandGlowSmoke (void)		{ return PT_SMOKEGLOW + (rand()&1); }
+int pRandEmbers (void)			{ return PT_EMBERS1 + (rand()%3); }
+int pRandFire (void)			{ return PT_FIRE1 + (rand()&3); }
 
 /*
 =============================================================================
@@ -129,6 +129,7 @@ void	CG_SpawnParticle (float org0,					float org1,					float org2,
 
 	p = CG_AllocParticle ();
 	p->time = (float)cg.realTime;
+	p->type = type;
 
 	Vec3Set (p->org, org0, org1, org2);
 	Vec3Copy (p->org, p->oldOrigin);
@@ -140,7 +141,7 @@ void	CG_SpawnParticle (float org0,					float org1,					float org2,
 	Vec4Set (p->color, red, green, blue, alpha);
 	Vec4Set (p->colorVel, redVel, greenVel, blueVel, alphaVel);
 
-	p->shader = cgMedia.particleTable[type%PT_PICTOTAL];
+	p->mat = cgMedia.particleTable[type%PT_PICTOTAL];
 	p->style = style;
 	p->flags = flags;
 
@@ -180,7 +181,7 @@ void CG_ClearParticles (void)
 		cg_particleList[i].outPoly.colors = cg_particleList[i].outColor;
 		cg_particleList[i].outPoly.texCoords = cg_particleList[i].outCoords;
 		cg_particleList[i].outPoly.vertices = cg_particleList[i].outVertices;
-		cg_particleList[i].outPoly.shaderTime = 0;
+		cg_particleList[i].outPoly.matTime = 0;
 	}
 
 	cg_particleList[MAX_PARTICLES-1].next = NULL;
@@ -269,7 +270,7 @@ void CG_AddParticles (void)
 
 				// Lessen fillrate consumption
 				if (!(p->flags & PF_NOCLOSECULL)) {
-					dist = Vec3DistFast (cg.refDef.viewOrigin, org);
+					dist = Vec3Dist (cg.refDef.viewOrigin, org);
 					if (dist <= 5)
 						goto nextParticle;
 				}
@@ -307,7 +308,7 @@ void CG_AddParticles (void)
 		}
 
 		// Particle shading
-		if (p->flags & PF_SHADE && cg_particleShading->intVal) {
+		if ((p->flags & PF_SHADE) && cg_particleShading->intVal) {
 			cgi.R_LightPoint (p->org, shade);
 
 			lightest = 0;
@@ -392,50 +393,50 @@ void CG_AddParticles (void)
 				float s = (float)sin (DEG2RAD (orient)) * scale;
 
 				// Top left
-				Vec2Set (p->outCoords[0], 0, 0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + a_upVec[0]*s - a_rtVec[0]*c,
 											org[1] + a_upVec[1]*s - a_rtVec[1]*c,
 											org[2] + a_upVec[2]*s - a_rtVec[2]*c);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0, 1);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - a_upVec[0]*c - a_rtVec[0]*s,
 											org[1] - a_upVec[1]*c - a_rtVec[1]*s,
 											org[2] - a_upVec[2]*c - a_rtVec[2]*s);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1, 1);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - a_upVec[0]*s + a_rtVec[0]*c,
 											org[1] - a_upVec[1]*s + a_rtVec[1]*c,
 											org[2] - a_upVec[2]*s + a_rtVec[2]*c);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1, 0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + a_upVec[0]*c + a_rtVec[0]*s,
 											org[1] + a_upVec[1]*c + a_rtVec[1]*s,
 											org[2] + a_upVec[2]*c + a_rtVec[2]*s);
 			}
 			else {
 				// Top left
-				Vec2Set (p->outCoords[0], 0, 0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + a_upVec[0]*scale - a_rtVec[0]*scale,
 											org[1] + a_upVec[1]*scale - a_rtVec[1]*scale,
 											org[2] + a_upVec[2]*scale - a_rtVec[2]*scale);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0, 1);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - a_upVec[0]*scale - a_rtVec[0]*scale,
 											org[1] - a_upVec[1]*scale - a_rtVec[1]*scale,
 											org[2] - a_upVec[2]*scale - a_rtVec[2]*scale);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1, 1);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - a_upVec[0]*scale + a_rtVec[0]*scale,
 											org[1] - a_upVec[1]*scale + a_rtVec[1]*scale,
 											org[2] - a_upVec[2]*scale + a_rtVec[2]*scale);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1, 0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + a_upVec[0]*scale + a_rtVec[0]*scale,
 											org[1] + a_upVec[1]*scale + a_rtVec[1]*scale,
 											org[2] + a_upVec[2]*scale + a_rtVec[2]*scale);
@@ -447,7 +448,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = scale;
 
@@ -462,7 +463,7 @@ void CG_AddParticles (void)
 
 			Vec3Add (org, p->angle, delta);
 
-			dist = Vec3DistFast (org, delta);
+			dist = Vec3Dist (org, delta);
 
 			Vec2Set (p->outCoords[0], 1, dist);
 			Vec3Set (p->outVertices[0], org[0] + width[0],
@@ -495,9 +496,9 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
-			p->outPoly.radius = Vec3DistFast (org, delta);
+			p->outPoly.radius = Vec3Dist (org, delta);
 
 			cgi.R_AddPoly (&p->outPoly);
 			break;
@@ -515,28 +516,28 @@ void CG_AddParticles (void)
 			VectorNormalizeFastf (a_rtVec);
 
 			Vec3Scale (a_rtVec, 0.75f, a_rtVec);
-			Vec3Scale (a_upVec, 0.75f * Vec3LengthFast (p->angle), a_upVec);
+			Vec3Scale (a_upVec, 0.75f * Vec3Length (p->angle), a_upVec);
 
 			// Top left
-			Vec2Set (p->outCoords[0], 0, 0);
+			Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 			Vec3Set (p->outVertices[0], org[0] + a_upVec[0]*scale - a_rtVec[0]*scale,
 										org[1] + a_upVec[1]*scale - a_rtVec[1]*scale,
 										org[2] + a_upVec[2]*scale - a_rtVec[2]*scale);
 
 			// Bottom left
-			Vec2Set (p->outCoords[1], 0, 1);
+			Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 			Vec3Set (p->outVertices[1], org[0] - a_upVec[0]*scale - a_rtVec[0]*scale,
 										org[1] - a_upVec[1]*scale - a_rtVec[1]*scale,
 										org[2] - a_upVec[2]*scale - a_rtVec[2]*scale);
 
 			// Bottom right
-			Vec2Set (p->outCoords[2], 1, 1);
+			Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 			Vec3Set (p->outVertices[2], org[0] - a_upVec[0]*scale + a_rtVec[0]*scale,
 										org[1] - a_upVec[1]*scale + a_rtVec[1]*scale,
 										org[2] - a_upVec[2]*scale + a_rtVec[2]*scale);
 
 			// Top right
-			Vec2Set (p->outCoords[3], 1, 0);
+			Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 			Vec3Set (p->outVertices[3], org[0] + a_upVec[0]*scale + a_rtVec[0]*scale,
 										org[1] + a_upVec[1]*scale + a_rtVec[1]*scale,
 										org[2] + a_upVec[2]*scale + a_rtVec[2]*scale);
@@ -547,7 +548,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = scale;
 
@@ -561,50 +562,50 @@ void CG_AddParticles (void)
 				float s = (float)sin (DEG2RAD (orient)) * scale;
 
 				// Top left
-				Vec2Set (p->outCoords[0], 0.0, 0.0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + cg.refDef.viewAxis[1][0]*c + cg.refDef.viewAxis[2][0]*s,
 											org[1] + cg.refDef.viewAxis[1][1]*c + cg.refDef.viewAxis[2][1]*s,
 											org[2] + cg.refDef.viewAxis[1][2]*c + cg.refDef.viewAxis[2][2]*s);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0.0, 1.0);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - cg.refDef.viewAxis[1][0]*s + cg.refDef.viewAxis[2][0]*c,
 											org[1] - cg.refDef.viewAxis[1][1]*s + cg.refDef.viewAxis[2][1]*c,
 											org[2] - cg.refDef.viewAxis[1][2]*s + cg.refDef.viewAxis[2][2]*c);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1.0, 1.0);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - cg.refDef.viewAxis[1][0]*c - cg.refDef.viewAxis[2][0]*s,
 											org[1] - cg.refDef.viewAxis[1][1]*c - cg.refDef.viewAxis[2][1]*s,
 											org[2] - cg.refDef.viewAxis[1][2]*c - cg.refDef.viewAxis[2][2]*s);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1.0, 0.0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + cg.refDef.viewAxis[1][0]*s - cg.refDef.viewAxis[2][0]*c,
 											org[1] + cg.refDef.viewAxis[1][1]*s - cg.refDef.viewAxis[2][1]*c,
 											org[2] + cg.refDef.viewAxis[1][2]*s - cg.refDef.viewAxis[2][2]*c);
 			}
 			else {
 				// Top left
-				Vec2Set (p->outCoords[0], 0, 0);
+				Vec2Set(p->outCoords[0], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[0],	org[0] + cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 											org[1] + cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 											org[2] + cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 				// Bottom left
-				Vec2Set (p->outCoords[1], 0, 1);
+				Vec2Set(p->outCoords[1], cgMedia.particleCoords[p->type][0], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[1],	org[0] - cg.refDef.viewAxis[2][0]*scale + cg.refDef.viewAxis[1][0]*scale,
 											org[1] - cg.refDef.viewAxis[2][1]*scale + cg.refDef.viewAxis[1][1]*scale,
 											org[2] - cg.refDef.viewAxis[2][2]*scale + cg.refDef.viewAxis[1][2]*scale);
 
 				// Bottom right
-				Vec2Set (p->outCoords[2], 1, 1);
+				Vec2Set(p->outCoords[2], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][3]);
 				Vec3Set (p->outVertices[2],	org[0] - cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 											org[1] - cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 											org[2] - cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);
 
 				// Top right
-				Vec2Set (p->outCoords[3], 1, 0);
+				Vec2Set(p->outCoords[3], cgMedia.particleCoords[p->type][2], cgMedia.particleCoords[p->type][1]);
 				Vec3Set (p->outVertices[3],	org[0] + cg.refDef.viewAxis[2][0]*scale - cg.refDef.viewAxis[1][0]*scale,
 											org[1] + cg.refDef.viewAxis[2][1]*scale - cg.refDef.viewAxis[1][1]*scale,
 											org[2] + cg.refDef.viewAxis[2][2]*scale - cg.refDef.viewAxis[1][2]*scale);
@@ -616,7 +617,7 @@ void CG_AddParticles (void)
 			*(int *)p->outColor[2] = *(int *)outColor;
 			*(int *)p->outColor[3] = *(int *)outColor;
 
-			p->outPoly.shader = p->shader;
+			p->outPoly.mat = p->mat;
 			Vec3Copy (p->org, p->outPoly.origin);
 			p->outPoly.radius = scale;
 

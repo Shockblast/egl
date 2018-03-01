@@ -299,7 +299,7 @@ CL_WriteDemoMessageChunk
 This is only used for ENHANCED_PROTOCOL_VERSION
 ====================
 */
-void CL_WriteDemoMessageChunk (byte *buffer, int length, qBool forceFlush)
+void CL_WriteDemoMessageChunk (byte *buffer, size_t length, qBool forceFlush)
 {
 	if (!cls.demoRecording || cls.serverProtocol == ORIGINAL_PROTOCOL_VERSION)
 		return;
@@ -316,7 +316,7 @@ void CL_WriteDemoMessageChunk (byte *buffer, int length, qBool forceFlush)
 				MSG_WriteByte (&cl.demoBuffer, SVC_NOP);
 			}
 
-			swLen = LittleLong (cl.demoBuffer.curSize);
+			swLen = LittleLong ((int) cl.demoBuffer.curSize);
 			FS_Write (&swLen, sizeof (swLen), cls.demoFile);
 			FS_Write (cl.demoFrame, cl.demoBuffer.curSize, cls.demoFile);
 		}
@@ -341,7 +341,7 @@ void CL_WriteDemoMessageFull (void)
 	int		len, swLen;
 
 	// The first eight bytes are just packet sequencing stuff
-	len = cls.netMessage.curSize-8;
+	len = (int) cls.netMessage.curSize - 8;
 	swLen = LittleLong (len);
 	if (swLen) {
 		FS_Write (&swLen, sizeof (swLen), cls.demoFile);
@@ -398,7 +398,7 @@ qBool CL_StartDemoRecording (char *name)
 		if (cl.configStrings[i][0]) {
 			if (buf.curSize + (int)strlen (cl.configStrings[i]) + 32 > buf.maxSize) {
 				// write it out
-				len = LittleLong (buf.curSize);
+				len = LittleLong ((int) buf.curSize);
 				FS_Write (&len, sizeof (len), cls.demoFile);
 				FS_Write (buf.data, buf.curSize, cls.demoFile);
 				buf.curSize = 0;
@@ -421,7 +421,7 @@ qBool CL_StartDemoRecording (char *name)
 
 		if (buf.curSize + 64 > buf.maxSize) {
 			// Write it out
-			len = LittleLong (buf.curSize);
+			len = LittleLong ((int) buf.curSize);
 			FS_Write (&len, sizeof (len), cls.demoFile);
 			FS_Write (buf.data, buf.curSize, cls.demoFile);
 			buf.curSize = 0;
@@ -435,7 +435,7 @@ qBool CL_StartDemoRecording (char *name)
 	MSG_WriteString (&buf, "precache\n");
 
 	// Write it to the demo file
-	len = LittleLong (buf.curSize);
+	len = LittleLong ((int) buf.curSize);
 	FS_Write (&len, sizeof (len), cls.demoFile);
 	FS_Write (buf.data, buf.curSize, cls.demoFile);
 

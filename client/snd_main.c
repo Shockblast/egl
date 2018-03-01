@@ -335,7 +335,7 @@ sfxCache_t *Snd_LoadSound (sfx_t *s)
     char		namebuffer[MAX_QPATH];
 	byte		*data;
 	wavInfo_t	info;
-	int			len;
+	int			len = 0;
 	float		stepscale;
 	sfxCache_t	*sc;
 	int			fileLen;
@@ -671,7 +671,7 @@ Snd_AliasName
 static sfx_t *Snd_AliasName (char *aliasName, char *trueName)
 {
 	sfx_t	*sfx;
-	int		len;
+	size_t	len;
 
 	len = strlen (trueName);
 	if (len+1 >= MAX_QPATH)
@@ -953,7 +953,7 @@ Snd_Shutdown
 */
 void Snd_Shutdown (void)
 {
-	uint32	size;
+	size_t	size;
 
 	Cmd_RemoveCommand ("snd_restart", cmd_snd_restart);
 	Cmd_RemoveCommand ("play", cmd_play);

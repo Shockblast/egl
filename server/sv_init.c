@@ -333,7 +333,7 @@ void SV_LoadMap (qBool attractLoop, char *levelString, qBool loadGame, qBool dev
 {
 	char	level[MAX_QPATH];
 	char	*ch;
-	int		len;
+	size_t	len;
 	char	spawnPoint[MAX_QPATH];
 
 	sv.loadGame = loadGame;

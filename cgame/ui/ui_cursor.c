@@ -41,12 +41,12 @@ UI_DrawMouseCursor
 */
 void UI_DrawMouseCursor (void)
 {
-	struct shader_s *cursor;
+	struct material_s *cursor;
 
 	if (uiState.cursorOverItem)
-		cursor = uiMedia.cursorHoverShader;
+		cursor = uiMedia.cursorHoverMat;
 	else
-		cursor = uiMedia.cursorShader;
+		cursor = uiMedia.cursorMat;
 
 	cgi.R_DrawPic (cursor, 0, uiState.cursorX + 1, uiState.cursorY + 1,
 		uiState.cursorW * clamp (UIFT_SCALE, 0.5f, 1),
@@ -189,7 +189,7 @@ static void MenuImage_Setup (uiImage_t *s)
 		height = s->height;
 	}
 	else {
-		cgi.R_GetImageSize (s->shader, &width, &height);
+		cgi.R_GetImageSize (s->mat, &width, &height);
 		s->width = width;
 		s->height = height;
 	}
