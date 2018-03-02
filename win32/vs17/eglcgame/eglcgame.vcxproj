@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{B9A62DEC-748B-4B4A-B49F-9AAFBF51E2A3}</ProjectGuid>
     <RootNamespace>cgamex86</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>eglcgame</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -206,6 +206,7 @@
     <ClCompile Include="..\..\..\cgame\cg_tempents.c" />
     <ClCompile Include="..\..\..\cgame\cg_view.c" />
     <ClCompile Include="..\..\..\cgame\cg_weapon.c" />
+    <ClCompile Include="..\..\..\cgame\gmenu\menu_id_1.c" />
     <ClCompile Include="..\..\..\cgame\menu\menu.c" />
     <ClCompile Include="..\..\..\cgame\menu\m_main.c" />
     <ClCompile Include="..\..\..\cgame\menu\m_mp.c" />

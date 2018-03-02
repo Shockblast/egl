@@ -21,6 +21,9 @@
     <Filter Include="Header Files\menu">
       <UniqueIdentifier>{ea87c09b-50c2-4d99-ade3-5d41b2482627}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gmenu">
+      <UniqueIdentifier>{bc8ee9c3-6ffb-4945-a6e0-10d09b2925dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\cgame\cg_api.h">
@@ -237,6 +240,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\cgame\menu\menu.c">
       <Filter>Source Files\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cgame\gmenu\menu_id_1.c">
+      <Filter>Source Files\gmenu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

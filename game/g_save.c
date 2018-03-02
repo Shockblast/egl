@@ -25,6 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 mmove_t mmove_reloc;
 
 field_t fields[] = {
+	// <WatIsDeze>
+	{ "menu_id", FOFS(menu_id), F_INT },
+	{ "message_id", FOFS(message_id), F_INT },
+	{ "optionlist_id", FOFS(optionlist_id), F_INT },
+	// </WatIsDeze>
+
 	{"classname", FOFS(classname), F_LSTRING},
 	{"model", FOFS(model), F_LSTRING},
 	{"spawnflags", FOFS(spawnflags), F_INT},

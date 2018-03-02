@@ -149,6 +149,9 @@
     <ClCompile Include="..\..\..\game\p_weapon.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\game\g_menus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\game\m_tank.h">

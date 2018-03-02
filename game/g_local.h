@@ -1093,5 +1093,12 @@ struct edict_s
 	// common data blocks
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
+
+	// <WatIsDeze>
+	// GMenu related, although this code could really use restructuring. (Above this comment)
+	int menu_id;
+	int message_id;
+	int optionlist_id;
+	// </WatIsDeze>
 };
 

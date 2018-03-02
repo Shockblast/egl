@@ -275,6 +275,10 @@ enum svcTypes {
 	SVC_ZPACKET,				// new for ENHANCED_PROTOCOL_VERSION
 	SVC_ZDOWNLOAD,				// new for ENHANCED_PROTOCOL_VERSION
 
+	// <WatIsDeze>
+	SVC_FUNC_MENU,
+	// </WatIsDeze>
+
 	SVC_MAX
 };
 
