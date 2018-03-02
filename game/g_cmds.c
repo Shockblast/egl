@@ -901,6 +901,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
+void ED_CallSpawn (edict_t *ent);
 
 /*
 =================
@@ -915,6 +916,27 @@ void ClientCommand (edict_t *ent)
 		return;		// not fully in game yet
 
 	cmd = gi.argv(0);
+
+	if (Q_stricmp(cmd, "spawn") == 0) {
+        edict_t *e;
+        vec3_t  forward;
+ 
+        if (!gi.argv(1))
+        {
+            gi.dprintf("syntax: spawn <classname>\n");
+            return;
+        }
+        e = G_Spawn();
+        e->classname = gi.TagMalloc(strlen(gi.argv(1)) + 1, TAG_LEVEL);
+        strcpy(e->classname, gi.argv(1));
+        Angles_Vectors(ent->client->v_angle, forward, NULL, NULL);
+        //Vec3Angle(ent->client->v_angle, forward, NULL, NULL);
+        Vec3MA(ent->s.origin, 128, forward, e->s.origin);
+        e->s.angles[YAW] = ent->s.angles[YAW];
+        ED_CallSpawn(e);
+		gi.linkentity(e);
+		return;
+    }
 
 	if (Q_stricmp (cmd, "players") == 0)
 	{

@@ -854,7 +854,10 @@ void door_use_areaportals (edict_t *self, qBool open)
 	edict_t	*t = NULL;
 
 	if (!self->target)
+	{
+		gi.SetAreaPortalState(self->s.number, open);
 		return;
+	}
 
 	while ((t = G_Find (t, FOFS(targetname), self->target)))
 	{
