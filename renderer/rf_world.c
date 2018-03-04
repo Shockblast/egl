@@ -411,12 +411,6 @@ void R_AddQ2BrushModel (refEntity_t *ent)
 =============================================================================
 */
 
-static qBool			r_q3_visChanged;
-static uint32			r_q3_numVisSurfs;
-static mBspSurface_t	*r_q3_visSurfs[Q3BSP_MAX_LEAFFACES];
-static uint32			r_q3_numSkySurfs;
-static mBspSurface_t	*r_q3_skySurfs[Q3BSP_MAX_LEAFFACES];
-
 /*
 ================
 R_AddQ3Surface
@@ -425,7 +419,8 @@ R_AddQ3Surface
 static void R_AddQ3Surface (mBspSurface_t *surf, refEntity_t *ent, meshType_t meshType)
 {
 	// Add to list
-	R_AddMeshToList (surf->q3_shaderRef->mat, ent->matTime, ent, surf->q3_fog, meshType, surf);
+	if (!R_AddMeshToList (surf->q3_shaderRef->mat, ent->matTime, ent, surf->q3_fog, meshType, surf))
+		return;
 
 	// Surface is used this frame
 	surf->visFrame = ri.frameCount;
@@ -526,28 +521,52 @@ R_CullQ3SurfaceBounds
 
 
 /*
-=============
-R_MarkQ3Surfaces
-=============
+================
+R_RecursiveQ2WorldNode
+================
 */
-static void R_MarkQ3Surfaces (mBspNode_t *node)
+static void R_RecursiveQ3WorldNode (mBspNode_t *node, int clipFlags)
 {
-	mBspSurface_t	**mark, *surf;
+	cBspPlane_t		*p;
+	mBspSurface_t	*surf, **mark;
 	mBspLeaf_t		*leaf;
+	int				clipped, i;
 
 	for ( ; ; ) {
-		if (node->c.visFrame != ri.scn.visFrameCount)
-			return;
+		if (R_CullNode (node))
+			return;		// Node not visible this frame
+
+		// Cull
+		if (clipFlags && !node->c.badBounds) {
+			for (i=0, p=ri.scn.viewFrustum ; i<5 ; i++, p++) {
+				if (!(clipFlags & (1<<i)))
+					continue;
+
+				clipped = BoxOnPlaneSide (node->c.mins, node->c.maxs, p);
+				switch (clipped) {
+				case 1:
+					clipFlags &= ~(1<<i);
+					break;
+
+				case 2:
+					ri.pc.cullBounds[CULL_PASS]++;
+					return;
+				}
+			}
+			ri.pc.cullBounds[CULL_FAIL]++;
+		}
+
 		if (!node->c.plane)
 			break;
 
-		R_MarkQ3Surfaces (node->children[0]);
+		R_RecursiveQ3WorldNode(node->children[0], clipFlags);
 		node = node->children[1];
 	}
 
 	// If a leaf node, draw stuff
 	leaf = (mBspLeaf_t *)node;
-	if (!leaf->q3_firstVisSurface)
+
+	if (!(leaf->q3_firstVisSurface && *leaf->q3_firstVisSurface))
 		return;
 
 	// Check for door connected areas
@@ -561,34 +580,41 @@ static void R_MarkQ3Surfaces (mBspNode_t *node)
 		surf = *mark++;
 
 		// See if it's been touched, if not, touch it
-		if (surf->q3_nodeFrame == ri.scn.visFrameCount)
+		if (surf->visFrame == ri.frameCount)
 			continue;	// Already touched this frame
-		surf->q3_nodeFrame = ri.scn.visFrameCount;
 
 		// Sky surface
 		if (surf->q3_shaderRef->mat->flags & MAT_SKY) {
-			// See if there's room
-			if (r_q3_numSkySurfs >= Q3BSP_MAX_LEAFFACES) {
-				Com_Printf (PRNT_WARNING, "R_MarkQ3Surfaces: hit max surface count!\n");
-				break;
-			}
+			if (R_CullQ3SurfacePlanar(surf, surf->q3_shaderRef->mat, ri.def.viewOrigin))
+				continue;
+			if (R_CullQ3SurfaceBounds(surf, clipFlags))
+				continue;
 
-			// Add to list
-			r_q3_skySurfs[r_q3_numSkySurfs++] = surf;
+			R_ClipSkySurface(surf);
 			continue;
 		}
 
-		// See if there's room
-		if (r_q3_numVisSurfs >= Q3BSP_MAX_LEAFFACES) {
-			Com_Printf (PRNT_WARNING, "R_MarkQ3Surfaces: hit max surface count!\n");
+		switch(surf->q3_faceType) {
+		case FACETYPE_FLARE:
+			if (R_CullQ3FlareSurface(surf, ri.scn.worldEntity, clipFlags))
+				continue;
+
+			R_AddQ3Surface(surf, ri.scn.worldEntity, MBT_Q3BSP_FLARE);
+			break;
+
+		case FACETYPE_PLANAR:
+			if (R_CullQ3SurfacePlanar(surf, surf->q3_shaderRef->mat, ri.def.viewOrigin))
+				continue;
+			// FALL THROUGH
+		default:
+			if (R_CullQ3SurfaceBounds(surf, clipFlags))
+				continue;
+
+			R_AddQ3Surface(surf, ri.scn.worldEntity, MBT_Q3BSP);
 			break;
 		}
-
-		// Add to list
-		r_q3_visSurfs[r_q3_numVisSurfs++] = surf;
 	} while (*mark);
 }
-
 
 /*
 =============
@@ -602,9 +628,6 @@ static void R_MarkQ3Leaves (void)
 	mBspLeaf_t		*leaf;
 	mBspNode_t		*node;
 	int				cluster;
-	// If this is true, it's because of a map change
-	// Map changes should for a visibility set update
-	r_q3_visChanged = !ri.scn.visFrameCount;
 
 	// Current viewcluster
 	if (ri.scn.worldModel && !ri.scn.mirrorView) {
@@ -629,9 +652,6 @@ static void R_MarkQ3Leaves (void)
 
 	ri.scn.visFrameCount++;
 	ri.scn.oldViewCluster = ri.scn.viewCluster;
-
-	// Update visibility array
-	r_q3_visChanged = qTrue;
 
 	if (r_noVis->intVal || ri.scn.viewCluster == -1 || !ri.scn.worldModel->q3BspModel.vis) {
 		// Mark everything
@@ -658,123 +678,6 @@ static void R_MarkQ3Leaves (void)
 			} while (node);
 		}
 	}
-}
-
-
-/*
-=============
-R_DrawQ3WorldList
-=============
-*/
-static void R_DrawQ3WorldList (qBool cull)
-{
-	mBspSurface_t	*surf;
-	uint32			i;
-
-	// No culling
-	if (!cull) {
-		// Clip sky surfaces
-		for (i=0 ; i<r_q3_numSkySurfs ; i++) {
-			surf = r_q3_skySurfs[i];
-			R_ClipSkySurface (surf);
-		}
-
-		// Add world surfaces
-		for (i=0 ; i<r_q3_numVisSurfs ; i++) {
-			surf = r_q3_visSurfs[i];
-
-			switch (surf->q3_faceType) {
-			case FACETYPE_FLARE:
-				if (!r_flares->intVal || !r_flareFade->floatVal)
-					continue;
-
-				R_AddQ3Surface (surf, ri.scn.worldEntity, MBT_Q3BSP_FLARE);
-				break;
-
-			default:
-				R_AddQ3Surface (surf, ri.scn.worldEntity, MBT_Q3BSP);
-				break;
-			}
-		}
-
-		return;
-	}
-
-	// FIXME: these could be properly sorted by node, and frustum culling of nodes will be usable again
-
-	// Clip sky surfaces
-	for (i=0 ; i<r_q3_numSkySurfs ; i++) {
-		surf = r_q3_skySurfs[i];
-		if (R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->mat, ri.def.viewOrigin))
-			continue;
-		if (R_CullQ3SurfaceBounds (surf, 31))
-			continue;
-
-		R_ClipSkySurface (surf);
-	}
-
-	// Add world surfaces
-	for (i=0 ; i<r_q3_numVisSurfs ; i++) {
-		surf = r_q3_visSurfs[i];
-		switch (surf->q3_faceType) {
-		case FACETYPE_FLARE:
-			if (R_CullQ3FlareSurface (surf, ri.scn.worldEntity, 31))
-				continue;
-
-			R_AddQ3Surface (surf, ri.scn.worldEntity, MBT_Q3BSP_FLARE);
-			break;
-
-		case FACETYPE_PLANAR:
-			if (R_CullQ3SurfacePlanar (surf, surf->q3_shaderRef->mat, ri.def.viewOrigin))
-				continue;
-			// FALL THROUGH
-		default:
-			if (R_CullQ3SurfaceBounds (surf, 31))
-				continue;
-
-			R_AddQ3Surface (surf, ri.scn.worldEntity, MBT_Q3BSP);
-			break;
-		}
-	}
-}
-
-
-/*
-=============
-R_AddQ3WorldToList
-=============
-*/
-static void R_AddQ3WorldToList (void)
-{
-	uint32	startTime = 0;
-
-	if (r_times->intVal)
-		startTime = Sys_UMilliseconds ();
-	R_MarkQ3Leaves ();
-	if (r_times->intVal)
-		ri.pc.timeMarkLeaves += Sys_UMilliseconds () - startTime;
-
-	if (!r_drawworld->intVal)
-		return;
-
-	if (r_q3_visChanged) {
-		r_q3_visChanged = qFalse;
-		r_q3_numVisSurfs = 0;
-		r_q3_numSkySurfs = 0;
-		R_MarkQ3Surfaces (ri.scn.worldModel->bspModel.nodes);
-	}
-
-	if (r_times->intVal)
-		startTime = Sys_UMilliseconds ();
-	R_Q3BSP_MarkWorldLights ();
-	if (r_times->intVal)
-		ri.pc.timeMarkLights += Sys_UMilliseconds () - startTime;
-
-	if (r_times->intVal)
-		startTime = Sys_UMilliseconds ();
-	R_DrawQ3WorldList (!(r_noCull->intVal));
-	if (r_times->intVal)
-		ri.pc.timeRecurseWorld += Sys_UMilliseconds () - startTime;
 }
 
 /*
@@ -886,17 +789,17 @@ void R_AddWorldToList (void)
 
 	R_ClearSky ();
 
-	if (ri.def.rdFlags & RDF_NOWORLDMODEL)
+	if (ri.def.rdFlags & RDF_NOWORLDMODEL ||
+		!ri.scn.worldModel)
 		return;
-
-	if (ri.scn.worldModel && ri.scn.worldModel->type == MODEL_Q3BSP) {
-		R_AddQ3WorldToList ();
-		return;
-	}
 
 	if (r_times->intVal)
 		startTime = Sys_UMilliseconds ();
-	R_MarkQ2Leaves ();
+
+	if (ri.scn.worldModel->type == MODEL_Q3BSP)
+		R_MarkQ3Leaves();
+	else
+		R_MarkQ2Leaves ();
 	if (r_times->intVal)
 		ri.pc.timeMarkLeaves += Sys_UMilliseconds () - startTime;
 
@@ -905,13 +808,19 @@ void R_AddWorldToList (void)
 
 	if (r_times->intVal)
 		startTime = Sys_UMilliseconds ();
-	R_Q2BSP_MarkWorldLights ();
+	if (ri.scn.worldModel->type == MODEL_Q3BSP)
+		R_Q3BSP_MarkWorldLights();
+	else
+		R_Q2BSP_MarkWorldLights ();
 	if (r_times->intVal)
 		ri.pc.timeMarkLights += Sys_UMilliseconds () - startTime;
 
 	if (r_times->intVal)
 		startTime = Sys_UMilliseconds ();
-	R_RecursiveQ2WorldNode (ri.scn.worldModel->bspModel.nodes, (r_noCull->intVal) ? 0 : 31);
+	if (ri.scn.worldModel->type == MODEL_Q3BSP)
+		R_RecursiveQ3WorldNode (ri.scn.worldModel->bspModel.nodes, (r_noCull->intVal) ? 0 : 31);
+	else
+		R_RecursiveQ2WorldNode (ri.scn.worldModel->bspModel.nodes, (r_noCull->intVal) ? 0 : 31);
 	if (r_times->intVal)
 		ri.pc.timeRecurseWorld += Sys_UMilliseconds () - startTime;
 }
