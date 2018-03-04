@@ -4252,8 +4252,8 @@ void R_RegisterMap (char *mapName)
 	// Force markleafs
 	ri.scn.oldViewCluster = -1;
 	ri.scn.viewCluster = -1;
-	ri.scn.visFrameCount--;
-	ri.frameCount--;			// Just need to force an update on systems that rely on this variable
+	ri.scn.visFrameCount++;
+	ri.frameCount++;			// Just need to force an update on systems that rely on this variable
 }
 
 
