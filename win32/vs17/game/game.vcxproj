@@ -95,7 +95,7 @@
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
-      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <DisableSpecificWarnings>5045;4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
@@ -114,7 +114,7 @@
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
-      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <DisableSpecificWarnings>5045;4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(SolutionDir)..\..\game\exports.def</ModuleDefinitionFile>
@@ -134,7 +134,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
+      <DisableSpecificWarnings>5045;4244;4820;4464;4100;4242;4459;4706;4255;4668;4310;4710;4127;4152;4702;4131;4057</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
