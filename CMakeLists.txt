@@ -61,6 +61,16 @@ set(EGL_SRCDIR_WIN32_DIR ${EGL_SRCDIR_ROOT_DIR}/win32)
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(X11 REQUIRED)
+
+# Minizip..
+INCLUDE (FindPkgConfig)
+if (PKG_CONFIG_FOUND)
+        PKG_CHECK_MODULES(UNZIP minizip)
+endif (PKG_CONFIG_FOUND)
 
 # General linker flags.
 set(EGL_LINKER_FLAGS "")
@@ -250,6 +260,7 @@ set(EGL_SRC_ENGINE
     ${EGL_SRCDIR_CLIENT}/gui_draw.c 
     ${EGL_SRCDIR_CLIENT}/gui_events.c 
     ${EGL_SRCDIR_CLIENT}/gui_items.c 
+    ${EGL_SRCDIR_CLIENT}/gui_init.c
     ${EGL_SRCDIR_CLIENT}/gui_keys.c 
     ${EGL_SRCDIR_CLIENT}/gui_main.c 
     ${EGL_SRCDIR_CLIENT}/gui_vars.c 
@@ -264,6 +275,7 @@ set(EGL_SRC_ENGINE
     ${EGL_SRCDIR_COMMON}/cm_q2_trace.c
     ${EGL_SRCDIR_COMMON}/cm_q3_main.c
     ${EGL_SRCDIR_COMMON}/cm_q3_trace.c 
+    ${EGL_SRCDIR_COMMON}/cm_q3_patch.c 
     ${EGL_SRCDIR_COMMON}/cmd.c 
     ${EGL_SRCDIR_COMMON}/common.c 
     ${EGL_SRCDIR_COMMON}/crc.c 
@@ -385,6 +397,16 @@ if(${BUILD_EGL})
     set_target_properties(EGL PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/
             )
-    target_link_libraries(EGL ${EGL_LINKER_FLAGS} ${SDL_LIBRARY} ${OPENAL_LIBRARY} zlib libjpeg libpng)# ws2_32 winmm)
+    target_link_libraries(EGL
+        ${EGL_LINKER_FLAGS} 
+        ${SDL_LIBRARY} 
+        ${OPENAL_LIBRARY} 
+        ${PNG_LIBRARIES} 
+        ${JPEG_LIBRARIES} 
+        ${ZLIB_LIBRARIES} 
+        ${UNZIP_LIBRARIES} 
+        ${X11_LIBRARIES}
+    
+    )# ws2_32 winmm)
 endif()
 

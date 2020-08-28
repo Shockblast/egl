@@ -205,6 +205,15 @@ void Conbuf_AppendText (const char *pMsg)
   Sys_ConsoleOutput (pMsg);
 }
 
+/*
+==================
+Sys_SetConsoleTitle
+==================
+*/
+void Sys_SetConsoleTitle (const char *title)
+{
+
+}
 
 /*
 ==================

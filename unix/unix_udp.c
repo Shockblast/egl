@@ -92,14 +92,14 @@ char	*NET_AdrToString (netAdr_t *a)
 {
 	static	char	str[64];
 	
-	switch (a.naType) {
+	switch (a->naType) {
 	case NA_LOOPBACK:
 		Q_snprintfz (str, sizeof (str), "loopback");
 		break;
 
 	case NA_IP:
 		Q_snprintfz (str, sizeof (str), "%i.%i.%i.%i:%i",
-			a.ip[0], a.ip[1], a.ip[2], a.ip[3], ntohs(a.port));
+			a->ip[0], a->ip[1], a->ip[2], a->ip[3], ntohs(a->port));
 		break;
 	}
 
@@ -224,7 +224,7 @@ LOOPBACK BUFFERS FOR LOCAL PLAYER
 =============================================================================
 */
 
-qBool	NET_GetLoopPacket (int sock, netAdr_t *net_from, netMsg_t *net_message)
+qBool	NET_GetLoopPacket (netSrc_t sock, netAdr_t *fromAddr, netMsg_t *message)
 {
 	int		i;
 	loopBack_t	*loop;
@@ -240,15 +240,15 @@ qBool	NET_GetLoopPacket (int sock, netAdr_t *net_from, netMsg_t *net_message)
 	i = loop->get & (MAX_LOOPBACK-1);
 	loop->get++;
 
-	memcpy (net_message->data, loop->msgs[i].data, loop->msgs[i].datalen);
-	net_message->curSize = loop->msgs[i].datalen;
-	*net_from = net_local_adr;
+	memcpy (message->data, loop->msgs[i].data, loop->msgs[i].datalen);
+	message->curSize = loop->msgs[i].datalen;
+	*fromAddr = net_local_adr;
 	return qTrue;
 
 }
 
 
-void NET_SendLoopPacket (int sock, int length, void *data, netAdr_t to)
+void NET_SendLoopPacket (netSrc_t sock, int length, void *data, netAdr_t *to)
 {
 	int		i;
 	loopBack_t	*loop;
@@ -264,7 +264,7 @@ void NET_SendLoopPacket (int sock, int length, void *data, netAdr_t to)
 
 //=============================================================================
 
-qBool NET_GetPacket (int sock, netAdr_t *net_from, netMsg_t *net_message)
+qBool NET_GetPacket (netSrc_t sock, netAdr_t *net_from, netMsg_t *net_message)
 {
 	int 	ret;
 	struct sockaddr_in	from;
@@ -290,12 +290,12 @@ qBool NET_GetPacket (int sock, netAdr_t *net_from, netMsg_t *net_message)
 		if (err == EWOULDBLOCK || err == ECONNREFUSED)
 			return qFalse;
 		Com_Printf (0, "NET_GetPacket: %s from %s\n", NET_ErrorString(),
-					NET_AdrToString(*net_from));
+					NET_AdrToString(net_from));
 		return 0;
 	}
 
 	if (ret == net_message->maxSize) {
-		Com_Printf (0, "Oversize packet from %s\n", NET_AdrToString (*net_from));
+		Com_Printf (0, "Oversize packet from %s\n", NET_AdrToString (net_from));
 		return qFalse;
 	}
 
@@ -308,13 +308,13 @@ qBool NET_GetPacket (int sock, netAdr_t *net_from, netMsg_t *net_message)
 
 //=============================================================================
 
-int NET_SendPacket (int sock, int length, void *data, netAdr_t to)
+int NET_SendPacket (netSrc_t sock, size_t length, void *data, netAdr_t *to)
 {
 	int		ret;
 	struct sockaddr_in	addr;
 	int		net_socket;
 
-	switch (to.naType) {
+	switch (to->naType) {
 	case NA_LOOPBACK:
 		NET_SendLoopPacket (sock, length, data, to);
 		return 0;
@@ -332,7 +332,7 @@ int NET_SendPacket (int sock, int length, void *data, netAdr_t to)
 		break;
 
 	default:
-		Com_Error (ERR_FATAL, "NET_SendPacket: bad address type: %d", to.naType);
+		Com_Error (ERR_FATAL, "NET_SendPacket: bad address type: %d", to->naType);
 		break;
 	}
 
@@ -358,7 +358,7 @@ NET_Config
 A single player game will only use the loopback code
 ====================
 */
-int NET_Config (int openFlags)
+netConfig_t NET_Config (netConfig_t openFlags)
 {
 	int		i;
 
