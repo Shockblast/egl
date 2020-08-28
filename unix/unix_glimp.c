@@ -208,8 +208,8 @@ void VID_Init (refConfig_t *outConfig)
 	vid_fullscreen = Cvar_Register ("vid_fullscreen", "0", CVAR_ARCHIVE);
 
 	// Add some console commands that we want to handle
-	Cmd_AddCommand (qFalse, "vid_restart", VID_Restart_f, "Restarts refresh and media");
-	Cmd_AddCommand (qFalse, "listremaps", ListRemaps_f, "Lists what keys are remapped to AUX* bindings");
+	Cmd_AddCommand ("vid_restart", VID_Restart_f, "Restarts refresh and media");
+	Cmd_AddCommand ("listremaps", ListRemaps_f, "Lists what keys are remapped to AUX* bindings");
 
 	// Start the graphics mode and load refresh DLL
 	vid_isActive = qFalse;

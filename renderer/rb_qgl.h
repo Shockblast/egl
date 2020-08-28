@@ -34,8 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 # include <GL/glx.h>
 #endif
 
+#ifdef _WIN32
 typedef int GLsizeiptrARB;
 typedef int GLintptrARB;
+#endif
 
 #ifndef APIENTRY
 # define APIENTRY

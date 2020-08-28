@@ -88,7 +88,7 @@ void NET_NetadrToSockadr (netAdr_t *a, struct sockaddr_in *s)
 	}
 }
 
-char	*NET_AdrToString (netAdr_t a)
+char	*NET_AdrToString (netAdr_t *a)
 {
 	static	char	str[64];
 	
@@ -583,7 +583,7 @@ NET_Init
 */
 void NET_Init (void)
 {
-  cmd_netStats = Cmd_AddCommand (qFalse, "net_stats", NET_Stats_f, "Prints out connection information");
+  cmd_netStats = Cmd_AddCommand ("net_stats", NET_Stats_f, "Prints out connection information");
 }
 
 
