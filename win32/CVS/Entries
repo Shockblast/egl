@@ -1,0 +1,18 @@
+/EGL.APS/1.5/Mon Aug 16 18:20:03 2004/-kb/
+/EGL.rc/1.2/Mon Jul 26 02:27:56 2004//
+/con_win.c/1.9/Tue Mar  1 07:43:04 2005//
+/conproc.c/1.12/Wed Feb 23 05:33:01 2005//
+/egl.ico/1.2/Sat Jun  5 00:46:34 2004/-kb/
+/resource.h/1.5/Wed Aug 18 09:13:57 2004//
+/wglext.h/1.1/Mon Mar 22 20:48:27 2004//
+D/lib////
+/glimp_win.h/1.15/Wed Apr 20 02:48:51 2005//
+/winquake.h/1.15/Tue May 31 06:20:05 2005//
+/snd_win.c/1.38/Mon Jul  4 11:42:07 2005//
+/in_win.c/1.44/Thu Aug  4 06:10:42 2005//
+/net_wins.c/1.48/Sat Aug 20 19:45:40 2005//
+/glimp_win.c/1.71/Sat Aug 20 22:32:54 2005//
+/qgl_win.c/1.30/Sat Aug 20 22:25:24 2005//
+/sys_win.c/1.44/Sat Aug 20 22:58:42 2005//
+/vid_win.c/1.69/Sat Aug 20 23:07:30 2005//
+/cd_win.c/1.20/Sun Aug 21 00:58:44 2005//

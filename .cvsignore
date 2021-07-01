@@ -1,0 +1,6 @@
+release
+debug
+*.opt
+*.plg
+*.ncb
+*.suo
