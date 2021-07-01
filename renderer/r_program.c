@@ -1,0 +1,442 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+//
+// r_program.c
+// Vertex and fragment program handling
+//
+
+#include "r_local.h"
+
+#define MAX_PROGRAMS		1024
+#define MAX_PROGRAM_HASH	128
+
+static program_t	r_fragmentPrograms[MAX_PROGRAMS];
+static program_t	*r_fragmentHashTree[MAX_PROGRAM_HASH];
+static uInt			r_numFragmentPrograms;
+
+static program_t	r_vertexPrograms[MAX_PROGRAMS];
+static program_t	*r_vertexHashTree[MAX_PROGRAM_HASH];
+static uInt			r_numVertexPrograms;
+
+/*
+==============================================================================
+
+	PROGRAM UPLOADING
+
+==============================================================================
+*/
+
+/*
+===============
+R_UploadProgram
+===============
+*/
+static qBool R_UploadProgram (char *name, byte *buffer, int bufferLen, qBool fragProg)
+{
+	const char	*errorString;
+	int			errorPos;
+	uInt		target;
+
+	// Select a target
+	if (fragProg)
+		target = GL_FRAGMENT_PROGRAM_ARB;
+	else
+		target = GL_VERTEX_PROGRAM_ARB;
+
+	// Upload
+	qglProgramStringARB (target, GL_PROGRAM_FORMAT_ASCII_ARB, bufferLen, buffer);
+
+	// Check for errors
+	errorString = qglGetString (GL_PROGRAM_ERROR_STRING_ARB);
+	qglGetIntegerv (GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+
+	if (errorPos == -1)
+		return qTrue;
+
+	if (fragProg)
+		Com_Printf (0, "R_UploadProgram: fragment program error in '%s' at char #%i: '%s'\n", name, errorPos, errorString);
+	else
+		Com_Printf (0, "R_UploadProgram: fragment vertex error in '%s' at char #%i: '%s'\n", name, errorPos, errorString);
+	return qFalse;
+}
+
+/*
+==============================================================================
+
+	PROGRAM LOADING
+
+==============================================================================
+*/
+
+/*
+===============
+R_FindProgram
+===============
+*/
+static program_t *R_FindProgram (const char *name, qBool fragProg)
+{
+	char		fixedName[MAX_QPATH];
+	program_t	*prog;
+	uLong		hash;
+	int		len;
+
+	// Check the length
+	len = strlen (name);
+	if (len < 4) {
+		Com_Printf (0, S_COLOR_RED "R_FindProgram: Program name too short! %s\n", name);
+		return NULL;
+	}
+	if (len >= MAX_QPATH) {
+		Com_Printf (0, S_COLOR_RED "R_FindProgram: Program name too long! %s\n", name);
+		return NULL;
+	}
+
+	// Fix the name
+	Q_FixPathName (fixedName, sizeof (fixedName), 2, qFalse);
+
+	// Calculate hash
+	hash = CalcHash (fixedName, MAX_PROGRAM_HASH);
+
+	// Search
+	if (fragProg) {
+		for (prog=r_fragmentHashTree[hash] ; prog ; prog=prog->hashNext) {
+			if (!prog->touchFrame)
+				continue;
+
+			// Check name
+			if (!strcmp (fixedName, prog->name))
+				return prog;
+		}
+	}
+	else {
+		for (prog=r_vertexHashTree[hash] ; prog ; prog=prog->hashNext) {
+			if (!prog->touchFrame)
+				continue;
+
+			// Check name
+			if (!strcmp (fixedName, prog->name))
+				return prog;
+		}
+	}
+
+	return NULL;
+}
+
+
+/*
+===============
+R_LoadProgram
+===============
+*/
+static program_t *R_LoadProgram (char *name, byte *buffer, int bufferLen, qBool fragProg)
+{
+	program_t	*prog;
+	uInt		target;
+	uInt		i;
+
+	if (fragProg) {
+		// Find a free r_fragmentPrograms spot
+		for (i=0, prog=r_fragmentPrograms ; i<r_numFragmentPrograms ; i++, prog++) {
+			if (!prog->touchFrame)
+				break;
+		}
+
+		// None found, create a new spot
+		if (i == r_numFragmentPrograms) {
+			if (r_numFragmentPrograms >= MAX_PROGRAMS)
+				Com_Error (ERR_DROP, "R_LoadProgram: r_numFragmentPrograms >= MAX_PROGRAMS");
+
+			prog = &r_fragmentPrograms[r_numFragmentPrograms++];
+		}
+
+		// Set the target
+		target = GL_FRAGMENT_PROGRAM_ARB;
+	}
+	else {
+		// Find a free r_vertexPrograms spot
+		for (i=0, prog=r_vertexPrograms ; i<r_numVertexPrograms ; i++, prog++) {
+			if (!prog->touchFrame)
+				break;
+		}
+
+		// None found, create a new spot
+		if (i == r_numVertexPrograms) {
+			if (r_numVertexPrograms >= MAX_PROGRAMS)
+				Com_Error (ERR_DROP, "R_LoadProgram: r_numVertexPrograms >= MAX_PROGRAMS");
+
+			prog = &r_vertexPrograms[r_numVertexPrograms++];
+		}
+
+		// Set the target
+		target = GL_VERTEX_PROGRAM_ARB;
+	}
+
+	// Fill out properties
+	Q_strncpyz (prog->name, name, sizeof (prog->name));
+	qglGenProgramsARB (1, &prog->progNum);
+	prog->touchFrame = r_registrationFrame;
+	prog->hashValue = CalcHash (prog->name, MAX_PROGRAM_HASH);
+
+	// Upload
+	qglBindProgramARB (target, prog->progNum);
+	if (!R_UploadProgram (name, buffer, bufferLen, fragProg)) {
+		qglDeleteProgramsARB (1, &prog->progNum);
+		memset (prog, 0, sizeof (program_t));
+	}
+
+	// Link it in
+	if (fragProg) {
+		prog->hashNext = r_fragmentHashTree[prog->hashValue];
+		r_fragmentHashTree[prog->hashValue] = prog;
+	}
+	else {
+		prog->hashNext = r_vertexHashTree[prog->hashValue];
+		r_vertexHashTree[prog->hashValue] = prog;
+	}
+
+	return prog;
+}
+
+
+/*
+===============
+R_RegisterProgram
+===============
+*/
+program_t *R_RegisterProgram (char *name, qBool fragProg)
+{
+	program_t	*prog;
+	byte		*buffer;
+	int			bufferLen;
+
+	// Check the name
+	if (!name || !name[0])
+		return NULL;
+
+	// Check for extension
+	if (fragProg && !glConfig.extFragmentProgram) {
+		Com_Error (ERR_DROP, "R_RegisterProgram: attempted to register fragment program when extension is not enabled");
+		return NULL;
+	}
+	else if (!glConfig.extVertexProgram) {
+		Com_Error (ERR_DROP, "R_RegisterProgram: attempted to register vertex program when extension is not enabled");
+		return NULL;
+	}
+
+	// Find
+	prog = R_FindProgram (name, fragProg);
+	if (prog) {
+		prog->touchFrame = r_registrationFrame;
+		return prog;
+	}
+
+	// Upload
+	bufferLen = FS_LoadFile (name, (void **)&buffer);
+	if (buffer) {
+		prog = R_LoadProgram (name, buffer, bufferLen, fragProg);
+		FS_FreeFile (buffer);
+		return prog;
+	}
+
+	return NULL;
+}
+
+
+/*
+===============
+R_FreeProgram
+===============
+*/
+static void R_FreeProgram (program_t *prog, qBool fragProg)
+{
+	program_t	*hashProg;
+	program_t	**prev;
+
+	if (fragProg) {
+		// De-link it from the hash tree
+		prev = &r_fragmentHashTree[prog->hashValue];
+		for ( ; ; ) {
+			hashProg = *prev;
+			if (!hashProg)
+				break;
+
+			if (hashProg == prog) {
+				*prev = hashProg->hashNext;
+				break;
+			}
+			prev = &hashProg->hashNext;
+		}
+	}
+	else {
+		// De-link it from the hash tree
+		prev = &r_vertexHashTree[prog->hashValue];
+		for ( ; ; ) {
+			hashProg = *prev;
+			if (!hashProg)
+				break;
+
+			if (hashProg == prog) {
+				*prev = hashProg->hashNext;
+				break;
+			}
+			prev = &hashProg->hashNext;
+		}
+	}
+
+	// Free it
+	qglDeleteProgramsARB (1, &prog->progNum);
+	memset (prog, 0, sizeof (program_t));
+}
+
+
+/*
+===============
+R_EndProgramRegistration
+===============
+*/
+void R_EndProgramRegistration (void)
+{
+	program_t	*prog;
+	uInt		i, startTime;
+	uInt	freed;
+
+	// Check fragment programs
+	freed = 0;
+	startTime = Sys_Milliseconds ();
+	for (i=0, prog=r_fragmentPrograms ; i<r_numFragmentPrograms ; i++, prog++) {
+		if (prog->touchFrame == r_registrationFrame)
+			continue;		// Used this sequence
+
+		R_FreeProgram (prog, qTrue);
+		freed++;
+	}
+	Com_Printf (0, "%i untouched fragment programs free'd in %.2fs\n", freed, (Sys_Milliseconds () - startTime)*0.001f);
+
+	// Check vertex programs
+	freed = 0;
+	startTime = Sys_Milliseconds ();
+	for (i=0, prog=r_vertexPrograms ; i<r_numVertexPrograms ; i++, prog++) {
+		if (prog->touchFrame == r_registrationFrame)
+			continue;		// Used this sequence
+
+		R_FreeProgram (prog, qFalse);
+		freed++;
+	}
+	Com_Printf (0, "%i untouched vertex programs free'd in %.2fs\n", freed, (Sys_Milliseconds () - startTime)*0.001f);
+}
+
+/*
+==============================================================================
+
+	CONSOLE FUNCTIONS
+
+==============================================================================
+*/
+
+/*
+===============
+R_ProgramList_f
+===============
+*/
+static void R_ProgramList_f (void)
+{
+	program_t	*prog;
+	uInt		i;
+
+	// List fragment programs
+	Com_Printf (0, "------------------------------------------------------\n");
+	Com_Printf (0, "Fragment programs:\n");
+	for (i=0, prog=r_fragmentPrograms ; i<r_numFragmentPrograms ; i++, prog++) {
+		Com_Printf (0, "%s\n", prog->name);
+	}
+	Com_Printf (0, "Total fragment programs: %i\n", r_numFragmentPrograms);
+	Com_Printf (0, "------------------------------------------------------\n");
+
+	// List vertex programs
+	Com_Printf (0, "------------------------------------------------------\n");
+	Com_Printf (0, "Vertex programs:\n");
+	for (i=0, prog=r_vertexPrograms ; i<r_numVertexPrograms ; i++, prog++) {
+		Com_Printf (0, "%s\n", prog->name);
+	}
+	Com_Printf (0, "Total vertex programs: %i\n", r_numVertexPrograms);
+	Com_Printf (0, "------------------------------------------------------\n");
+}
+
+/*
+==============================================================================
+
+	INIT / SHUTDOWN
+
+==============================================================================
+*/
+
+static cmdFunc_t	*cmd_programList;
+
+/*
+===============
+R_ProgramInit
+===============
+*/
+void R_ProgramInit (void)
+{
+	// Commands
+	cmd_programList = Cmd_AddCommand ("programlist", R_ProgramList_f, "Prints out a list of currently loaded vertex and fragment programs");
+}
+
+
+/*
+===============
+R_ProgramShutdown
+===============
+*/
+void R_ProgramShutdown (void)
+{
+	program_t	*prog;
+	uInt		i;
+
+	// Remove commands
+	Cmd_RemoveCommand ("programlist", cmd_programList);
+
+	// Shut fragment programs down
+	for (i=0, prog=r_fragmentPrograms ; i<r_numFragmentPrograms ; i++, prog++) {
+		if (!prog->touchFrame)
+			continue;	// Free r_imageList slot
+
+		// Free it
+		qglDeleteProgramsARB (1, &prog->progNum);
+	}
+
+	r_numFragmentPrograms = 0;
+	memset (r_fragmentPrograms, 0, sizeof (r_fragmentPrograms));
+	memset (r_fragmentHashTree, 0, sizeof (r_fragmentHashTree));
+
+	// Shut vertex programs down
+	for (i=0, prog=r_vertexPrograms ; i<r_numVertexPrograms ; i++, prog++) {
+		if (!prog->touchFrame)
+			continue;	// Free r_imageList slot
+
+		// Free it
+		qglDeleteProgramsARB (1, &prog->progNum);
+	}
+
+	r_numVertexPrograms = 0;
+	memset (r_vertexPrograms, 0, sizeof (r_vertexPrograms));
+	memset (r_vertexHashTree, 0, sizeof (r_vertexHashTree));
+}

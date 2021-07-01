@@ -1,0 +1,732 @@
+==============================
+Quake2Max stuff to do:
+==============================
+* rendering backend
+* fix alt-tab at fullscreen
+* copy in some of R1CH's buffer overflow fixes
+* quakemsg protection
+* ditch push/pop
+* make gloom legal
+* internal memory management
+* MD3
+* profile it
+* broke the menu scale or something, the multiplayer/options/etc buttons aren't showing right
+* add showing IP address of selected server in join menu to statusbar
+* fuk.bsp -- alpha surfaces with certain flags -- show up as full white (GL_REPLACE issue, right?)
+* hashing
+* pause the game and watch teleporter particles collect until it's unpaused and they fly out
+* re-write how images are loaded
+* fix decal memory usage
+* fix memory usage in general
+* particle/decal's being intertwined causes fun, like when there's a lot of decals you can't make any more particles
+* update console tab completion
+* fix not having colormap crashing, give it palette in code etc
+
+DONE:
+* Merged renderer dll and engine
+* Fixed all warnings and errors at W3 w/ warnings as errors
+* Removed r_shaders cvar, since shaders will be necessary to do some effects optimally in the long run
+* Case insensitive alias/cvar/cmd lookup
+* Ditched Sul's buggy PNG loading code, replaced with R1GL's
+* Thread optimized PNG screenshot code
+* Removed silly GLU
+* A lot of unecessary files removed (specifically ones related to software mode, which is removed)
+
+* TALLY:
+  Crashes fixed: 6
+  * Fixed railtrail decal causing a crash when ALL particle spots are used up
+  * Fixed recursive Com_Error calls
+  * Particle-image related pointer issue resolved
+  * Fixed join menu crashing
+  * Fixed buggy image loading
+  * Better error reporting during intialization (no more generic "Error during initialization" message)
+  Switch optimizations: 2
+  * Multiplayer menu
+  * Shader blendfunc lookup
+
+
+
+
+Game
+|- Single Player
+|  |- New game
+|  |  |- Easy
+|  |  |- Medium
+|  |  '- Hard
+|  |- Load game
+|  '- Save game
+|- Multiplayer
+|  |- Join Server
+|  |  |- Master Servers
+|  |  '- Address Book
+|  '- Start Server
+'- Credits
+
+Settings
+|- Audio
+|- Input
+|- Controls
+|- Player
+|- Download
+|- Effects
+|- Display (HUD+Screen)
+'- Video
+   '- Extensions
+
+Quit
+
+
+Last few things before next release:
+- ir goggles too green for green chat text
+- still need to finish the code that does all the lighting for DOT3
+
+
+make a separate buffer for the chathud
+
+smoke detects collision and stops/makes smoke on wall
+
+alphafunc the beam noise? (make next layer depthfunc == equal, and alpha/rgbgen = identity)
+
+
+doom3 like sortKey values
+make rail trail have * effect
+
+client-side changeclass and login menu for gloom
+client-side build menu for gloom
+- will need to detect weither a class is available to go, or structure is available to build
+- will need to know if im a builder (gloom class pred?)
+
+
+
+cg.realtime -> cg.time for particles/decals?
+
+alphamap? luminositymap?
+onClick mouse shaders for items
+ui_scale is kinda sloppy, too many multiplications too
+
+Sound shaders?
+
+Materials
+- Rename the current 'shader' system to a 'material' system? Or just use them to mark models etc (as static, for like VBO optimizing and stuff)
+- Fragment/vertex programs become shaders
+
+
+
+==============================
+ENGINE
+==============================
+Effects:
+* BModel decals
+* Alias model decals
+* Vertex light trans surfaces with dlights.
+
+Features:
+* cg_autoDemo -- will record a demo automatically at map start when enabled.
+
+Fix:
+* Cinematics stuttery with new filesystem functionality.
+  - Seems to drop a frame every time a cinematic starts playing...
+* Disallow multiple instances.
+* Iterate through all possible PFD's, describe, and find the best match. !(pfd.dwFlags & (PFD_GENERIC_ACCELERATED|PFD_GENERIC_FORMAT)) == HW Accel
+* Pasting into console/messages doesn't paste where cursor is, just to end of line...
+* Save old mouse position when mouse cursor dissapears when the console is let up, then set it again when the console is let down
+* Fix sky rendering. Tends to get really bad with weird values over long periods of time...
+
+Images:
+* Add support for 3D textures?
+  - How would one best implement this? Considering there are no 3D image formats, I'll need to be creative.
+    Perhaps a scripting language that defines the different 'layers'?
+* Bring back the "haloe" crap code for PCX images?
+  - This was the crappy hackish shit Quake2 was originally doing to 8bit (PCX/WAL) images to foolishly correct
+    for horrible texture filtering. Removing it made the original textures not look "as good" (hahaha).
+
+Misc:
+* AVI output?
+  - Would be rather annoying, since (iirc) it's implementation (operating system) specific.
+  - http://sourceforge.net/project/showfiles.php?group_id=86840 http://quakecapture.sourceforge.net/
+
+Optimizations:
+* Make Sys_FindFiles a little lighter on its toes.
+
+Shaders:
+* Add GLSL?
+* sizeBase is so fucking gross, remove the usage of getimagesize :|
+
+Test:
+* Passing too much BitInfo for userinfo cvars? Could add a warning whenever the client thinks it will overflow
+  the netchan buffer.
+* RF_TRANSLUCENT
+  - Alias models AND BModels
+
+
+
+==============================
+CGAME
+==============================
+Cleanups:
+
+Effects:
+* C4 explosion tweaks
+  - Smaller decal...
+  - Make it "plume" upward, a lot of smoke
+  - Resemble a tank on fire like in BIA?
+* Lightstyle interpolation.
+* Slightly darken blood decals.
+* Blob shadow option.
+* Add readouts and doodads to infrared vision.
+* HL2's bleed effect is nice...
+* Combined shells (red + green, red + blue, green + blue) make completely unique effects
+
+Fixes:
+* Railtrail hit-wall effect should NOT be showing when you shoot the sky.
+
+Optimizations:
+* switch (p->type), instead of using flags.
+* Why does "Client #%i" take the longest during map load time?
+
+
+
+==============================
+UI
+==============================
+Console:
+* Move to UI DLL?
+  - Remove con_font from the engine entirely, along with drawing strings
+* Realtime word wrapping?
+
+Notifications:
+* Popup notices when you first init to let you know taht sgis mipgen sux on ati and vbo sux on nvidia
+* Show something on screen when attempting to download a file.
+
+
+
+==============================
+SOURCE CONTROL
+==============================
+* Get EGL compiling on the 'Bloodshed' compiler
+remove small loops, not optimal
+GL_CheckForError call in GLimp_EndFrame spits out 'out of memory' when you alt tab in fullscreen now?
+
+
+
+==============================
+WEBSITE
+==============================
+* Email myself 404/etc errors
+
+
+
+
+
+
+
+
+
+
+
+
+
+* limit sliders in vid menu to maximum the video card supports?
+  - GetGLConfig
+
+mouse speed increase outside of q2 when you close it/alt-tab?
+* need dinput to resolve this I bet
+
+test cinematics more -- like 'THE END' pcx etc
+* when it hits the pcx, if you hit esc it doesn't drop -- supposed to stay?
+
+
+MAKE THIS TODO LIST A WEBPAGE
+- Can sort by urgency that way...
+
+
+
+
+
+
+noDraw base shader flag, used for when you want a surface to not be rendered -- no reason to force people into drawing a full trans surf for special stuff
+throw an error if texture object is not found?
+  ** use old fallback code instead
+
+test RF_TRANSLUCENT on bmodels and view weapon
+
+
+Crucial for next release:
+* add advanced infrared and third person camera to the about page
+* finish human/alien advanced infrared goggles
+  - human IR noise needs to be "lessened"
+  - alien IR sucks
+  - both need to be brighter
+  - add to menu
+* port egl addons
+  - convert all png images to tga
+  - deprecate md2's for md3's
+* depthWrite is kinda gross
+* let client know when attempting to download shit (on the loading screen, or a new screen)
+* allocate a large chunk of memory during registration for speedup purposes
+* get worldlights and use them for alias lighting?
+* cinematics (d1, newgame, etc) seem to be REALLY stuttery to load...
+  - new file system not reading them the same?
+  - also getting dropped frame warnings every time they play
+* shader lang documentation update
+* the last userinfo bug -- was that due to the massive cleanup ? didn't see it happening before and the config was writing just the same before...
+  - could have not been noticed because the userinfo flags weren't carried over before
+  - overflow them intentionally again, and do more testing
+
+CHEESECAKE SITE
+EGL SITE
+QUAKEDEV SITE
+
+buy out cold k
+
+doom3 pk4 = zip?
+
+international keyboard support?
+
+clean up overly called getimagesize funcs by storing values, since they dont fucking change
+more realistic railtrail style
+sky broke after long period of time, etombed for example
+dont kill console when loading a map?
+remove RF_TRANSLUCENT and RF_VIEWERMODEL
+
+don't play sounds while connecting/downloading ffs
+* fixed?
+error on deflate or smthng
+* protocol error I bet
+
+
+cl_rail/spirallife
+Lithium DM crash?
+
+problem with downloading player models to directory? (no? haven't had this myself)
+UNIQUE EXTERM ROCKET TRAIL
+WATER/SLIME/LAVA FOOTSTEPS WHEN YOU/OTHERS COME OUT OF LAVA AND FOOTSTEP
+
+POLYGON-BASED FOG
+* Underwater fog that isn't hacky, actually fog the surfaces under appropriately!
+* Would require applying such to player models/sprites etc
+STORE OFF OLD FUNC FOR QGL_DEBUG? for Arsonide <- eww ewww ewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+
+image verification instead of forum login for echon.org downloading
+
+LOOK AT -> MSVC6 WORKSPACE <- LOOK AT
+
+TEST NEW PNG LOADING CODE WITH KAIN'S SHIT
+VBO STATIC WORLD MESHES >:B
+
+move the console to the ui.dll?
+
+Lil' Wayne - Bring It Back
+Crime Mob - Knuck If You Buck
+Jay-Z - Dirt Off Your Shoulder
+Freaks - Play-N-Skillz
+Ice Cube - It Was A Good Day
+Kanye West - Through the Wire
+E-A-S Ki - My Bad
+E-A-S Ki - Ride
+Kayda-Luz - Ain't No Holdin Me Down
+Cam'ron - Down and Out (ft Kanye West)
+Sly Boogy - It's Nuthin
+Ja Rule - Livin it up ft Case
+
+
+ui/cgame need to parse print/info messages
+
+edit new step noises, raise volume like 10%
+
+go through all possible PFD's finding the best match
+
+
+
+for center (not for averaging, except on buildsurface where it's only used on c_s c_t)
+* wtf is the point of c_s c_t, the name is gay and maybe there's a 'better way'
+
+verts->vertices
+indexes->indices
+ability to shader the entire sky env, nice domes etc ala qfusion
+
+memory system struct to common.h, then allow individual pools without having to make new enums
+
+Changes:
+* star (asterisk, *) shaped beams
+* wildcard bindlist
+* factor the desktop gamma ramp into screenshots
+* add to menu, for some* just wait until they get used:
+  - gl_arb_vertex_buffer_object*
+  - gl_ext_compiled_vertex_array*
+  - gl_ext_draw_range_elements*
+  - gl_ext_swapinterval
+  - gl_ext_texture_env_add
+  - al_driver
+  - gl_errorcheck
+
+--------------------
+Additions:
+* Surface material scripting system, specify texture types for special effects,
+  for example:
+  - footstep noises
+  - decal types (ie: glass bullet/explosion decals)
+  - surface specific particle effects
+* Skydomes
+* MD3 tags
+* LSHIFT RSHIFT LCTRL RCTRL LALT RALT
+* view weapon scale option? (dumb :/)
+* model frame scripting
+* dedicated server build
+
+--------------------
+Speed-ups:
+* 3DNow! SSE! SSE2!
+* string filtering is probably sub-optimal
+  - FS_NOFILTER -- don't filter this string (Draw_String only really), only
+  speedier on text that is _NOT_ going to have color codes at ALL (r_speeds, dev
+  info)
+
+--------------------
+Clean-ups:
+* with new cgame, make some huds !
+  - remove field_3 damnit, new hud nums, standard, dead and being-hurt-yellow
+* try to eliminate the need for FS_CurrGame
+
+--------------------
+Shader:
+* More options!!
+  - depthmask
+  - depthfunc
+  - depthrange (taking RF_DEPTHHACK into account)
+  - tenebrae/q2max/sc2pt style glares
+  - texenv option, GL_ADD GL_DECAL GL_REPLACE GL_MODULATE options, default to
+    GL_MODULATE
+* cos/sin tables?
+* commands to flush/reload all shaders?
+
+--------------------
+Fixes:
+* openal needs support to looping sounds (from entities)
+* openal doesn't work with cinematics
+* reports of config files not executing/saving? can't seem to reproduce...
+* server gravity needs to affect bouncing particles and generic particle gravity
+* did i break any minidriver specific crap? getting a voodoo3 soon
+* need to use pthread for linux (png screenshots use win32 _begin/endthreadex)
+* abilitity to put color codes into name from menu (assume ^r at the end too)
+* viewsize (menu, when updating without vid_restart, which is needed) and
+  vid_restart fuck up when game is paused
+
+
+
+
+
+
+
+
+
+
+
+
+* FS_SECONDARY crashes Draw_String when you just pass "characters like this" -- strdup?
+* finish gl_paranoid
+* vsync option
+* a better way to handle UI and CGAME dlls is to:
+  - initialize on load and restart on game change (not map change)
+  - have functions that 'touch' all media
+  - for cgame the ability keep an eye on connection status is necessary
+
+to menu:
+- gl_ext_compiled_vertex_array
+- gl_ext_draw_range_elements
+- gl_arb_vertex_buffer_object
+- r_bloom*
+mention in doc:
+- gl_shownormals
+- mention r_bloom cvars, put into menu
+  - ban in gloom
+- cl_protocol
+- net_stats
+- r_spherecull
+r_cull.c
+more function keys?
+
+-----
+Server:
+* r1's new baseline stuff?
+
+-----
+Bugs:
+* railtrail decal bugged, start from the just before the _End_ of the trail and trace forth, if you clip up close it makes the decal there O_O
+ - glow light, same color as spiral/beam if no spiral? lingers a few secs etc like flak secondary explo kinda
+
+Cleanups:
+* cgi.Draw_Yourmom -> CGI_DrawYourMom, can localize cgi to cg_api.c then
+* fade out oldest decal/particle, when hit the max, for the new decal/particle
+* string rendering and handling pushed into cgame/ui dll's so that Draw_Char/String aren't in the imports
+
+Add:
+* 3d hud stuff! -- hud model rendering
+* particle/decal subsystems, DSYS_MARKS DSYS_BLOOD or something
+* loc
+* tag allocation and freeing
+
+-----
+Dedicated console:
+* Unknown command "nope^R"
+  - remove color chars from dedicated console
+* up arrow scrolls through command buffer for previous commands
+* buffer size on console text is too short, after a while it runs out -- static buffer + WM_SETTEXT
+* mousewheel needs to scroll
+
+-----
+Effects:
+* make mfx option 1 only ignore really CLOSE ents
+* dday particle fx
+* mfx corona that has two l-shaped parts of the flare that rotate in the opposite direction with distance
+  (just like SW BF)
+* FORGOT A LIGHT ON GLOOM.BSP ???
+  - gloom.bsp red ceil lights need more glow
+* bouncy explo/ricochet sparks, spark image style sorta like ut2k4 (glow around outsides)
+
+-----
+Rendering backend related:
+* Moving transparent surfaces and garena-b -- gloom dll's fault?
+* scene randomly seizes up, everything stops
+* remove cubemap turret/engy/mech shaders (envmap ones are better)
+
+-----
+Loading screen:
+* Players/maxplayers
+
+-----
+Speedups
+* GL_TexEnv called WAYY too fucking much
+* searches for model.md3 every time when it's already loaded as md2
+* compile a function call tree to determine overcalls
+* #define the Matrix_ Quat_ etc functions too
+
+-----
+Fixes
+* shower player cfg menu w/o models
+* Cvar_Variable* is pointless with new hash system really, just messy now
+  - Cvar_VariableForceSet
+  - Cvar_VariableForceSetValue
+* strcmp strcpy checks
+  - strcmp -> strncmp (where applicable)
+  - strcpy/strncpy -> Q_strcpyz
+* don't strcmp/strncmp past array bounds, or on pointers (use strlen? testme)
+  - image system (like MAX_QPATH w/ strncmp)
+* get banned from your own server, get dropped to the console and the ui is dead after doing 'map x'
+* re-write how models are searched for to match that of the image system
+* water on spambox2 alien base, pulses alpha? shader or shenanigans?
+* printf fuctions, that use varargs, and aren't passed "%s", st will try and use st as a format string
+* keys.c is common, isn't it?
+* alphabetize cvarlist cmdlist bindlist
+  - done but needs less static array
+* WM_MOUSEHWHEEL
+* Command related
+  - don't remove a cmd on cgame shutdown that was made on init and watch the crash
+  - disconenct while loading a map and you're able to exec cmds while loading to crash
+  - map q2dm1 -- game gloom -- disconnect -- game baseq2 -- game gloom -- crash
+* change game and savecfg, does it save to right dir?
+
+* vid_maximized - fix maximize for vid_restart/next init (store to cvar)
+  - wgl pfd fucks with starting maximized, and even when it starts maximized it
+    fucks up the vidheight/width
+* some jpeg images make everything ELSE dark when they upload, only on the bq detail texture so far though
+* wtf, timerefresh on the p3 gf2, dlight behind you?
+* if a color code hits the middle of itself over the end of a word wrap,
+  it works but puts the second half of the code on the next line ?
+* spam a message when a user puts something into a shader that isn't an option
+* download system that checks for duplicates
+* word wrapping is "broken," should real-time word wrapping be implemented?
+  -- Mem_Alloc each line (StrDup technically)
+  -- free when buffer size is getting too large
+  -- will solve overly large static array issues
+  -- ignore color characters
+
+-----
+Framerate decoupling related:
+* self prediction breaks on ramps with the entity drawn?
+  - it breaks already thanks to framerate decoupling
+
+-----
+Client-side ents needed!!1:
+* explosion debris pls
+* ejecting brass
+
+
+-----
+Protocol improvement ideas ((requires a new protocol for gloom :|)):
+* SVC_OBITUARY
+* SVC_INVENTORYITEM
+
+-----
+Texture related:
+* upload non-powerOfTwo dimension images with the ARB_texture_non_power_of_two extension (if avail) instead of resampling?
+  - need the extension first
+* fix glGenTextures usage in bloom k
+  - Com_Error during first scene rendering causes the screen to be stuck at bloom refdef size
+* 8bit / greyscale PNG images -> test pls
+* turn off iTxt or smthng TEXT buffer dealy for png
+* gl_finish might play a part in whats going on when vid < net, so may fullscreen?
+* remove IF_NOGAMMA/NOINTENS :/ hacky and could just make black on ramps = BLACK
+
+-----
+Model related:
+* finish MD5 doom3 model support
+* animation scripting language
+* scale normals for shells
+* pull as many RF_* funcs from the renderer (probably end up having to dupe ents for shell ents)
+* average normals between neighboring normals in dlight shading so its not so abrupt
+* lod models
+  - RF_FORCENOLOD consideration
+
+-----
+Menu/UI related:
+* UITYPE_IMAGE needs it's struct to have
+  int		width, height;
+  so that when the image isn't found and is replaced by a white texture, it isn't some fucked up size (like 0x0)
+* default to white texture when a UITYPE_IMAGE isn't found too
+* fix keyboard item selection when first item is a missing banner image..
+* specify image item width/height in ui
+  - scale too? for aspect
+  - fix if no image found, default to whitetexture
+    - make grey when selected too
+* scale to aspect in the ui/cg by the wid/640 height/480 etc
+  - need vscale/hscale passed to draw string/char funcs?
+* no images in main menu = broken main menu
+* header image missing = even if it's set to no select it's selectable
+
+UI Bugs:
+* start server menu, the selection box is 'fucked'
+* main menu needs static dimensions set for each item rather than looking it up, that way the menu isn't blank when the images are missing
+
+Add to UI:
+* tag allocation and freeing
+
+UI Cleanups:
+* uii. -> UI_, can localize uii to ui_api.c then
+* Make uii static to ui_api, UI_ funcs
+* pull console over
+
+-----
+Website stuff:
+* egl install page
+* sort screenshots pages by type
+* lmr homepage
+
+-----
+change game dir and watch font fuck up
+- IF_NOFLUSH to blame, remove?
+ check it out in crown
+
+
+for duplicate shader loaded checkery etc check the directory name too, dday.ers in baseq2 can conflict with dday.ers in gloom
+
+
+
+
+
+
+when an ERR_DROP is thrown, free any unfinished (not fully loaded) models
+ - check anywhere else that memory is allocated for Com_Error's that could leave memory allocated that is not used
+   * Mod_FreeUndone
+   * Img_FreeUndone
+model_t image_t += qBool loaded
+   - call after registration finishes
+shader func names from RS_ to R_
+gl_drawnormals -> draw from center of poly
+
+
+
+winamp console commands
+
+
+
+downloadserverport useless? tcp downloading isn't used
+test demo recording
+
+
+
+
+
+
+GL_REFLECTION_MAP_ARB belong to an extension? cube map?
+
+
+dinput for mouse
+
+
+
+
+
+
+
+* allow screenshots during loading screen pls
+  - allowing some commands during loading screen causes a crash when ui/cg is forced off -- fix?
+* some of the string fucntions in shared.c can be moved to string.c
+
+
+*** INSTALL PACKAGE ***
+- will need to make .loc files available as optional
+- will need to make .mfx files available as optional
+*** INSTALL PACKAGE ***
+
+
+TO DO!:
+* pull muzzleflash stuff from renderer, should be done in cgame
+* DIE alut
+* parse the map entity string for light entities
+* egldedicated
+* ent alpha < 1.0 needs to be all over shader shit because it only takes rf_translucent into account? force rf_translucent if < 1.0 ?
+- decal fragments have a decal parent pointer for removing entire decals instead of entire fragments
+- separate renderer part flags and cgame only part flags
+ - do something to remove sv_pmove.c :/
+* auto-gmd download
+* framerate decoupling
+* Mod_VerifyModel or something for precache -- no byte swap functions out of place please
+* cl_precache.c ? cl_download.c ?
+* VCR-like UI thing for demos
+
+
+Server Cleanups:
+* ge. -> GI_, can localize gi to sv_gameapi.c then
+* sv_local.h is kinda ugly and unorganized -- the server in general is messy
+* sv_world.c? -- a lot of world stuff in sv_main.c ..
+
+
+
+Features to add:
+* avg fps
+* turb nv shader deserves its own cvar
+* projected volumetric stencil shadows
+* mirrors
+* infrared
+* minimap
+* custom video widths
+* start coding in quake3-like and other shader options, needs more control
+* envshot
+* green shell texture sucks
+* slash decals like the new d3 bullet decal (rivet on the edge)
+
+
+
+LiteGL crap (hey I have an idea, MOVE THIS TO LITEGL DOC):
+* ignore image extensions in litegl in image seeking, kill upname
+* m_accel 1 -> litegl
+* k 30s delay on !p_ in litegl
+* litegl taskbar icon
+* fix the dlight glitch in litegl
+* non-push/pop-ogl-matrix particles in LiteGL
+
+
+
+* test if chars are actually shaderable
+
+* PF_NOLAVA PF_NOSLIME PF_NOWATER and DF_*, instead of PF/DF_AIRONLY?
+* CM_PointContents -> CL_PMPointContents ?
+
+* print out numPFD's in PFD print out after refresh init etc
+
+
+* simd optimize sound?
+* water ripples, rail concussion, using directional particles or re-clipped decals
+* ability to clip decals to turb surfaces? turb the decal?!? good for water
+  ripples I suppose ... surf_water only flag?
