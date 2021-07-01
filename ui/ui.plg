@@ -1,0 +1,132 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: UI - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP129.tmp" with contents
+[
+/nologo /MTd /W3 /Gi /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UI_EXPORTS" /FR".\debug/" /Fp"debug/ui.pch" /YX /Fo"debug/" /Fd"debug/" /FD /GZ /c 
+"C:\dev\EGL\ui\ui_api.c"
+"C:\dev\EGL\ui\ui_backend.c"
+"C:\dev\EGL\ui\ui_common.c"
+"C:\dev\EGL\ui\ui_cursor.c"
+"C:\dev\EGL\ui\ui_draw.c"
+"C:\dev\EGL\ui\ui_keys.c"
+"C:\dev\EGL\ui\ui_addrbook.c"
+"C:\dev\EGL\ui\ui_dlopts.c"
+"C:\dev\EGL\ui\ui_dmflags.c"
+"C:\dev\EGL\ui\ui_joinserver.c"
+"C:\dev\EGL\ui\ui_multiplayer.c"
+"C:\dev\EGL\ui\ui_playercfg.c"
+"C:\dev\EGL\ui\ui_startserver.c"
+"C:\dev\EGL\ui\ui_controls.c"
+"C:\dev\EGL\ui\ui_effects.c"
+"C:\dev\EGL\ui\ui_fog.c"
+"C:\dev\EGL\ui\ui_gloom.c"
+"C:\dev\EGL\ui\ui_hud.c"
+"C:\dev\EGL\ui\ui_input.c"
+"C:\dev\EGL\ui\ui_misc.c"
+"C:\dev\EGL\ui\ui_options.c"
+"C:\dev\EGL\ui\ui_screen.c"
+"C:\dev\EGL\ui\ui_sound.c"
+"C:\dev\EGL\ui\ui_game.c"
+"C:\dev\EGL\ui\ui_loadgame.c"
+"C:\dev\EGL\ui\ui_savegame.c"
+"C:\dev\EGL\ui\ui_glexts.c"
+"C:\dev\EGL\ui\ui_video.c"
+"C:\dev\EGL\ui\ui_vidsettings.c"
+"C:\dev\EGL\ui\ui_credits.c"
+"C:\dev\EGL\ui\ui_mainmenu.c"
+"C:\dev\EGL\ui\ui_quit.c"
+"C:\dev\EGL\shared\mathlib.c"
+"C:\dev\EGL\shared\shared.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP129.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP12A.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /pdb:"debug/eglui.pdb" /map:"debug/egluix86.map" /debug /machine:I386 /def:".\exports.def" /out:"c:\quake2\baseq2\egluix86.dll" /implib:"c:\quake2\baseq2\egluix86.lib" /pdbtype:sept 
+.\debug\ui_api.obj
+.\debug\ui_backend.obj
+.\debug\ui_common.obj
+.\debug\ui_cursor.obj
+.\debug\ui_draw.obj
+.\debug\ui_keys.obj
+.\debug\ui_addrbook.obj
+.\debug\ui_dlopts.obj
+.\debug\ui_dmflags.obj
+.\debug\ui_joinserver.obj
+.\debug\ui_multiplayer.obj
+.\debug\ui_playercfg.obj
+.\debug\ui_startserver.obj
+.\debug\ui_controls.obj
+.\debug\ui_effects.obj
+.\debug\ui_fog.obj
+.\debug\ui_gloom.obj
+.\debug\ui_hud.obj
+.\debug\ui_input.obj
+.\debug\ui_misc.obj
+.\debug\ui_options.obj
+.\debug\ui_screen.obj
+.\debug\ui_sound.obj
+.\debug\ui_game.obj
+.\debug\ui_loadgame.obj
+.\debug\ui_savegame.obj
+.\debug\ui_glexts.obj
+.\debug\ui_video.obj
+.\debug\ui_vidsettings.obj
+.\debug\ui_credits.obj
+.\debug\ui_mainmenu.obj
+.\debug\ui_quit.obj
+.\debug\mathlib.obj
+.\debug\shared.obj
+]
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP12A.tmp"
+<h3>Output Window</h3>
+Compiling...
+ui_api.c
+ui_backend.c
+ui_common.c
+ui_cursor.c
+ui_draw.c
+ui_keys.c
+ui_addrbook.c
+ui_dlopts.c
+ui_dmflags.c
+ui_joinserver.c
+ui_multiplayer.c
+ui_playercfg.c
+ui_startserver.c
+ui_controls.c
+ui_effects.c
+ui_fog.c
+ui_gloom.c
+ui_hud.c
+ui_input.c
+ui_misc.c
+ui_options.c
+ui_screen.c
+ui_sound.c
+ui_game.c
+ui_loadgame.c
+ui_savegame.c
+ui_glexts.c
+ui_video.c
+ui_vidsettings.c
+ui_credits.c
+ui_mainmenu.c
+ui_quit.c
+mathlib.c
+shared.c
+Linking...
+   Creating library c:\quake2\baseq2\egluix86.lib and object c:\quake2\baseq2\egluix86.exp
+
+
+
+<h3>Results</h3>
+egluix86.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

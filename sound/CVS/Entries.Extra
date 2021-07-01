@@ -1,0 +1,7 @@
+/cdaudio.h///
+/snd_pub.h///
+/snd_loc.h///
+/snd_mix.c///
+/snd_mem.c///
+/snd_dma.c///
+/snd_openal.c///
