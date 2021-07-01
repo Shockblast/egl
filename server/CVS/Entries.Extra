@@ -1,0 +1,10 @@
+/sv_gameapi.c///
+/sv_ents.c///
+/sv_local.h///
+/sv_send.c///
+/sv_ccmds.c///
+/sv_init.c///
+/sv_main.c///
+/sv_user.c///
+/sv_pmove.c///
+/sv_world.c///

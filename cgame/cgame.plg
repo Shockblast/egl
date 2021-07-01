@@ -1,0 +1,123 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: CGAME - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP1295.tmp" with contents
+[
+/nologo /MTd /W3 /Gi /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CGAME_EXPORTS" /FR"debug/" /Fp"debug/cgame.pch" /YX /Fo"debug/" /Fd"debug/" /FD /GZ /c 
+"C:\dev\egl\cgame\cg_decals.c"
+"C:\dev\egl\cgame\cg_light.c"
+"C:\dev\egl\cgame\cg_mapeffects.c"
+"C:\dev\egl\cgame\cg_parteffects.c"
+"C:\dev\egl\cgame\cg_partgloom.c"
+"C:\dev\egl\cgame\cg_particles.c"
+"C:\dev\egl\cgame\cg_partsustain.c"
+"C:\dev\egl\cgame\cg_partthink.c"
+"C:\dev\egl\cgame\cg_parttrail.c"
+"C:\dev\egl\cgame\cg_entities.c"
+"C:\dev\egl\cgame\cg_localents.c"
+"C:\dev\egl\cgame\cg_tempents.c"
+"C:\dev\egl\cgame\cg_weapon.c"
+"C:\dev\egl\cgame\cg_api.c"
+"C:\dev\egl\cgame\cg_main.c"
+"C:\dev\egl\cgame\cg_media.c"
+"C:\dev\egl\cgame\cg_predict.c"
+"C:\dev\egl\cgame\pmove.c"
+"C:\dev\egl\cgame\cg_muzzleflash.c"
+"C:\dev\egl\cgame\cg_parse.c"
+"C:\dev\egl\cgame\cg_players.c"
+"C:\dev\egl\cgame\cg_draw.c"
+"C:\dev\egl\cgame\cg_hud.c"
+"C:\dev\egl\cgame\cg_inventory.c"
+"C:\dev\egl\cgame\cg_screen.c"
+"C:\dev\egl\cgame\cg_view.c"
+"C:\dev\egl\game\m_flash.c"
+"C:\dev\egl\shared\infostrings.c"
+"C:\dev\egl\shared\mathlib.c"
+"C:\dev\egl\shared\shared.c"
+"C:\dev\egl\shared\string.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP1295.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP1296.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /pdb:"debug\eglcgamex86.pdb" /map:"debug/eglcgamex86.map" /debug /machine:I386 /def:".\exports.def" /out:"c:\quake2\baseq2\eglcgamex86.dll" /implib:"c:\quake2\baseq2\eglcgamex86.lib" /pdbtype:sept 
+.\debug\cg_decals.obj
+.\debug\cg_light.obj
+.\debug\cg_mapeffects.obj
+.\debug\cg_parteffects.obj
+.\debug\cg_partgloom.obj
+.\debug\cg_particles.obj
+.\debug\cg_partsustain.obj
+.\debug\cg_partthink.obj
+.\debug\cg_parttrail.obj
+.\debug\cg_entities.obj
+.\debug\cg_localents.obj
+.\debug\cg_tempents.obj
+.\debug\cg_weapon.obj
+.\debug\cg_api.obj
+.\debug\cg_main.obj
+.\debug\cg_media.obj
+.\debug\cg_predict.obj
+.\debug\pmove.obj
+.\debug\cg_muzzleflash.obj
+.\debug\cg_parse.obj
+.\debug\cg_players.obj
+.\debug\cg_draw.obj
+.\debug\cg_hud.obj
+.\debug\cg_inventory.obj
+.\debug\cg_screen.obj
+.\debug\cg_view.obj
+.\debug\m_flash.obj
+.\debug\infostrings.obj
+.\debug\mathlib.obj
+.\debug\shared.obj
+.\debug\string.obj
+]
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP1296.tmp"
+<h3>Output Window</h3>
+Compiling...
+cg_decals.c
+cg_light.c
+cg_mapeffects.c
+cg_parteffects.c
+cg_partgloom.c
+cg_particles.c
+cg_partsustain.c
+cg_partthink.c
+cg_parttrail.c
+cg_entities.c
+cg_localents.c
+cg_tempents.c
+cg_weapon.c
+cg_api.c
+cg_main.c
+cg_media.c
+cg_predict.c
+pmove.c
+cg_muzzleflash.c
+cg_parse.c
+cg_players.c
+cg_draw.c
+cg_hud.c
+cg_inventory.c
+cg_screen.c
+cg_view.c
+m_flash.c
+infostrings.c
+mathlib.c
+shared.c
+string.c
+Linking...
+   Creating library c:\quake2\baseq2\eglcgamex86.lib and object c:\quake2\baseq2\eglcgamex86.exp
+
+
+
+<h3>Results</h3>
+eglcgamex86.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
