@@ -1,0 +1,8 @@
+/eax.h///
+/cdaudio.h///
+/qal.h///
+/snd_pub.h///
+/snd_loc.h///
+/snd_mix.c///
+/snd_openal.c///
+/snd_dma.c///

@@ -1,0 +1,68 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: UI - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP870.tmp" with contents
+[
+/nologo /MTd /W3 /Gi /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UI_EXPORTS" /FR"debug/" /Fp"debug/ui.pch" /YX /Fo"debug/" /Fd"debug/" /FD /GZ /c 
+"C:\dev\egl\ui\ui_startserver.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP870.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP871.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /pdb:"debug/eglui.pdb" /map:"debug/egluix86.map" /debug /machine:I386 /def:".\exports.def" /out:"c:\quake2\baseq2\egluix86.dll" /implib:"c:\quake2\baseq2\egluix86.lib" /pdbtype:sept 
+.\debug\ui_api.obj
+.\debug\ui_backend.obj
+.\debug\ui_common.obj
+.\debug\ui_cursor.obj
+.\debug\ui_draw.obj
+.\debug\ui_keys.obj
+.\debug\ui_addrbook.obj
+.\debug\ui_dlopts.obj
+.\debug\ui_dmflags.obj
+.\debug\ui_joinserver.obj
+.\debug\ui_multiplayer.obj
+.\debug\ui_playercfg.obj
+.\debug\ui_startserver.obj
+.\debug\ui_controls.obj
+.\debug\ui_effects.obj
+.\debug\ui_fog.obj
+.\debug\ui_gloom.obj
+.\debug\ui_hud.obj
+.\debug\ui_input.obj
+.\debug\ui_misc.obj
+.\debug\ui_options.obj
+.\debug\ui_screen.obj
+.\debug\ui_sound.obj
+.\debug\ui_game.obj
+.\debug\ui_loadgame.obj
+.\debug\ui_savegame.obj
+.\debug\ui_glexts.obj
+.\debug\ui_video.obj
+.\debug\ui_vidsettings.obj
+.\debug\ui_credits.obj
+.\debug\ui_mainmenu.obj
+.\debug\ui_quit.obj
+.\debug\endian.obj
+.\debug\infostrings.obj
+.\debug\mathlib.obj
+.\debug\shared.obj
+.\debug\string.obj
+]
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP871.tmp"
+<h3>Output Window</h3>
+Compiling...
+ui_startserver.c
+Linking...
+
+
+
+<h3>Results</h3>
+egluix86.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

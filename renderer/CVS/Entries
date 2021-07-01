@@ -1,0 +1,24 @@
+D/jpg////
+D/png////
+/defpal.h/1.1/Sat Jun  5 00:39:51 2004//
+/glext.h/1.2/Sat Jun  5 00:39:51 2004//
+/warpsin.h/1.4/Sun Jun 13 19:59:30 2004//
+/r_backend.c/1.6/Mon Jul 26 02:14:49 2004//
+/r_glstate.c/1.16/Mon Jul 26 02:16:45 2004//
+/r_sprite.c/1.10/Wed Jul 28 21:18:58 2004//
+/r_draw.c/1.29/Sun Aug  1 09:36:55 2004//
+/qgl.h/1.13/Fri Aug  6 05:55:16 2004//
+/r_alias.c/1.35/Thu Aug  5 01:26:50 2004//
+/r_entity.c/1.24/Fri Aug  6 05:45:21 2004//
+/r_light.c/1.32/Thu Aug  5 01:27:08 2004//
+/r_cin.c/1.12/Thu Aug 12 00:24:31 2004//
+/r_fx.c/1.31/Thu Aug 12 00:24:26 2004//
+/r_model.h/1.22/Thu Aug 12 00:25:40 2004//
+/refresh.h/1.35/Thu Aug 12 00:20:54 2004//
+/r_local.h/1.71/Sun Aug 15 10:35:44 2004//
+/r_surface.c/1.32/Sun Aug 15 10:35:49 2004//
+/r_image.c/1.49/Mon Aug 16 14:13:19 2004//
+/r_main.c/1.67/Mon Aug 16 14:13:48 2004//
+/r_model.c/1.43/Mon Aug 16 14:13:58 2004//
+/r_shader.c/1.52/Mon Aug 16 14:14:10 2004//
+/r_sky.c/1.34/Mon Aug 16 14:14:20 2004//
