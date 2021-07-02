@@ -21,7 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // x11_main.c
 // Main windowed and fullscreen graphics interface module
 //
-
+#include "../common/common.h"
+#include "../common/cmd.h"
 #include "x11_linux.h"
 #include "unix_glimp.h"
 #include "unix_local.h"
@@ -690,7 +691,7 @@ void IN_Init (void)
 	// Mouse variables
 	in_dgamouse	= Cvar_Register ("in_dgamouse", "1", CVAR_ARCHIVE);
 
-	Cmd_AddCommand (qFalse, "force_centerview", Force_CenterView_f, "Force the screen to a center view");
+	Cmd_AddCommand ("force_centerview", Force_CenterView_f, "Force the screen to a center view");
 }
 
 

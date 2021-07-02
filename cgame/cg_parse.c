@@ -136,6 +136,21 @@ void CG_EndServerMessage (int realTime)
 }
 
 
+// <WatIsDeze>
+// TODO: Place elsewhere, just here for now...
+void menu_id_1_activate(char menu_id, char message_id, char optionlist_id);
+
+void CG_ParseFuncMenu() {
+	// Read in which menu ID to open.
+	char menu_id = cgi.MSG_ReadByte();
+	char message_id = cgi.MSG_ReadByte();
+	char optionlist_id = cgi.MSG_ReadByte();
+
+	// Todo: Code some general activate function that shows the registered menu_id menu.
+	menu_id_1_activate(menu_id, message_id, optionlist_id);
+}
+// </WatIsDeze>
+
 /*
 ==============
 CG_ParseServerMessage
@@ -169,6 +184,10 @@ qBool CG_ParseServerMessage (int command)
 
 	case SVC_TEMP_ENTITY:
 		CG_ParseTempEnt ();
+		return qTrue;
+
+	case SVC_FUNC_MENU:
+		CG_ParseFuncMenu();
 		return qTrue;
 
 	default:

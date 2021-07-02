@@ -623,7 +623,7 @@ typedef struct libList_s {
 } libList_t;
 
 static libList_t sys_libList[LIB_MAX] = {
-	{ "LIB_CGAME",	NULL,	"eglcgame" LIBARCH ".so",	"GetCGameAPI"	},
+	{ "LIB_CGAME",	NULL,	"cgame" LIBARCH ".so",	"GetCGameAPI"	},
 	{ "LIB_GAME",	NULL,	"game" LIBARCH ".so",		"GetGameAPI"	},
 };
 
